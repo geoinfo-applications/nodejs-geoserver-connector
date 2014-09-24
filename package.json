@@ -1,0 +1,25 @@
+{
+    "name": "geoserver-manager",
+    "version": "0.0.1",
+    "description": "Geoserver Manager",
+    "main": "server.js",
+    "repository": {
+        "type": "git",
+        "url": "http://geo9x006.geoinfo.ch:8080/scm/ngp/geoservermanager.git"
+    },
+
+    "author": "Geoinfo AG",
+    "license": "ISC",
+    "private": "true",
+    "engines": {
+        "node": ">=0.10.26 <0.12",
+        "npm": "^1.4.*"
+    },
+    "engineStrict": true,
+
+    "dependencies": {
+        "q": "^1.0.1",
+        "request": "^2.39.0",
+        "underscore": "^1.6.0"
+    }
+}
