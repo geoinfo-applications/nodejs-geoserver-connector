@@ -5,15 +5,12 @@ var Q = require("q");
 var _ = require("underscore");
 var util = require("util");
 
-var envConfig = require("../../config/config");
+function GeoserverRepository(config) {
 
-function GeoserverRepository(geoserverConfig) {
+    var gsConfig = config.geoserver;
+    var dbConfig = config.db.flat;
 
-    var env = process.env.NODE_ENV || "development";
-    var gsConfig = envConfig[env].geoserver;
-    var dbConfig = envConfig[env].db.flat;
-
-    this.gs = _.extend({}, geoserverConfig || gsConfig);
+    this.gs = _.extend({}, gsConfig);
     if (this.gs.context) {
         this.gs.context += "/";
     } else {
