@@ -2,7 +2,7 @@
     "name": "geoservermanager",
     "version": "0.0.1",
     "description": "Geoserver Manager",
-    "main": "server.js",
+    "main": "module.js",
     "repository": {
         "type": "git",
         "url": "http://geo9x006.geoinfo.ch:8080/scm/ngp/geoservermanager.git"

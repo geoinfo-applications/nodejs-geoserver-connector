@@ -5,19 +5,19 @@ var Q = require("q");
 var _ = require("underscore");
 var util = require("util");
 
+require('./GeoserverUtils.js');
+
 function GeoserverRepository(config) {
 
     var gsConfig = config.geoserver;
     var dbConfig = config.db.flat;
 
-    this.gs = _.extend({}, gsConfig);
-    if (this.gs.context) {
-        this.gs.context += "/";
+    this.geoserver = _.extend({}, gsConfig);
+    if (this.geoserver.context) {
+        this.geoserver.context += "/";
     } else {
-        this.gs.context = "";
+        this.geoserver.context = "";
     }
-
-    this.timeout = this.gs.timeout || 5000;
 
     this.db = _.extend({}, dbConfig);
     if (!this.db.passwd) {
@@ -26,12 +26,13 @@ function GeoserverRepository(config) {
     }
     this.db.dbtype = "postgis";
 
-    this.baseUrl = util.format("http://%s:%d/" + this.gs.context + "rest", this.gs.host, this.gs.port);
+    this.baseUrl = util.format("http://%s:%d/" + this.geoserver.context + "rest",
+        this.geoserver.host, this.geoserver.port);
 
+    this.timeout = this.geoserver.timeout || 5000;
     this.geoserverDetails = null;
     this.isEnabled = false;
 }
-
 
 GeoserverRepository.prototype = {
 
@@ -66,8 +67,8 @@ GeoserverRepository.prototype = {
             },
             timeout: this.timeout,
             auth: {
-                user: this.gs.user,
-                pass: this.gs.pass,
+                user: this.geoserver.user,
+                pass: this.geoserver.pass,
                 sendImmediately: true
             }
         }, response);
@@ -81,14 +82,14 @@ GeoserverRepository.prototype = {
 
         if (type === "layer") {
             requestUrl = "/workspaces/%s/datastores/%s/featuretypes/%s.json";
-            wsName = config && config.workspace || this.gs.workspace;
-            storeName = config && config.datastore || this.gs.datastore;
+            wsName = config && config.workspace || this.geoserver.workspace;
+            storeName = config && config.datastore || this.geoserver.datastore;
             requestParams = [ wsName, storeName, config.name ];
 
         } else if (type === "datastore") {
             requestUrl = "/workspaces/%s/datastores/%s.json";
-            wsName = config && config.workspace || this.gs.workspace;
-            storeName = config && config.name || this.gs.datastore;
+            wsName = config && config.workspace || this.geoserver.workspace;
+            storeName = config && config.name || this.geoserver.datastore;
             if (!config) {
                 config = { name: storeName };
             }
@@ -96,7 +97,7 @@ GeoserverRepository.prototype = {
 
         } else if (type === "workspace") {
             requestUrl = "/workspaces/%s.json";
-            wsName = config && config.name || this.gs.workspace;
+            wsName = config && config.name || this.geoserver.workspace;
             if (!config) {
                 config = { name: wsName };
             }
@@ -114,11 +115,11 @@ GeoserverRepository.prototype = {
     initializeWorkspace: function () {
 
         var createDefaultWorkspace = function () {
-            return this.createWorkspace({name: this.gs.workspace});
+            return this.createWorkspace({name: this.geoserver.workspace});
         }.bind(this);
 
         var createDefaultDatastore = function () {
-            return this.createDatastore({name: this.gs.datastore});
+            return this.createDatastore({name: this.geoserver.datastore});
         }.bind(this);
 
         return this.isGeoserverRunning()
@@ -146,8 +147,8 @@ GeoserverRepository.prototype = {
                 "Content-type": "text/json"
             },
             auth: {
-                "user": this.gs.user,
-                "pass": this.gs.pass,
+                "user": this.geoserver.user,
+                "pass": this.geoserver.pass,
                 "sendImmediately": true
             }
         }, function (err, response, body) {
@@ -182,8 +183,8 @@ GeoserverRepository.prototype = {
                 "Content-type": "text/json"
             },
             auth: {
-                "user": this.gs.user,
-                "pass": this.gs.pass,
+                "user": this.geoserver.user,
+                "pass": this.geoserver.pass,
                 "sendImmediately": true
             }
         }, function (err, response, body) {
@@ -210,8 +211,8 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        var storeName = config && config.datastore || this.gs.datastore;
-        var wsName = config && config.workspace || this.gs.workspace;
+        var storeName = config && config.datastore || this.geoserver.datastore;
+        var wsName = config && config.workspace || this.geoserver.workspace;
 
         var requestUrl, requestParams;
         switch (type) {
@@ -252,8 +253,8 @@ GeoserverRepository.prototype = {
             },
             body: payload,
             auth: {
-                user: this.gs.user,
-                pass: this.gs.pass,
+                user: this.geoserver.user,
+                pass: this.geoserver.pass,
                 sendImmediately: true
             }
         }, response);
@@ -276,8 +277,8 @@ GeoserverRepository.prototype = {
                 "Content-type": "text/json"
             },
             auth: {
-                "user": this.gs.user,
-                "pass": this.gs.pass,
+                "user": this.geoserver.user,
+                "pass": this.geoserver.pass,
                 "sendImmediately": true
             }
         }, function (err, response, body) {
@@ -302,8 +303,8 @@ GeoserverRepository.prototype = {
     getLayer: function (config) {
 
         var layerName = config && config.name;
-        var storeName = config && config.datastore || this.gs.datastore;
-        var wsName = config && config.workspace || this.gs.workspace;
+        var storeName = config && config.datastore || this.geoserver.datastore;
+        var wsName = config && config.workspace || this.geoserver.workspace;
 
         var layerConfig = {
             featureType: { name: layerName },
@@ -318,8 +319,8 @@ GeoserverRepository.prototype = {
     createLayer: function (config) {
 
         var layerName = config && config.name;
-        var storeName = config && config.datastore || this.gs.datastore;
-        var wsName = config && config.workspace || this.gs.workspace;
+        var storeName = config && config.datastore || this.geoserver.datastore;
+        var wsName = config && config.workspace || this.geoserver.workspace;
 
         return this.layerExists({ name: layerName, datastore: storeName, workspace: wsName }).then(function (lyExists) {
 
@@ -341,8 +342,8 @@ GeoserverRepository.prototype = {
 
     createDatastore: function (config) {
 
-        var storeName = config && config.name || this.gs.datastore;
-        var wsName = config && config.workspace || this.gs.workspace;
+        var storeName = config && config.name || this.geoserver.datastore;
+        var wsName = config && config.workspace || this.geoserver.workspace;
         var dbParams = config && config.connectionParameters || this.db;
 
         return this.datastoreExists({name: storeName}).then(function (dsExists) {
@@ -368,7 +369,7 @@ GeoserverRepository.prototype = {
 
     createWorkspace: function (config) {
 
-        var wsName = config && config.name || this.gs.workspace;
+        var wsName = config && config.name || this.geoserver.workspace;
 
         return this.workspaceExists({name: wsName}).then(function (wsExists) {
 
@@ -403,8 +404,8 @@ GeoserverRepository.prototype = {
     deleteLayer: function (config) {
 
         var layerName = config && config.name;
-        var storeName = config && config.datastore || this.gs.datastore;
-        var wsName = config && config.workspace || this.gs.workspace;
+        var storeName = config && config.datastore || this.geoserver.datastore;
+        var wsName = config && config.workspace || this.geoserver.workspace;
 
         return this.layerExists({ name: layerName, datastore: storeName, workspace: wsName }).then(function (exists) {
 
@@ -419,8 +420,8 @@ GeoserverRepository.prototype = {
 
     deleteDatastore: function (config) {
 
-        var dsName = config && config.name || this.gs.datastore;
-        var wsName = config && config.workspace || this.gs.workspace;
+        var dsName = config && config.name || this.geoserver.datastore;
+        var wsName = config && config.workspace || this.geoserver.workspace;
 
         return this.datastoreExists({ name: dsName, workspace: wsName }).then(function (dsExists) {
 
@@ -435,7 +436,7 @@ GeoserverRepository.prototype = {
 
     deleteWorkspace: function (config) {
 
-        var wsName = config && config.name || this.gs.workspace;
+        var wsName = config && config.name || this.geoserver.workspace;
 
         return this.workspaceExists({name: wsName}).then(function (wsExists) {
 
@@ -467,8 +468,8 @@ GeoserverRepository.prototype = {
                 },
                 body: payload,
                 auth: {
-                    "user": this.gs.user,
-                    "pass": this.gs.pass,
+                    "user": this.geoserver.user,
+                    "pass": this.geoserver.pass,
                     "sendImmediately": true
                 }
             }, function (err, response, body) {
@@ -510,8 +511,8 @@ GeoserverRepository.prototype = {
     recalculateLayerBBox: function (config) {
 
         var layerName = config && config.name;
-        var storeName = config && config.datastore || this.gs.datastore;
-        var wsName = config && config.workspace || this.gs.workspace;
+        var storeName = config && config.datastore || this.geoserver.datastore;
+        var wsName = config && config.workspace || this.geoserver.workspace;
 
         var layerConfig = {
             featureType: {
@@ -538,8 +539,8 @@ GeoserverRepository.prototype = {
             },
             body: payload,
             auth: {
-                "user": this.gs.user,
-                "pass": this.gs.pass,
+                "user": this.geoserver.user,
+                "pass": this.geoserver.pass,
                 "sendImmediately": true
             }
         }, function (err, response, body) {
