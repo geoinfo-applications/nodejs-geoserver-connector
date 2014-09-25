@@ -5,7 +5,7 @@ var Q = require("q");
 var _ = require("underscore");
 var util = require("util");
 
-require('./GeoserverUtils.js');
+require("./GeoserverUtils.js");
 
 function GeoserverRepository(config) {
 
@@ -559,7 +559,13 @@ GeoserverRepository.prototype = {
         }.bind(config));
 
         return deferred.promise;
-    }
+    },
+    
+    setDefaultLayerStyle: function (config) {
+        var layerName = config && config.name;
+        var storeName = config && config.datastore || this.geoserver.datastore;
+        var wsName = config && config.workspace || this.geoserver.workspace;
+    } 
 };
 
 module.exports = GeoserverRepository;
