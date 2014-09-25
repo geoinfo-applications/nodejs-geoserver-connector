@@ -16,7 +16,7 @@ var config = {
 
         geoserver : {
             host: "localhost",
-            port: 9090,
+            port: 3003,
             context: "geoserver",
             timeout: 100,
             user: "admin",

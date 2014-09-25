@@ -5,7 +5,8 @@ var Q = require("q");
 var _ = require("underscore");
 var util = require("util");
 
-require("./GeoserverUtils.js");
+var GeoserverDispatcher = require("./GeoserverDispatcher.js");
+var GeoserverResolver = require("./GeoserverResolver.js");
 
 function GeoserverRepository(config) {
 
@@ -26,10 +27,28 @@ function GeoserverRepository(config) {
     }
     this.db.dbtype = "postgis";
 
-    this.baseUrl = util.format("http://%s:%d/" + this.geoserver.context + "rest",
+    this.baseURL = util.format("http://%s:%d/" + this.geoserver.context + "rest",
         this.geoserver.host, this.geoserver.port);
 
+    this.geoserverRestAPI = {
+        infoURL: "/about/version.json"
+    };
+
     this.timeout = this.geoserver.timeout || 5000;
+
+    this.dispatcher = new GeoserverDispatcher({
+        baseURL: this.baseURL,
+        timeout: this.timeout,
+        user: this.geoserver.user,
+        pass: this.geoserver.pass
+    });
+
+    this.resolver = new GeoserverResolver({
+        baseURL: this.baseURL,
+        workspace: this.geoserver.workspace,
+        datastore: this.geoserver.datastore
+    });
+
     this.geoserverDetails = null;
     this.isEnabled = false;
 }
@@ -39,77 +58,39 @@ GeoserverRepository.prototype = {
     isGeoserverRunning: function () {
         var deferred = Q.defer();
 
-        var geoserverStatusUrl = this.baseUrl + "/about/version.json";
-
-        var response = function (err, response, body) {
-            if (err || (response && response.statusCode !== 200)) {
-
-                var errorMsg = (err && err.message) || body;
-                console.error("Error accessing Geoserver instance > " + this.baseUrl, errorMsg);
-                deferred.reject({ msg: "Error accessing Geoserver instance", reason: errorMsg});
+        var response = function (err, resp, body) {
+            if (isResponseError(err, resp)) {
+                logError.call(this, err, body);
+                deferred.reject(err);
             } else {
-
-                this.isEnabled = true;
-
-                var responseDetails = JSON.parse(body);
-                this.geoserverDetails = responseDetails.about.resource[0];
-
-                console.log("Geoserver instance initialized @ " + this.baseUrl);
+                updateGeoserverStatus.call(this, body);
+                logInstanceInitialization.call(this, null);
                 deferred.resolve();
             }
         }.bind(this);
 
-        request({
-            uri: geoserverStatusUrl,
-            method: "GET",
-            headers: {
-                "Content-type": "text/json"
-            },
-            timeout: this.timeout,
-            auth: {
-                user: this.geoserver.user,
-                pass: this.geoserver.pass,
-                sendImmediately: true
-            }
-        }, response);
-
-        return deferred.promise;
-    },
-
-    resolveGeoserverObject: function (type, config) {
-
-        var requestUrl, requestParams, wsName, storeName;
-
-        if (type === "layer") {
-            requestUrl = "/workspaces/%s/datastores/%s/featuretypes/%s.json";
-            wsName = config && config.workspace || this.geoserver.workspace;
-            storeName = config && config.datastore || this.geoserver.datastore;
-            requestParams = [ wsName, storeName, config.name ];
-
-        } else if (type === "datastore") {
-            requestUrl = "/workspaces/%s/datastores/%s.json";
-            wsName = config && config.workspace || this.geoserver.workspace;
-            storeName = config && config.name || this.geoserver.datastore;
-            if (!config) {
-                config = { name: storeName };
-            }
-            requestParams = [ wsName, storeName ];
-
-        } else if (type === "workspace") {
-            requestUrl = "/workspaces/%s.json";
-            wsName = config && config.name || this.geoserver.workspace;
-            if (!config) {
-                config = { name: wsName };
-            }
-            requestParams = [ wsName ];
+        function isResponseError(err, response){
+            return err || (response && response.statusCode !== 200);
         }
 
-        requestParams.unshift(this.baseUrl + requestUrl);
+        function logError(error, requestBody){
+            var errorMsg = (error && error.message) || requestBody;
+            console.error("Error accessing Geoserver instance > " + this.baseURL, errorMsg);
+        }
 
-        return {
-            url: util.format.apply(null, requestParams),
-            config: config
-        };
+        function updateGeoserverStatus(requestBody){
+            this.isEnabled = true;
+            var responseDetails = JSON.parse(requestBody);
+            this.geoserverDetails = responseDetails.about.resource[0];
+        }
+
+        function logInstanceInitialization(){
+            console.log("Geoserver instance initialized @ " + this.baseURL);
+        }
+
+        this.dispatcher.get({url: this.geoserverRestAPI.infoURL, callback: response});
+
+        return deferred.promise;
     },
 
     initializeWorkspace: function () {
@@ -125,7 +106,7 @@ GeoserverRepository.prototype = {
         return this.isGeoserverRunning()
             .then(createDefaultWorkspace)
             .then(createDefaultDatastore)
-            .then(function(){
+            .then(function () {
                 return this;
             }.bind(this))
             .catch(function (err) {
@@ -138,20 +119,9 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        var gsObject = this.resolveGeoserverObject(type, config);
+        var gsObject = this.resolver.get(type, config);
 
-        request({
-            uri: gsObject.url,
-            method: "GET",
-            headers: {
-                "Content-type": "text/json"
-            },
-            auth: {
-                "user": this.geoserver.user,
-                "pass": this.geoserver.pass,
-                "sendImmediately": true
-            }
-        }, function (err, response, body) {
+        var response = function (err, response, body) {
 
             if (err) {
                 return deferred.reject(err, body);
@@ -162,10 +132,11 @@ GeoserverRepository.prototype = {
                 return deferred.resolve(false);
             }
 
-            //console.log("Geoserver object exists >", type, this.name);
             deferred.resolve(true);
 
-        }.bind(gsObject.config));
+        }.bind(gsObject.config);
+
+        this.dispatcher.get({url: gsObject.url, callback: response});
 
         return deferred.promise;
     },
@@ -174,20 +145,9 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        var gsObject = this.resolveGeoserverObject(type, config);
+        var gsObject = this.resolver.get(type, config);
 
-        request({
-            uri: gsObject.url,
-            method: "GET",
-            headers: {
-                "Content-type": "text/json"
-            },
-            auth: {
-                "user": this.geoserver.user,
-                "pass": this.geoserver.pass,
-                "sendImmediately": true
-            }
-        }, function (err, response, body) {
+        function response (err, resp, body) {
 
             if (err) {
                 return deferred.reject(err, body);
@@ -198,11 +158,12 @@ GeoserverRepository.prototype = {
                 return deferred.reject(false);
             }
 
-            //console.log("Geoserver object exists >", type, this.name);
             var receivedObject = JSON.parse(body);
             deferred.resolve(receivedObject);
 
-        }.bind(gsObject.config));
+        }
+
+        this.dispatcher.get({url: gsObject.url, callback: response.bind(gsObject.config)});
 
         return deferred.promise;
     },
@@ -230,7 +191,7 @@ GeoserverRepository.prototype = {
                 break;
         }
 
-        requestParams.unshift(this.baseUrl + requestUrl);
+        requestParams.unshift(this.baseURL + requestUrl);
         var objectCreateUrl = util.format.apply(null, requestParams);
 
         var payload = JSON.stringify(config);
@@ -266,22 +227,11 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        var gsObject = this.resolveGeoserverObject(type, config);
+        var gsObject = this.resolver.get(type, config);
 
         gsObject.url += "?recurse=true";
 
-        request({
-            uri: gsObject.url,
-            method: "DELETE",
-            headers: {
-                "Content-type": "text/json"
-            },
-            auth: {
-                "user": this.geoserver.user,
-                "pass": this.geoserver.pass,
-                "sendImmediately": true
-            }
-        }, function (err, response, body) {
+        function response (err, resp, body) {
 
             if (err) {
                 return deferred.reject(err);
@@ -294,8 +244,9 @@ GeoserverRepository.prototype = {
 
             //console.log("Geoserver object deleted >", type, this.name);
             deferred.resolve(this);
+        }
 
-        }.bind(gsObject.config));
+        this.dispatcher.delete({ url: gsObject.url, callback: response.bind(gsObject.config)});
 
         return deferred.promise;
     },
@@ -457,7 +408,7 @@ GeoserverRepository.prototype = {
 
             var deferred = Q.defer();
 
-            var gsObject = this.resolveGeoserverObject("layer", layerConfig);
+            var gsObject = this.resolver.get("layer", layerConfig);
             var payload = JSON.stringify(newLayerConfig);
 
             request({
@@ -526,7 +477,7 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        var gsObject = this.resolveGeoserverObject("layer", layerConfig);
+        var gsObject = this.resolver.get("layer", layerConfig);
         gsObject.url += "?recalculate=nativebbox,latlonbbox";
 
         var payload = JSON.stringify(gsObject.config);
@@ -560,12 +511,31 @@ GeoserverRepository.prototype = {
 
         return deferred.promise;
     },
-    
-    setDefaultLayerStyle: function (config) {
-        var layerName = config && config.name;
-        var storeName = config && config.datastore || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-    } 
+
+
+    getLayerStyles: function (config) {
+        return new Q();
+    },
+
+    getLayerDefaultStyle: function (config) {
+        return new Q();
+    },
+
+    setLayerDefaultStyle: function (config) {
+        return new Q();
+    },
+
+    getWorkspaceStyles: function (config) {
+        return new Q();
+    },
+
+    createStyle: function (config) {
+        return new Q();
+    },
+
+    uploadStyle: function (config) {
+        return new Q();
+    }
 };
 
 module.exports = GeoserverRepository;

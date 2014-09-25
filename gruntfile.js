@@ -9,6 +9,7 @@ module.exports = function (grunt) {
             jsFiles : [
                 "**/*.js",
                 "!node_modules/**",
+                "!coverage/**"
             ],
             options: {
                 jshintrc: true
@@ -19,10 +20,12 @@ module.exports = function (grunt) {
         mochaTest: {
             unit_tests: {
                 options: {
-                    reporter: "spec"
+                    reporter: "spec",
+                    bail: "true",
+                    slow: 2
                     //,require: "server/test/test-server.js"
                 },
-                src: ["server/test/**/*.js"]
+                src: ["!**/startGeoserverMockupServer.js", "server/test/**/*.js" ]
             }
         },
 
@@ -30,11 +33,11 @@ module.exports = function (grunt) {
             unit_tests: {
                 src: "./server/test/**",
                 options: {
-                    reporter: "mocha-multi",
+                    reporter: "spec",
                     excludes: ["**/integration/"],
                     recursive: true,
                     coverageFolder: "./coverage/server",
-                    require: ["./server/test/test-server.js"]
+                    //require: ["./server/test/test-server.js"]
                 }
             }
         }

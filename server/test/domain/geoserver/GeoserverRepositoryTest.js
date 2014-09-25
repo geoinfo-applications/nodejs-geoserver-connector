@@ -14,30 +14,39 @@ var config = require("../../config.js");
 
 describe("Geoserver instance", function () {
 
-    this.timeout(600 * 1000);
+    this.timeout(100000);
 
-    var geoserverMockServer = new GeoserverMockServer(config.test.geoserver);
+    describe("testing offline Geoserver access", function () {
 
-    var gsRepository;
+        var gsRepository, geoserverMockServer, mockServer;
 
-    beforeEach(function (done) {
-        gsRepository = new GeoserverRepository(config.test);
-        done();
-    });
+        before(function (done) {
 
-    afterEach(function () {
-        try {
+            geoserverMockServer = new GeoserverMockServer();
+            geoserverMockServer.addTimeoutRequestHandler();
+
+            mockServer = geoserverMockServer.getServer().listen(3003, function () {
+                done();
+            });
+
+        });
+
+        beforeEach(function (done) {
+            gsRepository = new GeoserverRepository(config.test);
+            done();
+        });
+
+        afterEach(function () {
             gsRepository = null;
-        } catch (e) {
-            // already closed
-        }
-    });
+        });
 
-    after(function () {
-        geoserverMockServer.close();
-    });
-
-    describe("testing Geoserver access", function () {
+        after(function () {
+            try {
+                mockServer.close();
+            } catch (e) {
+                // already closed
+            }
+        });
 
         it("GS repository should be disabled if Geoserver instance is not initialized", function (done) {
             expect(gsRepository.isEnabled).not.to.be.equal(true);
@@ -46,25 +55,59 @@ describe("Geoserver instance", function () {
 
         it("should handle Geoserver initialization timeout", function (done) {
 
-            geoserverMockServer.get("/geoserver/about/version.json", function () {
-                // timeout
-                var a = 1;
-            });
-
-            gsRepository.isEnabled = false;
-            gsRepository.timeout = 1;
+            gsRepository.dispatcher.timeout = 1;
 
             gsRepository.initializeWorkspace().then(function () {
-                done(new Error("GS shouldn't be initialized"));
+                done(new Error("Geoserver instance shouldn't be initialized"));
             }).catch(function (err) {
                 expect(gsRepository.isEnabled).to.be.equal(false);
-                expect(err.reason).to.be.equal("ETIMEDOUT");
+                expect(err.message).to.be.equal("ETIMEDOUT");
                 done();
             });
 
         });
+    });
+
+    describe("testing online Geoserver access", function () {
+
+        var gsRepository, geoserverMockServer, mockServer;
+
+        before(function (done) {
+            geoserverMockServer = new GeoserverMockServer();
+            geoserverMockServer.addDefaultRequestHandlers();
+
+            mockServer = geoserverMockServer.getServer().listen(3003, function () {
+                done();
+            });
+        });
+
+        beforeEach(function (done) {
+            gsRepository = new GeoserverRepository(config.test);
+            done();
+        });
+
+        afterEach(function () {
+            gsRepository = null;
+        });
+
+        after(function () {
+            try {
+                mockServer.close();
+            } catch (e) {
+                // already closed
+            }
+        });
 
         it("should correctly fetch Geoserver details ", function (done) {
+
+            gsRepository.isGeoserverRunning().then(function () {
+                expect(gsRepository.isEnabled).to.be.equal(true);
+                done();
+            }).catch(done);
+
+        });
+
+        it("should correctly initialize new Geoserver instance ", function (done) {
 
             gsRepository.initializeWorkspace().then(function (gsInstance) {
                 expect(gsInstance.isEnabled).to.be.equal(true);
@@ -74,7 +117,50 @@ describe("Geoserver instance", function () {
 
         });
 
+        describe("testing Geoserver style functionalites", function () {
+
+            it("should get workspace styles ", function (done) {
+                gsRepository.getWorkspaceStyles().then(function () {
+                    done();
+                });
+            });
+
+            it("should get default layer style ", function (done) {
+                gsRepository.getLayerDefaultStyle().then(function () {
+                    done();
+                });
+            });
+
+            it("should get all layer styles ", function (done) {
+                gsRepository.getLayerStyles().then(function () {
+                    done();
+                });
+            });
+
+            it("should set default layer style ", function (done) {
+                gsRepository.setLayerDefaultStyle().then(function () {
+                    done();
+                });
+            });
+
+            it("should create new geoserver style ", function (done) {
+                gsRepository.createStyle().then(function () {
+                    done();
+                });
+            });
+
+            it("should upload new SLD file ", function (done) {
+                gsRepository.uploadStyle().then(function () {
+                    done();
+                });
+            });
+
+        });
+
     });
+
+
+
 });
 
 
