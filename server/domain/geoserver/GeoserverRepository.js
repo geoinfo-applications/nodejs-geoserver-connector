@@ -559,27 +559,65 @@ GeoserverRepository.prototype = {
         var styleConfig = {
             style: {
                 name: styleName,
-//                workspace: {
-//                    name: wsName
-//                },
+                workspace: { },
                 filename: styleName + ".sld"
             }
         };
 
-        var payload = JSON.stringify(styleConfig);
-
         function response(err, resp, body) {
-
             if (err || resp.statusCode !== 201) {
                 deferred.reject(new Error(err || body));
             }
-
             deferred.resolve(true);
         }
 
         var gsObject = this.resolver.styles("workspace", config);
 
+        styleConfig.style.workspace.name = gsObject.config.name;
+        var payload = JSON.stringify(styleConfig);
+
         this.dispatcher.post({
+            url: gsObject.url,
+            body: payload,
+            callback: response
+        });
+
+        return deferred.promise;
+    },
+
+    deleteWorkspaceStyle: function (styleName, config) {
+
+        var deferred = Q.defer();
+
+        var styleConfig = {
+            style: {
+                name: styleName,
+                filename: styleName + ".sld"
+            }
+        };
+
+        if(!config){
+            config = {};
+        }
+
+        config.name = styleName;
+
+        function response(err, resp, body) {
+            if (err || resp.statusCode !== 200) {
+                deferred.reject(new Error(err || body));
+            }
+            deferred.resolve(true);
+        }
+
+        var gsObject = this.resolver.styles("style", config);
+
+        if( config && config.deleteStyleFile){
+            gsObject.url += "?purge=true";
+        }
+
+        var payload = JSON.stringify(styleConfig);
+
+        this.dispatcher.delete({
             url: gsObject.url,
             body: payload,
             callback: response

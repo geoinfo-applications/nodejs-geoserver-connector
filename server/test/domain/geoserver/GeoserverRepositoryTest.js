@@ -238,7 +238,7 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            it("should create new geoserver style ", function (done) {
+            it("should create new workspace style ", function (done) {
                 gsRepository.createWorkspaceStyle("newStyle").then(function () {
                     done();
                 });
@@ -248,6 +248,19 @@ describe("Geoserver instance", function () {
                 gsRepository.uploadStyleContent().then(function () {
                     done();
                 });
+            });
+
+            it("should delete workspace style ", function (done) {
+                gsRepository.deleteWorkspaceStyle("newStyle").then(function () {
+                    done();
+                });
+            });
+
+            it("should delete workspace style and SLD file", function (done) {
+                gsRepository.deleteWorkspaceStyle("newStyle", { deleteStyleFile: true })
+                    .then(function () {
+                        done();
+                    });
             });
 
         });
