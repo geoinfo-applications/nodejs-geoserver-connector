@@ -3,19 +3,31 @@
 
 module.exports = function (grunt) {
 
+    var jsFiles = [
+        "**/*.js",
+        "!node_modules/**",
+        "!coverage/**"
+    ];
+
     // Project Configuration
     grunt.initConfig({
         jshint: {
-            jsFiles : [
-                "**/*.js",
-                "!node_modules/**",
-                "!coverage/**"
-            ],
+            jsFiles : jsFiles,
             options: {
                 jshintrc: true
             }
         },
 
+        watch: {
+            scripts: {
+                files: jsFiles,
+                tasks: ["jshint"],
+                options: {
+                    spawn: false,
+                    interrupt: true
+                },
+            },
+        },
 
         mochaTest: {
             unit_tests: {
