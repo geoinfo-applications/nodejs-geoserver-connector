@@ -535,11 +535,11 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        return this.getLayer(config).then(function (layer) {
+        this.getLayer(config).then(function (layer) {
             deferred.resolve(layer.defaultStyle);
         }).catch(function (err) {
             console.log(err);
-            return deferred.reject(err);
+            deferred.reject(err);
         });
 
         return deferred.promise;
@@ -553,8 +553,39 @@ GeoserverRepository.prototype = {
         throw new Error();
     },
 
-    createStyle: function (config) {
-        throw new Error();
+    createWorkspaceStyle: function (styleName, config) {
+        var deferred = Q.defer();
+
+        var styleConfig = {
+            style: {
+                name: styleName,
+//                workspace: {
+//                    name: wsName
+//                },
+                filename: styleName + ".sld"
+            }
+        };
+
+        var payload = JSON.stringify(styleConfig);
+
+        function response(err, resp, body) {
+
+            if (err || resp.statusCode !== 201) {
+                deferred.reject(new Error(err || body));
+            }
+
+            deferred.resolve(true);
+        }
+
+        var gsObject = this.resolver.styles("workspace", config);
+
+        this.dispatcher.post({
+            url: gsObject.url,
+            body: payload,
+            callback: response
+        });
+
+        return deferred.promise;
     },
 
     uploadStyleContent: function (config) {

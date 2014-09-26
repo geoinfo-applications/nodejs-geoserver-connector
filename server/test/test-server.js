@@ -25,7 +25,8 @@ function GeoserverMockServer() {
     this.geoserverRestCreateAPI = {
         createLayer: "/workspaces/:ws/datastores/:ds/featuretypes.json",
         createDatastore: "/workspaces/:ws/datastores.json",
-        createWorkspace: "/workspaces.json"
+        createWorkspace: "/workspaces.json",
+        createWorkspaceStyles: "/workspaces/:ws/styles.json"
     };
 
     this.geoserverRestGetAPI = {

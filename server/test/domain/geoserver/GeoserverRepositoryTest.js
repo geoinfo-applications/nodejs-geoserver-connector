@@ -209,6 +209,7 @@ describe("Geoserver instance", function () {
             it.skip("should fetch default workspace styles if name is not supplied ", function (done) {
 
                 gsRepository.getWorkspaceStyles().then(function (styles) {
+                    expect(styles).to.be.instanceof(Array);
                     done();
                 });
             });
@@ -238,13 +239,13 @@ describe("Geoserver instance", function () {
             });
 
             it("should create new geoserver style ", function (done) {
-                gsRepository.createStyle().then(function () {
+                gsRepository.createWorkspaceStyle("newStyle").then(function () {
                     done();
                 });
             });
 
             it("should upload new SLD file ", function (done) {
-                gsRepository.uploadStyle().then(function () {
+                gsRepository.uploadStyleContent().then(function () {
                     done();
                 });
             });
