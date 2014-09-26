@@ -80,7 +80,7 @@ GeoserverRepository.prototype = {
         }
 
         function isResponseError(err, response) {
-            return err || (response && response.statusCode !== 200);
+            return !!err || (response && response.statusCode !== 200);
         }
 
         function logError(error, requestBody) {
