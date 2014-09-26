@@ -214,8 +214,16 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            it("should get workspace styles ", function (done) {
+            it("should get all workspace styles ", function (done) {
                 gsRepository.getWorkspaceStyles({ name: "testWorkspace"}).then(function () {
+                    done();
+                });
+            });
+
+            //TODO mock styles
+            it("should get workspace style ", function (done) {
+                gsRepository.getWorkspaceStyle("styleName").then(function (workspaceHasStyle) {
+                    expect(workspaceHasStyle).to.be.equal(false);
                     done();
                 });
             });

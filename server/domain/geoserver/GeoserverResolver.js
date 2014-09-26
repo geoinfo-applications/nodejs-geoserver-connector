@@ -38,6 +38,7 @@ GeoserverResolver.prototype = {
                 config = { name: wsName };
             }
             requestParams = [ wsName ];
+
         } else if (type === "style") {
             requestUrl = "/workspaces/%s/styles/%s.json";
             wsName = config && config.wsName || this.workspace;

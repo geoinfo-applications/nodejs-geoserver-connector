@@ -503,6 +503,15 @@ GeoserverRepository.prototype = {
         return deferred.promise;
     },
 
+    getWorkspaceStyle: function (styleName, config) {
+        return this.getWorkspaceStyles(config).then(function (styles) {
+            if(styles && styles.some(styleName)){
+                return true;
+            }
+            return false;
+        });
+    },
+
     getWorkspaceStyles: function (config) {
 
         var deferred = Q.defer();
