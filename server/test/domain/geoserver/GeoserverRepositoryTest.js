@@ -225,7 +225,7 @@ describe("Geoserver instance", function () {
             });
 
             it("should get all layer styles ", function (done) {
-                gsRepository.getLayerStyles().then(function () {
+                gsRepository.getLayerStyles(layer).then(function () {
                     done();
                 });
             });

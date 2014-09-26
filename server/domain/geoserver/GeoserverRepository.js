@@ -98,7 +98,10 @@ GeoserverRepository.prototype = {
             console.log("Geoserver instance initialized @ " + self.baseURL);
         }
 
-        this.dispatcher.get({url: this.baseURL + this.geoserverRestAPI.infoURL, callback: response});
+        this.dispatcher.get({
+            url: this.baseURL + this.geoserverRestAPI.infoURL,
+            callback: response
+        });
 
         return deferred.promise;
     },
@@ -489,7 +492,7 @@ GeoserverRepository.prototype = {
             }
 
             var receivedObject = JSON.parse(body);
-            deferred.resolve(receivedObject);
+            deferred.resolve(receivedObject.styles.style);
         }
 
         this.dispatcher.get({
@@ -534,9 +537,16 @@ GeoserverRepository.prototype = {
             return Q.reject(new Error("layer name required"));
         }
 
+        var deferred = Q.defer();
+
         return this.getLayer(config).then(function (layer) {
-            return layer.defaultStyle;
+            deferred.resolve(layer.defaultStyle);
+        }).catch(function (err) {
+            console.log(err);
+            return deferred.reject(err);
         });
+
+        return deferred.promise;
     },
 
     setLayerDefaultStyle: function ( config, style) {
