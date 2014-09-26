@@ -10,7 +10,7 @@ function GeoserverMockServer() {
     var options = config.test.geoserver;
 
     this.gsMockServer = express();
-    this.gsMockServer.use(timeout(2000));
+    this.gsMockServer.use(timeout(200000));
 
     var gsOptions = _.extend({}, options);
     if (gsOptions.context) {
@@ -29,6 +29,9 @@ function GeoserverMockServer() {
     };
 
     this.geoserverRestGetAPI = {
+        getStyles: "/styles.json",
+        getWorkspaceStyles: "/workspaces/:ws/styles.json",
+        getLayerStyles: "/layers/:layer/styles.json",
         getLayerDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
     };
 

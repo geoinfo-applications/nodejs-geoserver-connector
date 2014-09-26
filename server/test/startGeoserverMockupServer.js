@@ -6,12 +6,14 @@
 //var GeoserverRepository = require("../../server/domain/geoserver/GeoserverRepository");
 //var config = require("./config.js");
 //
-//var geoserverMockServer = new GeoserverMockServer(config.test.geoserver, function () {
-//    gsRepository.initializeWorkspace();
-//});
-//
+//var geoserverMockServer = new GeoserverMockServer();
 //geoserverMockServer.addDefaultRequestHandlers();
 //
-//var gsRepository = new GeoserverRepository(config.test);
+//var mockServer = geoserverMockServer.getServer().listen(3003, function () {
+//
+//    var gsRepository = new GeoserverRepository(config.test);
+//
+//});
+
 
 /*ignore jslint end*/

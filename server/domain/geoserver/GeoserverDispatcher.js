@@ -45,16 +45,16 @@ GeoserverDispatcher.prototype = {
 
     "post": function (config) {
         this.get(
-            _.extend({ body: config.body || "", method: "POST"}, config));
+            _.extend({ method: "POST" }, config));
     },
 
     "put": function (config) {
         this.get(
-            _.extend({ body: config.body || "", method: "PUT"}, config));
+            _.extend({ method: "PUT" }, config));
     },
 
     "delete": function (config) {
-        this.get(_.extend({ method: "DELETE"}, config));
+        this.get(_.extend({ method: "DELETE" }, config));
     }
 };
 

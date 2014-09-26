@@ -14,7 +14,7 @@ var config = require("../../config.js");
 
 describe("Geoserver instance", function () {
 
-    this.timeout(100);
+    this.timeout(100000);
 
     describe("testing offline Geoserver access", function () {
 
@@ -94,6 +94,8 @@ describe("Geoserver instance", function () {
             }
         });
 
+        var layer = { name: "fooLayer", featureType: "fooLayer"};
+
         describe("testing Geoserver access functionalites", function () {
 
             beforeEach(function (done) {
@@ -122,8 +124,6 @@ describe("Geoserver instance", function () {
         });
 
         describe("testing Geoserver CRUD methods", function () {
-
-            var layer = { name: "fooLayer"};
 
             beforeEach(function (done) {
                 gsRepository = new GeoserverRepository(config.test);
@@ -167,13 +167,26 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
+            it("should fail renaming layer if new name is not supplied ", function (done) {
+
+                gsRepository.renameLayer(layer).catch(function (error) {
+                    expect(error.message).to.match(/layer name required/);
+                    done();
+                });
+            });
+
             it("should rename Geoserver layer ", function (done) {
 
-                gsRepository.renameLayer(layer).then(function () {
+                gsRepository.renameLayer(layer, "newLayerName").then(function () {
                     done();
                 }).catch(done);
             });
 
+            it.skip("should recalculate layer BBOX", function (done) {
+                return gsRepository.recalculateLayerBBox(layer).then(function () {
+
+                }).catch(done);
+            });
         });
 
         describe("testing Geoserver style functionalites", function () {
@@ -185,14 +198,28 @@ describe("Geoserver instance", function () {
                 });
             });
 
+            it("should get public styles ", function (done) {
+                gsRepository.getPublicStyles().then(function () {
+                    done();
+                });
+            });
+
+            it("should fail fetching workspace styles if name is not supplied ", function (done) {
+
+                gsRepository.getWorkspaceStyles({}).catch(function (error) {
+                    expect(error.message).to.match(/name required/);
+                    done();
+                });
+            });
+
             it("should get workspace styles ", function (done) {
-                gsRepository.getWorkspaceStyles().then(function () {
+                gsRepository.getWorkspaceStyles({ name: "testWorkspace"}).then(function () {
                     done();
                 });
             });
 
             it("should get default layer style ", function (done) {
-                gsRepository.getLayerDefaultStyle().then(function () {
+                gsRepository.getLayerDefaultStyle(layer).then(function () {
                     done();
                 });
             });
@@ -225,8 +252,5 @@ describe("Geoserver instance", function () {
 
     });
 
-
 });
-
-
 

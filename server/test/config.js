@@ -18,7 +18,7 @@ var config = {
             host: "localhost",
             port: 3003,
             context: "geoserver",
-            timeout: 1000,
+            timeout: 100000,
             user: "admin",
             pass: "geoserver",
             workspace: "geoportal",

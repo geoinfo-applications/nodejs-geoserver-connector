@@ -19,6 +19,36 @@ function GeoserverResolver(geoserverRepositoryConfig) {
 // TODO refactor !!!
 GeoserverResolver.prototype = {
 
+    styles: function (type, config) {
+
+        var requestUrl, wsName, storeName;
+        var requestParams = [];
+
+        if(type === "all"){
+            requestUrl = "/styles.json";
+
+        } else if (type === "layer") {
+            requestUrl = "/layer/%s/styles.json";
+            requestParams = [ config.name ];
+
+        } else if (type === "workspace") {
+            requestUrl = "/workspaces/%s/styles.json";
+            wsName = config && config.name || this.workspace;
+            if (!config) {
+                config = { name: wsName };
+            }
+            requestParams = [ wsName ];
+        }
+
+        requestParams.unshift(this.baseURL + requestUrl);
+
+        return {
+            url: util.format.apply(null, requestParams),
+            config: config
+        };
+
+    },
+
     create: function (type, config) {
 
         var requestUrl, requestParams, wsName, storeName;
@@ -58,7 +88,8 @@ GeoserverResolver.prototype = {
 
     "get": function (type, config) {
 
-        var requestUrl, requestParams, wsName, storeName;
+        var requestUrl, wsName, storeName;
+        var requestParams = [];
 
         if (type === "layer") {
             requestUrl = "/workspaces/%s/datastores/%s/featuretypes/%s.json";

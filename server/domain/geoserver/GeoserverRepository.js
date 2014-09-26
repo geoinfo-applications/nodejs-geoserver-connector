@@ -1,6 +1,5 @@
 "use strict";
 
-var request = require("request");
 var Q = require("q");
 var _ = require("underscore");
 var util = require("util");
@@ -31,7 +30,8 @@ function GeoserverRepository(config) {
         this.geoserver.host, this.geoserver.port);
 
     this.geoserverRestAPI = {
-        infoURL: "/about/version.json"
+        infoURL: "/about/version.json",
+        publicStyles: "styles.json"
     };
 
     this.timeout = this.geoserver.timeout || 5000;
@@ -52,21 +52,32 @@ function GeoserverRepository(config) {
     this.isEnabled = false;
 }
 
+
 GeoserverRepository.prototype = {
+
+    utils: {
+        objectNameDoesntExists: function(type, config){
+            if (!config || !config.name) {
+                //console.log();
+                return true;
+            }
+        }
+    },
 
     isGeoserverRunning: function () {
         var deferred = Q.defer();
+        var self = this;
 
-        var response = function (err, resp, body) {
+        function response(err, resp, body) {
             if (isResponseError(err, resp)) {
-                logError.call(this, err, body);
+                logError(err, body);
                 deferred.reject(err);
             } else {
-                updateGeoserverStatus.call(this, body);
-                logInstanceInitialization.call(this, null);
+                updateGeoserverStatus(body);
+                logInstanceInitialization();
                 deferred.resolve();
             }
-        }.bind(this);
+        }
 
         function isResponseError(err, response) {
             return err || (response && response.statusCode !== 200);
@@ -74,17 +85,17 @@ GeoserverRepository.prototype = {
 
         function logError(error, requestBody) {
             var errorMsg = (error && error.message) || requestBody;
-            console.error("Error accessing Geoserver instance > " + this.baseURL, errorMsg);
+            console.error("Error accessing Geoserver instance > " + self.baseURL, errorMsg);
         }
 
         function updateGeoserverStatus(requestBody) {
-            this.isEnabled = true;
+            self.isEnabled = true;
             var responseDetails = JSON.parse(requestBody);
-            this.geoserverDetails = responseDetails.about.resource[0];
+            self.geoserverDetails = responseDetails.about.resource[0];
         }
 
         function logInstanceInitialization() {
-            console.log("Geoserver instance initialized @ " + this.baseURL);
+            console.log("Geoserver instance initialized @ " + self.baseURL);
         }
 
         this.dispatcher.get({url: this.baseURL + this.geoserverRestAPI.infoURL, callback: response});
@@ -368,6 +379,10 @@ GeoserverRepository.prototype = {
 
     renameLayer: function (config, newLayerName) {
 
+        if (!newLayerName) {
+            return Q.reject(new Error("layer name required"));
+        }
+
         var layerConfig = _.extend({}, config);
 
         var renameLayer = function (newLayerConfig) {
@@ -390,7 +405,11 @@ GeoserverRepository.prototype = {
                 deferred.resolve(this);
             }
 
-            this.dispatcher.put({ url: gsObject.url, body: payload, callback: response});
+            this.dispatcher.put({
+                url: gsObject.url,
+                body: payload,
+                callback: response.bind(gsObject.config)
+            });
 
             return deferred.promise;
 
@@ -436,58 +455,100 @@ GeoserverRepository.prototype = {
 
         var payload = JSON.stringify(gsObject.config);
 
-        request({
-            uri: gsObject.url,
-            method: "PUT",
-            headers: {
-                "Content-type": "text/json"
-            },
-            body: payload,
-            auth: {
-                "user": this.geoserver.user,
-                "pass": this.geoserver.pass,
-                "sendImmediately": true
-            }
-        }, function (err, response, body) {
+        function response(err, resp, body) {
 
             if (err) {
-                return deferred.reject(err);
+                return deferred.reject(new Error(err));
             }
 
-            if (response.statusCode !== 200) {
+            if (resp.statusCode !== 200) {
                 console.error("Error recalculate Geoserver layer BBox >", body);
                 return deferred.reject(this);
             }
 
             deferred.resolve(this);
+        }
 
-        }.bind(config));
+        this.dispatcher.get({ url: gsObject.url, body: payload, callback: response.bind(gsObject.config)});
 
         return deferred.promise;
     },
 
-    getLayerStyles: function (config) {
-        return new Q();
-    },
+    getPublicStyles: function () {
 
-    getLayerDefaultStyle: function (config) {
-        return new Q();
-    },
+        var deferred = Q.defer();
 
-    setLayerDefaultStyle: function (config) {
-        return new Q();
+        function response(err, resp, body) {
+
+            if (err || resp.statusCode !== 200) {
+                deferred.reject(new Error(err || body));
+            }
+
+            var receivedObject = JSON.parse(body);
+            deferred.resolve(receivedObject);
+        }
+
+        this.dispatcher.get({
+            url: this.resolver.styles("all").url,
+            callback: response
+        });
+
+        return deferred.promise;
     },
 
     getWorkspaceStyles: function (config) {
-        return new Q();
+
+        var deferred = Q.defer();
+
+        if (!config || !config.name) {
+            return Q.reject(new Error("workspace name required"));
+        }
+
+        function response(err, resp, body) {
+
+            if (err || resp.statusCode !== 200) {
+                deferred.reject(new Error(err || body));
+            }
+
+            var receivedObject = JSON.parse(body);
+            deferred.resolve(receivedObject);
+        }
+
+        var gsObject = this.resolver.styles("workspace");
+
+        this.dispatcher.get({
+            url: gsObject.url,
+            callback: response
+        });
+
+        return deferred.promise;
+    },
+
+    getLayerDefaultStyle: function (config) {
+
+        if (!config || !config.name) {
+            return Q.reject(new Error("layer name required"));
+        }
+
+        return this.getLayer(config).then(function (layer) {
+            return layer.defaultStyle;
+        });
+    },
+
+    setLayerDefaultStyle: function ( config, style) {
+        throw new Error();
+    },
+
+    getLayerStyles: function (config) {
+        throw new Error();
     },
 
     createStyle: function (config) {
-        return new Q();
+        throw new Error();
     },
 
-    uploadStyle: function (config) {
-        return new Q();
+    uploadStyleContent: function (config) {
+        throw new Error();
     }
 };
 
