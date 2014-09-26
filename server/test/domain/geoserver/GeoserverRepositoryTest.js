@@ -14,7 +14,7 @@ var config = require("../../config.js");
 
 describe("Geoserver instance", function () {
 
-    this.timeout(100000);
+    this.timeout(100);
 
     describe("testing offline Geoserver access", function () {
 
@@ -81,11 +81,6 @@ describe("Geoserver instance", function () {
             });
         });
 
-        beforeEach(function (done) {
-            gsRepository = new GeoserverRepository(config.test);
-            done();
-        });
-
         afterEach(function () {
             gsRepository = null;
         });
@@ -93,31 +88,102 @@ describe("Geoserver instance", function () {
         after(function () {
             try {
                 mockServer.close();
+                gsRepository = null;
             } catch (e) {
                 // already closed
             }
         });
 
-        it("should correctly fetch Geoserver details ", function (done) {
+        describe("testing Geoserver access functionalites", function () {
 
-            gsRepository.isGeoserverRunning().then(function () {
-                expect(gsRepository.isEnabled).to.be.equal(true);
+            beforeEach(function (done) {
+                gsRepository = new GeoserverRepository(config.test);
                 done();
-            }).catch(done);
+            });
 
+            it("should correctly fetch Geoserver details ", function (done) {
+
+                gsRepository.isGeoserverRunning().then(function () {
+                    expect(gsRepository.isEnabled).to.be.equal(true);
+                    done();
+                }).catch(done);
+
+            });
+
+            it("should correctly initialize new Geoserver instance ", function (done) {
+
+                gsRepository.initializeWorkspace().then(function (gsInstance) {
+                    expect(gsInstance.isEnabled).to.be.equal(true);
+                    expect(gsInstance.geoserverDetails["@name"]).to.be.equal("GeoServer");
+                    done();
+                }).catch(done);
+
+            });
         });
 
-        it("should correctly initialize new Geoserver instance ", function (done) {
+        describe("testing Geoserver CRUD methods", function () {
 
-            gsRepository.initializeWorkspace().then(function (gsInstance) {
-                expect(gsInstance.isEnabled).to.be.equal(true);
-                expect(gsInstance.geoserverDetails["@name"]).to.be.equal("GeoServer");
-                done();
-            }).catch(done);
+            var layer = { name: "fooLayer"};
+
+            beforeEach(function (done) {
+                gsRepository = new GeoserverRepository(config.test);
+                gsRepository.initializeWorkspace().then(function () {
+                    done();
+                });
+            });
+
+            it("should fetch Geoserver workspace ", function (done) {
+
+                gsRepository.workspaceExists().then(function () {
+                    done();
+                }).catch(done);
+            });
+
+            it("should fetch Geoserver datastore ", function (done) {
+
+                gsRepository.datastoreExists().then(function () {
+                    done();
+                }).catch(done);
+            });
+
+            it("should return true if Geoserver layer exists", function (done) {
+
+                gsRepository.layerExists(layer).then(function () {
+                    done();
+                }).catch(done);
+            });
+
+            it("should get Geoserver layer details ", function (done) {
+
+                gsRepository.getLayer(layer).then(function () {
+                    done();
+                }).catch(done);
+            });
+
+            it("should delete Geoserver layer ", function (done) {
+
+                gsRepository.deleteLayer(layer).then(function () {
+                    done();
+                }).catch(done);
+            });
+
+            it("should rename Geoserver layer ", function (done) {
+
+                gsRepository.renameLayer(layer).then(function () {
+                    done();
+                }).catch(done);
+            });
 
         });
 
         describe("testing Geoserver style functionalites", function () {
+
+            beforeEach(function (done) {
+                gsRepository = new GeoserverRepository(config.test);
+                gsRepository.initializeWorkspace().then(function () {
+                    done();
+                });
+            });
 
             it("should get workspace styles ", function (done) {
                 gsRepository.getWorkspaceStyles().then(function () {
@@ -158,7 +224,6 @@ describe("Geoserver instance", function () {
         });
 
     });
-
 
 
 });

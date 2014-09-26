@@ -11,7 +11,6 @@ function GeoserverDispatcher(geoserverRepositoryConfig) {
 
     this.geoserverConfig = _.extend({}, geoserverRepositoryConfig);
 
-    this.baseURL = this.geoserverConfig.baseURL;
     this.timeout = this.geoserverConfig.timeout;
     this.user = this.geoserverConfig.user;
     this.pass = this.geoserverConfig.pass;
@@ -25,12 +24,13 @@ GeoserverDispatcher.prototype = {
         var callback = config.callback;
 
         if (!callback || !geoserverRestCall) {
-            throw new Error("Url and callback required;");
+            throw new Error("URL and Callback required");
         }
 
         request({
-            uri: this.baseURL + geoserverRestCall,
+            uri: geoserverRestCall,
             method: config.method || "GET",
+            body: config.body || undefined,
             headers: {
                 "Content-type": "text/json"
             },
@@ -43,8 +43,14 @@ GeoserverDispatcher.prototype = {
         }, callback);
     },
 
-    post: function (config) {
-        this.get(_.extend({ method: "POST"}, config));
+    "post": function (config) {
+        this.get(
+            _.extend({ body: config.body || "", method: "POST"}, config));
+    },
+
+    "put": function (config) {
+        this.get(
+            _.extend({ body: config.body || "", method: "PUT"}, config));
     },
 
     "delete": function (config) {

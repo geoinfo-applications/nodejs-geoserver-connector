@@ -37,7 +37,6 @@ function GeoserverRepository(config) {
     this.timeout = this.geoserver.timeout || 5000;
 
     this.dispatcher = new GeoserverDispatcher({
-        baseURL: this.baseURL,
         timeout: this.timeout,
         user: this.geoserver.user,
         pass: this.geoserver.pass
@@ -69,26 +68,26 @@ GeoserverRepository.prototype = {
             }
         }.bind(this);
 
-        function isResponseError(err, response){
+        function isResponseError(err, response) {
             return err || (response && response.statusCode !== 200);
         }
 
-        function logError(error, requestBody){
+        function logError(error, requestBody) {
             var errorMsg = (error && error.message) || requestBody;
             console.error("Error accessing Geoserver instance > " + this.baseURL, errorMsg);
         }
 
-        function updateGeoserverStatus(requestBody){
+        function updateGeoserverStatus(requestBody) {
             this.isEnabled = true;
             var responseDetails = JSON.parse(requestBody);
             this.geoserverDetails = responseDetails.about.resource[0];
         }
 
-        function logInstanceInitialization(){
+        function logInstanceInitialization() {
             console.log("Geoserver instance initialized @ " + this.baseURL);
         }
 
-        this.dispatcher.get({url: this.geoserverRestAPI.infoURL, callback: response});
+        this.dispatcher.get({url: this.baseURL + this.geoserverRestAPI.infoURL, callback: response});
 
         return deferred.promise;
     },
@@ -147,20 +146,19 @@ GeoserverRepository.prototype = {
 
         var gsObject = this.resolver.get(type, config);
 
-        function response (err, resp, body) {
+        function response(err, resp, body) {
 
             if (err) {
-                return deferred.reject(err, body);
+                deferred.reject(err);
             }
 
-            if (response.statusCode !== 200) {
+            if (resp.statusCode !== 200) {
                 //console.log("Geoserver object doesn't exist >", body);
                 return deferred.reject(false);
             }
 
             var receivedObject = JSON.parse(body);
             deferred.resolve(receivedObject);
-
         }
 
         this.dispatcher.get({url: gsObject.url, callback: response.bind(gsObject.config)});
@@ -172,27 +170,7 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        var storeName = config && config.datastore || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-
-        var requestUrl, requestParams;
-        switch (type) {
-            case "layer":
-                requestUrl = "/workspaces/%s/datastores/%s/featuretypes.json";
-                requestParams = [ wsName, storeName ];
-                break;
-            case "datastore":
-                requestUrl = "/workspaces/%s/datastores.json";
-                requestParams = [ wsName ];
-                break;
-            case "workspace":
-                requestUrl = "/workspaces.json";
-                requestParams = [];
-                break;
-        }
-
-        requestParams.unshift(this.baseURL + requestUrl);
-        var objectCreateUrl = util.format.apply(null, requestParams);
+        var gsObject = this.resolver.create(type, config);
 
         var payload = JSON.stringify(config);
 
@@ -206,19 +184,7 @@ GeoserverRepository.prototype = {
             }
         }.bind(config);
 
-        request({
-            uri: objectCreateUrl,
-            method: "POST",
-            headers: {
-                "Content-type": "text/json"
-            },
-            body: payload,
-            auth: {
-                user: this.geoserver.user,
-                pass: this.geoserver.pass,
-                sendImmediately: true
-            }
-        }, response);
+        this.dispatcher.post({url: gsObject.url, body: payload, callback: response});
 
         return deferred.promise;
     },
@@ -231,14 +197,14 @@ GeoserverRepository.prototype = {
 
         gsObject.url += "?recurse=true";
 
-        function response (err, resp, body) {
+        function response(err, resp, body) {
 
             if (err) {
                 return deferred.reject(err);
             }
 
-            if (response.statusCode !== 200) {
-                console.log("Error delete Geoserver object >", body);
+            if (resp.statusCode !== 200) {
+                console.log("Error deleting Geoserver object >", body);
                 return deferred.reject(this);
             }
 
@@ -411,32 +377,20 @@ GeoserverRepository.prototype = {
             var gsObject = this.resolver.get("layer", layerConfig);
             var payload = JSON.stringify(newLayerConfig);
 
-            request({
-                uri: gsObject.url,
-                method: "PUT",
-                headers: {
-                    "Content-type": "text/json"
-                },
-                body: payload,
-                auth: {
-                    "user": this.geoserver.user,
-                    "pass": this.geoserver.pass,
-                    "sendImmediately": true
-                }
-            }, function (err, response, body) {
+            function response(err, resp, body) {
 
                 if (err) {
                     return deferred.reject(err);
                 }
 
-                if (response.statusCode !== 200) {
+                if (resp.statusCode !== 200) {
                     console.error("Error rename Geoserver layer >", body);
                     return deferred.reject(this);
                 }
-
                 deferred.resolve(this);
+            }
 
-            }.bind(newLayerConfig));
+            this.dispatcher.put({ url: gsObject.url, body: payload, callback: response});
 
             return deferred.promise;
 
@@ -511,7 +465,6 @@ GeoserverRepository.prototype = {
 
         return deferred.promise;
     },
-
 
     getLayerStyles: function (config) {
         return new Q();

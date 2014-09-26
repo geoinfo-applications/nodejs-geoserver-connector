@@ -16,7 +16,46 @@ function GeoserverResolver(geoserverRepositoryConfig) {
 
 }
 
+// TODO refactor !!!
 GeoserverResolver.prototype = {
+
+    create: function (type, config) {
+
+        var requestUrl, requestParams, wsName, storeName;
+
+        if (type === "layer") {
+            requestUrl = "/workspaces/%s/datastores/%s/featuretypes.json";
+            wsName = config && config.workspace || this.workspace;
+            storeName = config && config.datastore || this.datastore;
+            requestParams = [ wsName, storeName ];
+
+        } else if (type === "datastore") {
+            requestUrl = "/workspaces/%s/datastores.json";
+            wsName = config && config.workspace || this.workspace;
+            storeName = config && config.name || this.datastore;
+            if (!config) {
+                config = { name: storeName };
+            }
+            requestParams = [ wsName ];
+
+        } else if (type === "workspace") {
+            requestUrl = "/workspaces.json";
+            wsName = config && config.name || this.workspace;
+            if (!config) {
+                config = { name: wsName };
+            }
+            requestParams = [];
+        }
+
+        requestParams.unshift(this.baseURL + requestUrl);
+
+        return {
+            url: util.format.apply(null, requestParams),
+            config: config
+        };
+
+    },
+
     "get": function (type, config) {
 
         var requestUrl, requestParams, wsName, storeName;

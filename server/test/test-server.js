@@ -10,7 +10,7 @@ function GeoserverMockServer() {
     var options = config.test.geoserver;
 
     this.gsMockServer = express();
-    this.gsMockServer.use(timeout(100));
+    this.gsMockServer.use(timeout(5000));
 
     var gsOptions = _.extend({}, options);
     if (gsOptions.context) {
@@ -28,8 +28,20 @@ function GeoserverMockServer() {
         createWorkspace: "/workspaces.json"
     };
 
+    this.geoserverRestGetAPI = {
+        getLayerDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
+    };
+
+    this.geoserverRestDeleteAPI = {
+        getLayerDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
+    };
+
+    this.geoserverRestPutAPI = {
+        getLayerDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
+    };
+
     this.geoserverRestAPI = {
-        getGeoserverDetails: "/about/version.json"
+        getInstanceDetails: "/about/version.json"
     };
 
 }
@@ -48,7 +60,25 @@ GeoserverMockServer.prototype = {
             });
         }.bind(this));
 
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGeoserverDetails, function (req, res) {
+        _.forEach(this.geoserverRestGetAPI, function (geoserverAPICall) {
+            this.gsMockServer.get(this.baseURL + geoserverAPICall, function (req, res) {
+                res.status(200).json(true);
+            });
+        }.bind(this));
+
+        _.forEach(this.geoserverRestDeleteAPI, function (geoserverAPICall) {
+            this.gsMockServer.delete(this.baseURL + geoserverAPICall, function (req, res) {
+                res.status(200).json(true);
+            });
+        }.bind(this));
+
+        _.forEach(this.geoserverRestPutAPI, function (geoserverAPICall) {
+            this.gsMockServer.put(this.baseURL + geoserverAPICall, function (req, res) {
+                res.status(200).json(true);
+            });
+        }.bind(this));
+
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getInstanceDetails, function (req, res) {
             res.json({
                 about: { resource: [
                     { "@name": "GeoServer", Version: 2.5 }
