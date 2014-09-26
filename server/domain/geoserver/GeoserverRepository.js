@@ -56,7 +56,7 @@ function GeoserverRepository(config) {
 GeoserverRepository.prototype = {
 
     utils: {
-        objectNameDoesntExists: function(type, config){
+        objectNameDoesntExists: function (type, config) {
             if (!config || !config.name) {
                 //console.log();
                 return true;
@@ -507,10 +507,6 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        if (!config || !config.name) {
-            return Q.reject(new Error("workspace name required"));
-        }
-
         function response(err, resp, body) {
 
             if (err || resp.statusCode !== 200) {
@@ -521,7 +517,7 @@ GeoserverRepository.prototype = {
             deferred.resolve(receivedObject);
         }
 
-        var gsObject = this.resolver.styles("workspace");
+        var gsObject = this.resolver.styles("workspace", config);
 
         this.dispatcher.get({
             url: gsObject.url,
@@ -549,7 +545,7 @@ GeoserverRepository.prototype = {
         return deferred.promise;
     },
 
-    setLayerDefaultStyle: function ( config, style) {
+    setLayerDefaultStyle: function (config, style) {
         throw new Error();
     },
 

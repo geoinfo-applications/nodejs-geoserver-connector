@@ -198,16 +198,16 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            it("should get public styles ", function (done) {
+            // TODO mock styles
+            it.skip("should get public styles ", function (done) {
                 gsRepository.getPublicStyles().then(function () {
                     done();
                 });
             });
 
-            it("should fail fetching workspace styles if name is not supplied ", function (done) {
+            it("should fetch default workspace styles if name is not supplied ", function (done) {
 
-                gsRepository.getWorkspaceStyles({}).catch(function (error) {
-                    expect(error.message).to.match(/name required/);
+                gsRepository.getWorkspaceStyles().then(function (styles) {
                     done();
                 });
             });
