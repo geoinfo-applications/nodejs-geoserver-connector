@@ -205,7 +205,8 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            it("should fetch default workspace styles if name is not supplied ", function (done) {
+            // TODO mock styles
+            it.skip("should fetch default workspace styles if name is not supplied ", function (done) {
 
                 gsRepository.getWorkspaceStyles().then(function (styles) {
                     done();

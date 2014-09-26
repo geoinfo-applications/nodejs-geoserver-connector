@@ -514,7 +514,7 @@ GeoserverRepository.prototype = {
             }
 
             var receivedObject = JSON.parse(body);
-            deferred.resolve(receivedObject);
+            deferred.resolve(receivedObject.styles);
         }
 
         var gsObject = this.resolver.styles("workspace", config);
