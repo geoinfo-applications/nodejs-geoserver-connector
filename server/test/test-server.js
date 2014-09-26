@@ -10,7 +10,7 @@ function GeoserverMockServer() {
     var options = config.test.geoserver;
 
     this.gsMockServer = express();
-    this.gsMockServer.use(timeout(5000));
+    this.gsMockServer.use(timeout(2000));
 
     var gsOptions = _.extend({}, options);
     if (gsOptions.context) {
