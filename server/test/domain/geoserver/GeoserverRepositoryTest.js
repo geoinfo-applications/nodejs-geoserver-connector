@@ -182,9 +182,9 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
-            it.skip("should recalculate layer BBOX", function (done) {
+            it("should recalculate layer BBOX", function (done) {
                 return gsRepository.recalculateLayerBBox(layer).then(function () {
-
+                    done();
                 }).catch(done);
             });
         });

@@ -408,7 +408,7 @@ GeoserverRepository.prototype = {
             this.dispatcher.put({
                 url: gsObject.url,
                 body: payload,
-                callback: response.bind(gsObject.config)
+                callback: response.bind(newLayerConfig)
             });
 
             return deferred.promise;
@@ -466,10 +466,14 @@ GeoserverRepository.prototype = {
                 return deferred.reject(this);
             }
 
-            deferred.resolve(this);
+            return deferred.resolve(this);
         }
 
-        this.dispatcher.get({ url: gsObject.url, body: payload, callback: response.bind(gsObject.config)});
+        this.dispatcher.put({
+            url: gsObject.url,
+            body: payload,
+            callback: response.bind(config)
+        });
 
         return deferred.promise;
     },
