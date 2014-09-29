@@ -15,7 +15,7 @@ var config = require("../../config.js");
 
 describe("Geoserver instance", function () {
 
-    this.timeout(60);
+    this.timeout(60000);
 
     describe("testing offline Geoserver access", function () {
 
@@ -250,7 +250,7 @@ describe("Geoserver instance", function () {
 
             it("should get all global styles ", function (done) {
                 gsRepository.getGlobalStyles().then(function (styles) {
-                    expect(styles).to.be.an('array');
+                    expect(styles).to.be.instanceof(Array);
                     expect(styles.length).to.be.equal(4);
                     expect(styles[0].name).to.be.equal("point");
                     done();
@@ -314,31 +314,13 @@ describe("Geoserver instance", function () {
 
             it("should get workspace style ", function (done) {
                 gsRepository.getWorkspaceStyle(style).then(function (workspaceStyle) {
-                    expect(workspaceStyle).to.be.an('object');
+                    expect(workspaceStyle).to.be.instanceof(Object);
                     expect(workspaceStyle.name).to.be.equal(style.name);
                     expect(workspaceStyle.filename).to.be.equal(style.filename);
                     done();
                 }).catch(done);
             });
 
-            // TODO mock styles
-            it.skip("should fetch default workspace styles if name is not supplied ", function (done) {
-
-                gsRepository.getWorkspaceStyles().then(function (styles) {
-                    expect(styles).to.be.instanceof(Array);
-                    done();
-                }).catch(done);
-            });
-
-            // TODO mock styles
-            it("should get all workspace styles ", function (done) {
-                gsRepository.getWorkspaceStyles({ name: "testWorkspace"}).then(function () {
-                    expect(styles).to.be.instanceof(Array);
-                    done();
-                }).catch(done);
-            });
-
-            //TODO mock styles
             it("should fail if workspace style name is not defined", function (done) {
                 gsRepository.getWorkspaceStyle().catch(function (error) {
                     expect(error.message).to.match(/name required/);
@@ -346,6 +328,15 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
+            it("should fetch all workspace styles ", function (done) {
+
+                gsRepository.getWorkspaceStyles().then(function (styles) {
+                    expect(styles).to.be.instanceof(Array);
+                    expect(styles.length).to.be.equal(4);
+                    expect(styles[0].name).to.be.equal("point");
+                    done();
+                }).catch(done);
+            });
 
             it("should get default layer style name", function (done) {
                 gsRepository.getLayerDefaultStyle(layer).then(function (defaultStyle) {
@@ -354,14 +345,14 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
-            it("should set default layer style ", function (done) {
-                gsRepository.setLayerDefaultStyle().then(function () {
+            it("should get all layer styles ", function (done) {
+                gsRepository.getLayerStyles(layer).then(function () {
                     done();
                 }).catch(done);
             });
 
-            it("should get all layer styles ", function (done) {
-                gsRepository.getLayerStyles(layer).then(function () {
+            it("should set default layer style ", function (done) {
+                gsRepository.setLayerDefaultStyle().then(function () {
                     done();
                 }).catch(done);
             });

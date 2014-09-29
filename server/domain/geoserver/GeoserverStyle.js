@@ -83,7 +83,7 @@ module.exports = function GeoserverLayer() {
 
     this.getWorkspaceStyle = function (config) {
 
-        if (!config.name) {
+        if (!config || !config.name) {
             return Q.reject(new Error("style name required"));
         }
 
@@ -93,29 +93,22 @@ module.exports = function GeoserverLayer() {
             });
     };
 
-    this.getWorkspaceStyles = function (config) {
+    this.getWorkspaceStyles = function () {
 
-        var deferred = Q.defer();
-
-        function response(err, resp, body) {
-
-            if (err || resp.statusCode !== 200) {
-                deferred.reject(new Error(err || body));
-            }
-
-            var receivedObject = JSON.parse(body);
-            deferred.resolve(receivedObject.styles);
-        }
-
-        var gsObject = this.resolver.styles("workspace", config);
-
-        this.dispatcher.get({
-            url: gsObject.url,
-            callback: response
-        });
-
-        return deferred.promise;
+        return this.getGeoserverObject("workspaceStyle")
+            .then(function (styleObject) {
+                return styleObject.styles.style;
+            });
     };
+
+    this.createWorkspaceStyle = function (styleName, config) {
+
+    };
+
+    this.deleteWorkspaceStyle = function (styleName, config) {
+
+    };
+
 
     this.getLayerDefaultStyle = function (config) {
 
@@ -135,6 +128,10 @@ module.exports = function GeoserverLayer() {
         return deferred.promise;
     };
 
+    this.getLayerStyles = function (config) {
+        throw new Error();
+    };
+
     this.setLayerDefaultStyle = function (config, styleName) {
         throw new Error();
         /*        return this.getLayer(config).then(function (layer) {
@@ -146,81 +143,5 @@ module.exports = function GeoserverLayer() {
 
     };
 
-    this.getLayerStyles = function (config) {
-        throw new Error();
-    };
-
-    this.createWorkspaceStyle = function (styleName, config) {
-        var deferred = Q.defer();
-
-        var styleConfig = {
-            style: {
-                name: styleName,
-                workspace: { },
-                filename: styleName + ".sld"
-            }
-        };
-
-        function response(err, resp, body) {
-            if (err || resp.statusCode !== 201) {
-                deferred.reject(new Error(err || body));
-            }
-            deferred.resolve(true);
-        }
-
-        var gsObject = this.resolver.styles("workspace", config);
-
-        styleConfig.style.workspace.name = gsObject.config.name;
-        var payload = JSON.stringify(styleConfig);
-
-        this.dispatcher.post({
-            url: gsObject.url,
-            body: payload,
-            callback: response
-        });
-
-        return deferred.promise;
-    };
-
-    this.deleteWorkspaceStyle = function (styleName, config) {
-
-        var deferred = Q.defer();
-
-        var styleConfig = {
-            style: {
-                name: styleName,
-                filename: styleName + ".sld"
-            }
-        };
-
-        if (!config) {
-            config = {};
-        }
-
-        config.name = styleName;
-
-        function response(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                deferred.reject(new Error(err || body));
-            }
-            deferred.resolve(true);
-        }
-
-        var gsObject = this.resolver.styles("style", config);
-
-        if (config && config.deleteStyleFile) {
-            gsObject.url += "?purge=true";
-        }
-
-        var payload = JSON.stringify(styleConfig);
-
-        this.dispatcher.delete({
-            url: gsObject.url,
-            body: payload,
-            callback: response
-        });
-
-        return deferred.promise;
-    };
 
 };

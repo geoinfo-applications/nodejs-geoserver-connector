@@ -95,8 +95,9 @@ GeoserverResolver.prototype = {
     },
 
     getWorkspaceStyleParameters: function (config) {
-        var workspaceName = config && config.name || this.workspace;
-        return [ workspaceName, config.name ];
+        var workspaceStyleName = config && config.name || "";
+        var workspaceName = config && config.workspace || this.workspace;
+        return [ workspaceName, workspaceStyleName ];
     },
 
     getStyleParameters: function (config) {
@@ -127,7 +128,7 @@ GeoserverResolver.prototype = {
     resolveDatastore: function (config, method) {
 
         var restUrl = this.restAPI.getDatastore;
-        var parameters =  this.getDatastoreParameters(config);
+        var parameters = this.getDatastoreParameters(config);
 
         if (this.methodIsCreateOrNoConfig(method, config)) {
             restUrl = this.restAPI.getDatastores;
@@ -156,7 +157,7 @@ GeoserverResolver.prototype = {
 
     resolveWorkspaceStyle: function (config, method) {
         var restUrl = this.restAPI.getWorkspaceStyle;
-        var parameters =  this.getWorkspaceStyleParameters(config);
+        var parameters = this.getWorkspaceStyleParameters(config);
 
         if (this.methodIsCreateOrNoConfig(method, config)) {
             restUrl = this.restAPI.getWorkspaceStyles;
