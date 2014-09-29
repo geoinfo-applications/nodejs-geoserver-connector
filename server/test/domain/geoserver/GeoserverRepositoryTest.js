@@ -14,7 +14,7 @@ var config = require("../../config.js");
 
 describe("Geoserver instance", function () {
 
-    this.timeout(100000);
+    this.timeout(6000);
 
     describe("testing offline Geoserver access", function () {
 
@@ -146,44 +146,44 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
-            it("should return true if Geoserver layer exists", function (done) {
+            it("should return true if Geoserver feature type exists", function (done) {
 
-                gsRepository.layerExists(layer).then(function () {
+                gsRepository.featureTypeExists(layer).then(function () {
                     done();
                 }).catch(done);
             });
 
-            it("should get Geoserver layer details ", function (done) {
+            it("should get Geoserver feature type details ", function (done) {
 
-                gsRepository.getLayer(layer).then(function () {
+                gsRepository.getFeatureType(layer).then(function () {
                     done();
                 }).catch(done);
             });
 
             it("should delete Geoserver layer ", function (done) {
 
-                gsRepository.deleteLayer(layer).then(function () {
+                gsRepository.deleteFeatureType(layer).then(function () {
                     done();
                 }).catch(done);
             });
 
             it("should fail renaming layer if new name is not supplied ", function (done) {
 
-                gsRepository.renameLayer(layer).catch(function (error) {
-                    expect(error.message).to.match(/layer name required/);
+                gsRepository.renameFeatureType(layer).catch(function (error) {
+                    expect(error.message).to.match(/name required/);
                     done();
                 });
             });
 
-            it("should rename Geoserver layer ", function (done) {
+            it("should rename Geoserver feature type ", function (done) {
 
-                gsRepository.renameLayer(layer, "newLayerName").then(function () {
+                gsRepository.renameFeatureType(layer, "newLayerName").then(function () {
                     done();
                 }).catch(done);
             });
 
-            it("should recalculate layer BBOX", function (done) {
-                return gsRepository.recalculateLayerBBox(layer).then(function () {
+            it("should recalculate feature type BBOX ", function (done) {
+                return gsRepository.recalculateFeatureTypeBBox(layer).then(function () {
                     done();
                 }).catch(done);
             });

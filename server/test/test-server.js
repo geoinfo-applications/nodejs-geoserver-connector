@@ -30,13 +30,15 @@ function GeoserverMockServer() {
     };
 
     this.geoserverRestGetAPI = {
+        getLayer: "/layers/:layer",
         getStyles: "/styles.json",
         getWorkspaceStyles: "/workspaces/:ws/styles.json",
         getLayerStyles: "/layers/:layer/styles.json",
-        getLayerDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
+        getLFeatureTypeDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
     };
 
     this.geoserverRestDeleteAPI = {
+        deleteLayer: "/layers/:layer",
         deleteFeatureType: "/workspaces/:ws/datastores/:ds/featuretypes/:layer",
         deleteWorkspaceStyle: "/workspaces/:ws/styles/:style"
     };

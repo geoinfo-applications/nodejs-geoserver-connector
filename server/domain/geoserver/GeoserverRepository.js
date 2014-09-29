@@ -6,6 +6,8 @@ var util = require("util");
 
 var GeoserverDispatcher = require("./GeoserverDispatcher.js");
 var GeoserverResolver = require("./GeoserverResolver.js");
+var GeoserverFeatureType = require("./GeoserverFeatureType.js");
+var GeoserverStyle = require("./GeoserverStyle.js");
 
 function GeoserverRepository(config) {
 
@@ -52,17 +54,7 @@ function GeoserverRepository(config) {
     this.isEnabled = false;
 }
 
-
 GeoserverRepository.prototype = {
-
-    utils: {
-        objectNameDoesntExists: function (type, config) {
-            if (!config || !config.name) {
-                //console.log();
-                return true;
-            }
-        }
-    },
 
     isGeoserverRunning: function () {
         var deferred = Q.defer();
@@ -132,24 +124,23 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        var gsObject = this.resolver.get(type, config);
+        var restUrl = this.resolver.get(type, config);
 
-        var response = function (err, response, body) {
+        var response = function (err, resp, body) {
 
             if (err) {
-                return deferred.reject(err, body);
+                return deferred.reject(err);
             }
 
-            if (response.statusCode !== 200) {
-                //console.log("Geoserver object doesn't exist >", body);
+            if (resp.statusCode !== 200) {
                 return deferred.resolve(false);
             }
 
             deferred.resolve(true);
 
-        }.bind(gsObject.config);
+        }
 
-        this.dispatcher.get({url: gsObject.url, callback: response});
+        this.dispatcher.get({url: restUrl, callback: response});
 
         return deferred.promise;
     },
@@ -158,7 +149,7 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        var gsObject = this.resolver.get(type, config);
+        var restUrl = this.resolver.get(type, config);
 
         function response(err, resp, body) {
 
@@ -167,15 +158,15 @@ GeoserverRepository.prototype = {
             }
 
             if (resp.statusCode !== 200) {
-                //console.log("Geoserver object doesn't exist >", body);
-                return deferred.reject(false);
+                //warn.log("Geoserver object doesn't exist >", body);
+                return deferred.reject(new Error(body));
             }
 
             var receivedObject = JSON.parse(body);
             deferred.resolve(receivedObject);
         }
 
-        this.dispatcher.get({url: gsObject.url, callback: response.bind(gsObject.config)});
+        this.dispatcher.get({ url: restUrl, callback: response });
 
         return deferred.promise;
     },
@@ -203,13 +194,14 @@ GeoserverRepository.prototype = {
         return deferred.promise;
     },
 
-    deleteGeoserverObject: function (type, config) {
+    deleteGeoserverObject: function (type, config, recursiveDelete) {
 
         var deferred = Q.defer();
 
-        var gsObject = this.resolver.get(type, config);
+        var restUrl = this.resolver.get(type, config);
 
-        gsObject.url += "?recurse=true";
+        var recursive = recursiveDelete || false;
+        restUrl += "?recurse=" + recursive;
 
         function response(err, resp, body) {
 
@@ -219,56 +211,16 @@ GeoserverRepository.prototype = {
 
             if (resp.statusCode !== 200) {
                 console.log("Error deleting Geoserver object >", body);
-                return deferred.reject(this);
+                return deferred.reject(new Error(body));
             }
 
-            //console.log("Geoserver object deleted >", type, this.name);
-            deferred.resolve(this);
+            //console.info("Geoserver object deleted >", type, this.name);
+            deferred.resolve(true);
         }
 
-        this.dispatcher.delete({ url: gsObject.url, callback: response.bind(gsObject.config)});
+        this.dispatcher.delete({ url: restUrl, callback: response.bind(config)});
 
         return deferred.promise;
-    },
-
-    getLayer: function (config) {
-
-        var layerName = config && config.name;
-        var storeName = config && config.datastore || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-
-        var layerConfig = {
-            featureType: { name: layerName },
-            name: layerName,
-            datastore: storeName,
-            workspace: wsName
-        };
-
-        return this.getGeoserverObject("layer", layerConfig);
-    },
-
-    createLayer: function (config) {
-
-        var layerName = config && config.name;
-        var storeName = config && config.datastore || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-
-        return this.layerExists({ name: layerName, datastore: storeName, workspace: wsName }).then(function (lyExists) {
-
-            if (lyExists) {
-                return true;
-            }
-
-            var layerConfig = {
-                featureType: { name: layerName },
-                name: layerName,
-                datastore: storeName,
-                workspace: wsName
-            };
-
-            return this.createGeoserverObject("layer", layerConfig);
-
-        }.bind(this));
     },
 
     createDatastore: function (config) {
@@ -320,33 +272,12 @@ GeoserverRepository.prototype = {
         }.bind(this));
     },
 
-    layerExists: function (layer) {
-        return this.geoserverObjectExists("layer", layer);
-    },
-
     datastoreExists: function (ds) {
         return this.geoserverObjectExists("datastore", ds);
     },
 
     workspaceExists: function (ws) {
         return this.geoserverObjectExists("workspace", ws);
-    },
-
-    deleteLayer: function (config) {
-
-        var layerName = config && config.name;
-        var storeName = config && config.datastore || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-
-        return this.layerExists({ name: layerName, datastore: storeName, workspace: wsName }).then(function (exists) {
-
-            if (exists) {
-                return this.deleteGeoserverObject("layer", config);
-            }
-
-            return config;
-
-        }.bind(this));
     },
 
     deleteDatastore: function (config) {
@@ -380,264 +311,9 @@ GeoserverRepository.prototype = {
         }.bind(this));
     },
 
-    renameLayer: function (config, newLayerName) {
-
-        if (!newLayerName) {
-            return Q.reject(new Error("layer name required"));
-        }
-
-        var layerConfig = _.extend({}, config);
-
-        var renameLayer = function (newLayerConfig) {
-
-            var deferred = Q.defer();
-
-            var gsObject = this.resolver.get("layer", layerConfig);
-            var payload = JSON.stringify(newLayerConfig);
-
-            function response(err, resp, body) {
-
-                if (err) {
-                    return deferred.reject(err);
-                }
-
-                if (resp.statusCode !== 200) {
-                    console.error("Error rename Geoserver layer >", body);
-                    return deferred.reject(this);
-                }
-                deferred.resolve(this);
-            }
-
-            this.dispatcher.put({
-                url: gsObject.url,
-                body: payload,
-                callback: response.bind(newLayerConfig)
-            });
-
-            return deferred.promise;
-
-        }.bind(this);
-
-        function updateLayerConfig(config) {
-            var newLayerConfig = {};
-            newLayerConfig.featureType = _.extend({}, config.featureType);
-            newLayerConfig.featureType.name = newLayerName;
-            newLayerConfig.featureType.nativeName = newLayerName;
-            return renameLayer(newLayerConfig);
-        }
-
-        return this.getLayer(layerConfig)
-            .then(updateLayerConfig)
-            .catch(function (err) {
-                console.log(err);
-                return Q.reject(err);
-            });
-
-    },
-
-    recalculateLayerBBox: function (config) {
-
-        var layerName = config && config.name;
-        var storeName = config && config.datastore || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-
-        var layerConfig = {
-            featureType: {
-                name: layerName,
-                enabled: true
-            },
-            name: layerName,
-            datastore: storeName,
-            workspace: wsName
-        };
-
-        var deferred = Q.defer();
-
-        var gsObject = this.resolver.get("layer", layerConfig);
-        gsObject.url += "?recalculate=nativebbox,latlonbbox";
-
-        var payload = JSON.stringify(gsObject.config);
-
-        function response(err, resp, body) {
-
-            if (err) {
-                return deferred.reject(new Error(err));
-            }
-
-            if (resp.statusCode !== 200) {
-                console.error("Error recalculate Geoserver layer BBox >", body);
-                return deferred.reject(this);
-            }
-
-            return deferred.resolve(this);
-        }
-
-        this.dispatcher.put({
-            url: gsObject.url,
-            body: payload,
-            callback: response.bind(config)
-        });
-
-        return deferred.promise;
-    },
-
-    getPublicStyles: function () {
-
-        var deferred = Q.defer();
-
-        function response(err, resp, body) {
-
-            if (err || resp.statusCode !== 200) {
-                deferred.reject(new Error(err || body));
-            }
-
-            var receivedObject = JSON.parse(body);
-            deferred.resolve(receivedObject.styles.style);
-        }
-
-        this.dispatcher.get({
-            url: this.resolver.styles("all").url,
-            callback: response
-        });
-
-        return deferred.promise;
-    },
-
-    getWorkspaceStyle: function (styleName, config) {
-        return this.getWorkspaceStyles(config).then(function (styles) {
-            if(styles && styles.some(styleName)){
-                return true;
-            }
-            return false;
-        });
-    },
-
-    getWorkspaceStyles: function (config) {
-
-        var deferred = Q.defer();
-
-        function response(err, resp, body) {
-
-            if (err || resp.statusCode !== 200) {
-                deferred.reject(new Error(err || body));
-            }
-
-            var receivedObject = JSON.parse(body);
-            deferred.resolve(receivedObject.styles);
-        }
-
-        var gsObject = this.resolver.styles("workspace", config);
-
-        this.dispatcher.get({
-            url: gsObject.url,
-            callback: response
-        });
-
-        return deferred.promise;
-    },
-
-    getLayerDefaultStyle: function (config) {
-
-        if (!config || !config.name) {
-            return Q.reject(new Error("layer name required"));
-        }
-
-        var deferred = Q.defer();
-
-        this.getLayer(config).then(function (layer) {
-            deferred.resolve(layer.defaultStyle);
-        }).catch(function (err) {
-            console.log(err);
-            deferred.reject(err);
-        });
-
-        return deferred.promise;
-    },
-
-    setLayerDefaultStyle: function (config, style) {
-        throw new Error();
-    },
-
-    getLayerStyles: function (config) {
-        throw new Error();
-    },
-
-    createWorkspaceStyle: function (styleName, config) {
-        var deferred = Q.defer();
-
-        var styleConfig = {
-            style: {
-                name: styleName,
-                workspace: { },
-                filename: styleName + ".sld"
-            }
-        };
-
-        function response(err, resp, body) {
-            if (err || resp.statusCode !== 201) {
-                deferred.reject(new Error(err || body));
-            }
-            deferred.resolve(true);
-        }
-
-        var gsObject = this.resolver.styles("workspace", config);
-
-        styleConfig.style.workspace.name = gsObject.config.name;
-        var payload = JSON.stringify(styleConfig);
-
-        this.dispatcher.post({
-            url: gsObject.url,
-            body: payload,
-            callback: response
-        });
-
-        return deferred.promise;
-    },
-
-    deleteWorkspaceStyle: function (styleName, config) {
-
-        var deferred = Q.defer();
-
-        var styleConfig = {
-            style: {
-                name: styleName,
-                filename: styleName + ".sld"
-            }
-        };
-
-        if(!config){
-            config = {};
-        }
-
-        config.name = styleName;
-
-        function response(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                deferred.reject(new Error(err || body));
-            }
-            deferred.resolve(true);
-        }
-
-        var gsObject = this.resolver.styles("style", config);
-
-        if( config && config.deleteStyleFile){
-            gsObject.url += "?purge=true";
-        }
-
-        var payload = JSON.stringify(styleConfig);
-
-        this.dispatcher.delete({
-            url: gsObject.url,
-            body: payload,
-            callback: response
-        });
-
-        return deferred.promise;
-    },
-
-    uploadStyleContent: function (config) {
-        throw new Error();
-    }
 };
+
+GeoserverFeatureType.call(GeoserverRepository.prototype);
+GeoserverStyle.call(GeoserverRepository.prototype);
 
 module.exports = GeoserverRepository;

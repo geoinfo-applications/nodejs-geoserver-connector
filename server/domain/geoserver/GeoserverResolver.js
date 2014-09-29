@@ -14,17 +14,118 @@ function GeoserverResolver(geoserverRepositoryConfig) {
     this.datastore = this.geoserverConfig.datastore;
     this.workspace = this.geoserverConfig.workspace;
 
+    this.baseRestAPI = {
+        datastores: "/workspaces/%s/datastores",
+        datastore: "/workspaces/%s/datastores/%s"
+    };
+
+    this.restAPI = {
+
+        getWorkspaces: "/workspaces",
+        createWorkspaces: "/workspaces",
+        getWorkspace: "/workspaces/%s",
+        modifyWorkspace: "/workspaces/%s",	//PUT
+        deleteWorkspace: "/workspaces/%s",
+
+        getDatastores: "/workspaces/%s/datastores",
+        getDatastore: "/workspaces/%s/datastores/%s",
+
+        createDatastore: "/workspaces/%s/datastores",
+        modifyDatastore: "/workspaces/%s/datastores/%s",
+        deleteDatastore: "/workspaces/%s/datastores/%s",
+
+        getFeatureTypes: "/workspaces/%s/datastores/%s/featuretypes",
+        createFeatureType: "/workspaces/%s/datastores/%s/featuretypes",
+        getFeatureType: "/workspaces/%s/datastores/%s/featuretypes/%s",
+        modifyFeatureType: "/workspaces/%s/datastores/%s/featuretypes/%s",
+        deleteFeatureType: "/workspaces/%s/datastores/%s/featuretypes/%s",
+
+        getLayers: "/layers",
+        createLayer: "/layers",
+        getLayer: "/layers/%s",
+        modifyLayer: "/layers/%s",	//PUT
+        deleteLayer: "/layers/%s",
+
+        getLayerStyles: "/layers/%s/styles",
+        addLayerStyle: "/layers/%s/styles",	//POST
+
+        getStyles: "/styles",
+        createStyle: "/styles",		//POST
+        getStyle: "/styles/%s",
+        uploadStyleSLD: "/styles/%s",		//PUT
+        deleteStyle: "/styles/%s",
+
+        getWorkspaceStyles: "/workspaces/%s/styles",
+        createWorkspaceStyle: "/workspaces/%s/styles",	//POST
+        getWorkspaceStyle: "/workspaces/%s/styles/%s",
+        uploadWorkspaceStyleSLD: "/workspaces/%s/styles/%s",	//PUT
+        deleteWorkspaceStyle: "/workspaces/%s/styles/%s"
+    };
+
 }
 
 // TODO refactor !!!
 GeoserverResolver.prototype = {
+
+    formatReturnUrl: function (restApiCall, parameters) {
+        parameters.unshift(this.baseURL + restApiCall);
+        return util.format.apply(null, parameters);
+    },
+
+    getLayerParameters: function (config) {
+        return [ config.name ];
+    },
+
+    getFeatureTypeParameters: function (config) {
+        var datastoreName = config && config.datastore || this.datastore;
+        var workspaceName = config && config.workspace || this.workspace;
+        return [ workspaceName, datastoreName, config.name ];
+    },
+
+    getDatastoreParameters: function (config) {
+        var datastoreName = config && config.name || this.datastore;
+        var workspaceName = config && config.workspace || this.workspace;
+        return [ workspaceName, datastoreName ];
+    },
+
+    getWorkspaceParameters: function (config) {
+        var workspaceName = config && config.name || this.workspace;
+        return [ workspaceName ];
+    },
+
+    resolveLayer: function (config) {
+        return this.formatReturnUrl(
+            this.restAPI.getLayer,
+            this.getLayerParameters(config));
+    },
+
+    resolveFeatureType: function (config) {
+        return this.formatReturnUrl(
+            this.restAPI.getFeatureType,
+            this.getFeatureTypeParameters(config)
+        );
+    },
+
+    resolveDatastore: function (config) {
+        return this.formatReturnUrl(
+            this.restAPI.getDatastore,
+            this.getDatastoreParameters(config)
+        );
+    },
+
+    resolveWorkspace: function (config) {
+        return this.formatReturnUrl(
+            this.restAPI.getWorkspace,
+            this.getWorkspaceParameters(config)
+        );
+    },
 
     styles: function (type, config) {
 
         var requestUrl, wsName, storeName;
         var requestParams = [];
 
-        if(type === "all"){
+        if (type === "all") {
             requestUrl = "/styles.json";
 
         } else if (type === "layer") {
@@ -96,6 +197,16 @@ GeoserverResolver.prototype = {
 
     "get": function (type, config) {
 
+        if (type === "layer") {
+            return this.resolveLayer(config);
+        } else if (type === "featureType") {
+            return this.resolveFeatureType(config);
+        } else if (type === "datastore") {
+            return this.resolveDatastore(config);
+        } else if (type === "workspace") {
+            return this.resolveWorkspace(config);
+        }
+
         var requestUrl, wsName, storeName;
         var requestParams = [];
 
@@ -129,7 +240,7 @@ GeoserverResolver.prototype = {
             url: util.format.apply(null, requestParams),
             config: config
         };
-    },
+    }
 };
 
 module.exports = GeoserverResolver;
