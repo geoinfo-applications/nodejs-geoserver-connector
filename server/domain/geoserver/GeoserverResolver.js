@@ -3,9 +3,6 @@
 var _ = require("underscore");
 var util = require("util");
 
-//var Q = require("q");
-
-
 function GeoserverResolver(geoserverRepositoryConfig) {
 
     this.geoserverConfig = _.extend({}, geoserverRepositoryConfig);
@@ -63,10 +60,9 @@ function GeoserverResolver(geoserverRepositoryConfig) {
 
 }
 
-// TODO refactor !!!
 GeoserverResolver.prototype = {
 
-    methodIsCreate: function (method, config) {
+    methodIsCreateOrNoConfig: function (method, config) {
         return method === "create" || !config;
     },
 
@@ -93,9 +89,14 @@ GeoserverResolver.prototype = {
         return [ workspaceName, datastoreName ];
     },
 
-    getWorkspaceParameters: function (config, method) {
+    getWorkspaceParameters: function (config) {
         var workspaceName = config && config.name || this.workspace;
         return [ workspaceName ];
+    },
+
+    getWorkspaceStyleParameters: function (config) {
+        var workspaceName = config && config.name || this.workspace;
+        return [ workspaceName, config.name ];
     },
 
     getStyleParameters: function (config) {
@@ -103,7 +104,7 @@ GeoserverResolver.prototype = {
         return [ styleName ];
     },
 
-    resolveLayer: function (config, method) {
+    resolveLayer: function (config) {
         return this.formatReturnUrl(
             this.restAPI.getLayer,
             this.getLayerParameters(config)
@@ -113,13 +114,9 @@ GeoserverResolver.prototype = {
     resolveFeatureType: function (config, method) {
 
         var restUrl = this.restAPI.getFeatureType;
-        var parameters = [];
+        var parameters = this.getFeatureTypeParameters(config);
 
-        if (config) {
-            parameters = this.getFeatureTypeParameters(config);
-        }
-
-        if (this.methodIsCreate(method, config)) {
+        if (this.methodIsCreateOrNoConfig(method, config)) {
             restUrl = this.restAPI.getFeatureTypes;
             parameters.pop();
         }
@@ -130,13 +127,9 @@ GeoserverResolver.prototype = {
     resolveDatastore: function (config, method) {
 
         var restUrl = this.restAPI.getDatastore;
-        var parameters = [];
+        var parameters =  this.getDatastoreParameters(config);
 
-        if (config) {
-            parameters = this.getDatastoreParameters(config);
-        }
-
-        if (this.methodIsCreate(method, config)) {
+        if (this.methodIsCreateOrNoConfig(method, config)) {
             restUrl = this.restAPI.getDatastores;
             parameters.pop();
         }
@@ -153,7 +146,7 @@ GeoserverResolver.prototype = {
             parameters = this.getWorkspaceParameters(config);
         }
 
-        if (this.methodIsCreate(method, config)) {
+        if (this.methodIsCreateOrNoConfig(method, config)) {
             restUrl = this.restAPI.getWorkspaces;
             parameters.pop();
         }
@@ -161,7 +154,19 @@ GeoserverResolver.prototype = {
         return this.formatReturnUrl(restUrl, parameters);
     },
 
-    resolveStyle: function (config, method) {
+    resolveWorkspaceStyle: function (config, method) {
+        var restUrl = this.restAPI.getWorkspaceStyle;
+        var parameters =  this.getWorkspaceStyleParameters(config);
+
+        if (this.methodIsCreateOrNoConfig(method, config)) {
+            restUrl = this.restAPI.getWorkspaceStyles;
+            parameters.pop();
+        }
+
+        return this.formatReturnUrl(restUrl, parameters);
+    },
+
+    resolveStyle: function (config, method, isWorkspaceStyle) {
 
         var restUrl = this.restAPI.getGlobalStyle;
         var parameters = [];
@@ -170,7 +175,7 @@ GeoserverResolver.prototype = {
             parameters = this.getStyleParameters(config);
         }
 
-        if (this.methodIsCreate(method, config)) {
+        if (this.methodIsCreateOrNoConfig(method, config)) {
             restUrl = this.restAPI.getGlobalStyles;
             parameters.pop();
         }
@@ -200,44 +205,11 @@ GeoserverResolver.prototype = {
             return this.resolveDatastore(config, method);
         } else if (type === "workspace") {
             return this.resolveWorkspace(config, method);
+        } else if (type === "workspaceStyle") {
+            return this.resolveWorkspaceStyle(config, method);
         } else if (type === "style") {
             return this.resolveStyle(config, method);
         }
-        /*
-         var requestUrl, wsName, storeName;
-         var requestParams = [];
-
-         if (type === "layer") {
-         requestUrl = "/workspaces/%s/datastores/%s/featuretypes/%s.json";
-         wsName = config && config.workspace || this.workspace;
-         storeName = config && config.datastore || this.datastore;
-         requestParams = [ wsName, storeName, config.name ];
-
-         } else if (type === "datastore") {
-         requestUrl = "/workspaces/%s/datastores/%s.json";
-         wsName = config && config.workspace || this.workspace;
-         storeName = config && config.name || this.datastore;
-         if (!config) {
-         config = { name: storeName };
-         }
-         requestParams = [ wsName, storeName ];
-
-         } else if (type === "workspace") {
-         requestUrl = "/workspaces/%s.json";
-         wsName = config && config.name || this.workspace;
-         if (!config) {
-         config = { name: wsName };
-         }
-         requestParams = [ wsName ];
-         }
-
-         requestParams.unshift(this.baseURL + requestUrl);
-
-         return {
-         url: util.format.apply(null, requestParams),
-         config: config
-         };
-         */
     }
 };
 

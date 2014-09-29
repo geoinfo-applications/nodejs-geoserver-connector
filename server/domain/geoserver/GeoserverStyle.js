@@ -87,7 +87,7 @@ module.exports = function GeoserverLayer() {
             return Q.reject(new Error("style name required"));
         }
 
-        return this.getGeoserverObject("style", config)
+        return this.getGeoserverObject("workspaceStyle", config)
             .then(function (styleObject) {
                 return styleObject.style;
             });

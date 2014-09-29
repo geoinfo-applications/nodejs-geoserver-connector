@@ -15,7 +15,7 @@ var config = require("../../config.js");
 
 describe("Geoserver instance", function () {
 
-    this.timeout(600000);
+    this.timeout(60);
 
     describe("testing offline Geoserver access", function () {
 
@@ -312,12 +312,13 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            //TODO mock styles
             it("should get workspace style ", function (done) {
-                gsRepository.getWorkspaceStyle("styleName").then(function (workspaceHasStyle) {
-                    expect(workspaceHasStyle).to.be.equal(false);
+                gsRepository.getWorkspaceStyle(style).then(function (workspaceStyle) {
+                    expect(workspaceStyle).to.be.an('object');
+                    expect(workspaceStyle.name).to.be.equal(style.name);
+                    expect(workspaceStyle.filename).to.be.equal(style.filename);
                     done();
-                });
+                }).catch(done);
             });
 
             // TODO mock styles
@@ -326,7 +327,7 @@ describe("Geoserver instance", function () {
                 gsRepository.getWorkspaceStyles().then(function (styles) {
                     expect(styles).to.be.instanceof(Array);
                     done();
-                });
+                }).catch(done);
             });
 
             // TODO mock styles
@@ -334,7 +335,7 @@ describe("Geoserver instance", function () {
                 gsRepository.getWorkspaceStyles({ name: "testWorkspace"}).then(function () {
                     expect(styles).to.be.instanceof(Array);
                     done();
-                });
+                }).catch(done);
             });
 
             //TODO mock styles
@@ -342,53 +343,53 @@ describe("Geoserver instance", function () {
                 gsRepository.getWorkspaceStyle().catch(function (error) {
                     expect(error.message).to.match(/name required/);
                     done();
-                });
+                }).catch(done);
             });
-
 
 
             it("should get default layer style name", function (done) {
                 gsRepository.getLayerDefaultStyle(layer).then(function (defaultStyle) {
                     expect(defaultStyle.name).to.be.equal(layer.defaultStyleName);
                     done();
-                });
+                }).catch(done);
             });
 
             it("should set default layer style ", function (done) {
                 gsRepository.setLayerDefaultStyle().then(function () {
                     done();
-                });
+                }).catch(done);
             });
 
             it("should get all layer styles ", function (done) {
                 gsRepository.getLayerStyles(layer).then(function () {
                     done();
-                });
+                }).catch(done);
             });
 
             it("should create new workspace style ", function (done) {
                 gsRepository.createWorkspaceStyle("newStyle").then(function () {
                     done();
-                });
+                }).catch(done);
             });
 
-            it("should upload new SLD file ", function (done) {
+            it("should upload new workspace SLD file ", function (done) {
                 gsRepository.uploadStyleContent().then(function () {
                     done();
-                });
+                }).catch(done);
             });
 
             it("should delete workspace style ", function (done) {
                 gsRepository.deleteWorkspaceStyle("newStyle").then(function () {
                     done();
-                });
+                }).catch(done);
             });
 
             it("should delete workspace style and SLD file", function (done) {
                 gsRepository.deleteWorkspaceStyle("newStyle", { deleteStyleFile: true })
                     .then(function () {
                         done();
-                    });
+                    }).catch(done);
+                ;
             });
 
         });

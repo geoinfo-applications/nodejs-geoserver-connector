@@ -23,17 +23,16 @@ function GeoserverMockServer() {
     this.baseURL = "/" + gsOptions.context + "rest";
 
     this.geoserverRestGetAPI = {
-        getWorkspaceStyles: "/workspaces/:ws/styles.json",
-        getLayerStyles: "/layers/:layer/styles.json",
+        getLayerStyles: "/layers/:layer/styles",
         getFeatureTypeDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
     };
 
     this.geoserverRestPostAPI = {
-        createLayer: "/workspaces/:ws/datastores/:ds/featuretypes.json",
+        createLayer: "/workspaces/:ws/datastores/:ds/featuretypes",
         createGlobalStyle: "/styles",
         createDatastore: "/workspaces/:ws/datastores",
         createWorkspace: "/workspaces",
-        createWorkspaceStyles: "/workspaces/:ws/styles.json"
+        createWorkspaceStyles: "/workspaces/:ws/styles"
     };
 
     this.geoserverRestDeleteAPI = {
@@ -52,8 +51,28 @@ function GeoserverMockServer() {
         getLayer: "/layers/:layer",
         getGlobalStyle: "/styles/:style",
         getGlobalStyles: "/styles",
+        getWorkspaceStyle: "/workspaces/:ws/styles/:style",
+        getWorkspaceStyles: "/workspaces/:ws/styles",
         getInstanceDetails: "/about/version.json"
     };
+
+    this.handlers = {
+        getStyle: function (req, res) {
+            if (req.params.style !== config.style.name) {
+                res.status(404);
+            }
+
+            var response = require("./domain/responses/getStyle");
+            response.style.name = config.style.name;
+            response.style.filename = config.style.filename;
+            res.json(response);
+        },
+
+        getStyles: function (req, res) {
+            var response = require("./domain/responses/getStyles");
+            res.json(response);
+        }
+    }
 
 }
 
@@ -91,7 +110,7 @@ GeoserverMockServer.prototype = {
 
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getLayer, function (req, res) {
 
-            if(req.params.layer !== config.layer.name){
+            if (req.params.layer !== config.layer.name) {
                 res.status(404);
             }
 
@@ -101,22 +120,11 @@ GeoserverMockServer.prototype = {
             res.json(response);
         });
 
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, function (req, res) {
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, this.handlers.getStyle);
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyle, this.handlers.getStyle);
 
-            if(req.params.style !== config.style.name){
-                res.status(404);
-            }
-
-            var response = require("./domain/responses/getPublicStyle");
-            response.style.name = config.style.name;
-            res.json(response);
-        });
-
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyles, function (req, res) {
-
-            var response = require("./domain/responses/getPublicStyles");
-            res.json(response);
-        });
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyles, this.handlers.getStyles);
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyles, this.handlers.getStyles);
 
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getInstanceDetails, function (req, res) {
             res.json({
