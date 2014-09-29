@@ -238,8 +238,6 @@ GeoserverRepository.prototype = {
         return deferred.promise;
     },
 
-
-
 };
 
 GeoserverWorkspace.call(GeoserverRepository.prototype);

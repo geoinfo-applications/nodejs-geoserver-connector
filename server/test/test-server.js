@@ -25,8 +25,7 @@ function GeoserverMockServer() {
     this.geoserverRestGetAPI = {
         getWorkspaceStyles: "/workspaces/:ws/styles.json",
         getLayerStyles: "/layers/:layer/styles.json",
-        getGlobalStyles: "/styles",
-        getLFeatureTypeDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
+        getFeatureTypeDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
     };
 
     this.geoserverRestPostAPI = {
@@ -45,12 +44,14 @@ function GeoserverMockServer() {
     };
 
     this.geoserverRestPutAPI = {
-        getLayerDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
+        updateFeatureType: "/workspaces/:ws/datastores/:ds/featuretypes/:layer",
+        uploadGlobalStyle: "/styles/:style"
     };
 
     this.geoserverRestAPI = {
         getLayer: "/layers/:layer",
         getGlobalStyle: "/styles/:style",
+        getGlobalStyles: "/styles",
         getInstanceDetails: "/about/version.json"
     };
 
@@ -108,6 +109,12 @@ GeoserverMockServer.prototype = {
 
             var response = require("./domain/responses/getPublicStyle");
             response.style.name = config.style.name;
+            res.json(response);
+        });
+
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyles, function (req, res) {
+
+            var response = require("./domain/responses/getPublicStyles");
             res.json(response);
         });
 

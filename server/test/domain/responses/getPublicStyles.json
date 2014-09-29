@@ -1,0 +1,22 @@
+{
+    "styles": {
+        "style": [
+            {
+                "name": "point",
+                "href": "http://localhost:8080/geoserver/rest/styles/point.json"
+            },
+            {
+                "name": "line",
+                "href": "http://localhost:8080/geoserver/rest/styles/line.json"
+            },
+            {
+                "name": "polygon",
+                "href": "http://localhost:8080/geoserver/rest/styles/polygon.json"
+            },
+            {
+                "name": "raster",
+                "href": "http://localhost:8080/geoserver/rest/styles/raster.json"
+            }
+        ]
+    }
+}

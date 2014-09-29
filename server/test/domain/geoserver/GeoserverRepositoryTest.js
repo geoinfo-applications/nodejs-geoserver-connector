@@ -2,11 +2,12 @@
 
 //var request = require("request");
 var expect = require("chai").expect;
+var fs = require("fs");
 //var pass = require("../../TestUtils").pass;
 //var fail = require("../../TestUtils").fail;
 
 //var util = require("util");
-//var Q = require("q");
+var Q = require("q");
 
 var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
 var GeoserverMockServer = require("../../test-server.js");
@@ -14,7 +15,7 @@ var config = require("../../config.js");
 
 describe("Geoserver instance", function () {
 
-    this.timeout(60);
+    this.timeout(600000);
 
     describe("testing offline Geoserver access", function () {
 
@@ -224,13 +225,6 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            it("should get a global style ", function (done) {
-                gsRepository.getGlobalStyle(style).then(function (styleObject) {
-                    expect(styleObject.name).to.be.equal(style.name);
-                    done();
-                });
-            });
-
             it("should return false if global style does not exist ", function (done) {
 
                 gsRepository.globalStyleExists({name: "notExistingStyle"}).then(function (exists) {
@@ -247,6 +241,22 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
+            it("should get a global style ", function (done) {
+                gsRepository.getGlobalStyle(style).then(function (styleObject) {
+                    expect(styleObject.name).to.be.equal(style.name);
+                    done();
+                });
+            });
+
+            it("should get all global styles ", function (done) {
+                gsRepository.getGlobalStyles().then(function (styles) {
+                    expect(styles).to.be.an('array');
+                    expect(styles.length).to.be.equal(4);
+                    expect(styles[0].name).to.be.equal("point");
+                    done();
+                }).catch(done);
+            });
+
             it("should create new global style configuration", function (done) {
 
                 gsRepository.createGlobalStyleConfiguration(style).then(function (result) {
@@ -255,6 +265,45 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
+            it("should fail if sld body is not defined", function (done) {
+
+                gsRepository.uploadGlobalStyleContent(style).catch(function (error) {
+                    expect(error.message).to.match(/content required/);
+                    done();
+                }).catch(done);
+            });
+
+            it("should upload global style SLD file", function (done) {
+
+                fs.readFile(__dirname + "/../data/teststyle.sld", 'ascii', function (err, sldContent) {
+
+                    var styleConfig = {
+                        name: style.name,
+                        sldBody: sldContent
+                    };
+
+                    gsRepository.uploadGlobalStyleContent(styleConfig).then(function (result) {
+                        expect(result).to.be.equal(true);
+                        done();
+                    }).catch(done);
+                });
+            });
+
+            it("should  create global style ", function (done) {
+
+                fs.readFile(__dirname + "/../data/teststyle.sld", 'ascii', function (err, sldContent) {
+
+                    var styleConfig = {
+                        name: style.name,
+                        sldBody: sldContent
+                    };
+
+                    gsRepository.createGlobalStyle(styleConfig).then(function (result) {
+                        expect(result).to.be.equal(true);
+                        done();
+                    }).catch(done);
+                });
+            });
 
             it("should delete global style", function (done) {
                 gsRepository.deleteGlobalStyle(style).then(function (result) {
@@ -263,9 +312,10 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            // TODO mock styles
-            it.skip("should get global styles ", function (done) {
-                gsRepository.getPublicStyles().then(function () {
+            //TODO mock styles
+            it("should get workspace style ", function (done) {
+                gsRepository.getWorkspaceStyle("styleName").then(function (workspaceHasStyle) {
+                    expect(workspaceHasStyle).to.be.equal(false);
                     done();
                 });
             });
@@ -295,13 +345,7 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            //TODO mock styles
-            it("should get workspace style ", function (done) {
-                gsRepository.getWorkspaceStyle("styleName").then(function (workspaceHasStyle) {
-                    expect(workspaceHasStyle).to.be.equal(false);
-                    done();
-                });
-            });
+
 
             it("should get default layer style name", function (done) {
                 gsRepository.getLayerDefaultStyle(layer).then(function (defaultStyle) {
