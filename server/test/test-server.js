@@ -22,19 +22,19 @@ function GeoserverMockServer() {
     }
     this.baseURL = "/" + gsOptions.context + "rest";
 
-    this.geoserverRestCreateAPI = {
-        createLayer: "/workspaces/:ws/datastores/:ds/featuretypes.json",
-        createDatastore: "/workspaces/:ws/datastores.json",
-        createWorkspace: "/workspaces.json",
-        createWorkspaceStyles: "/workspaces/:ws/styles.json"
-    };
-
     this.geoserverRestGetAPI = {
         getLayer: "/layers/:layer",
         getStyles: "/styles.json",
         getWorkspaceStyles: "/workspaces/:ws/styles.json",
         getLayerStyles: "/layers/:layer/styles.json",
         getLFeatureTypeDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
+    };
+
+    this.geoserverRestPostAPI = {
+        createLayer: "/workspaces/:ws/datastores/:ds/featuretypes.json",
+        createDatastore: "/workspaces/:ws/datastores.json",
+        createWorkspace: "/workspaces.json",
+        createWorkspaceStyles: "/workspaces/:ws/styles.json"
     };
 
     this.geoserverRestDeleteAPI = {
@@ -61,26 +61,26 @@ GeoserverMockServer.prototype = {
 
     addDefaultRequestHandlers: function () {
 
-        _.forEach(this.geoserverRestCreateAPI, function (geoserverAPICall) {
-            this.gsMockServer.post(this.baseURL + geoserverAPICall, function (req, res) {
-                res.status(201).json(true);
-            });
-        }.bind(this));
-
         _.forEach(this.geoserverRestGetAPI, function (geoserverAPICall) {
             this.gsMockServer.get(this.baseURL + geoserverAPICall, function (req, res) {
                 res.status(200).json(true);
             });
         }.bind(this));
 
-        _.forEach(this.geoserverRestDeleteAPI, function (geoserverAPICall) {
-            this.gsMockServer.delete(this.baseURL + geoserverAPICall, function (req, res) {
-                res.status(200).json(true);
+        _.forEach(this.geoserverRestPostAPI, function (geoserverAPICall) {
+            this.gsMockServer.post(this.baseURL + geoserverAPICall, function (req, res) {
+                res.status(201).json(true);
             });
         }.bind(this));
 
         _.forEach(this.geoserverRestPutAPI, function (geoserverAPICall) {
             this.gsMockServer.put(this.baseURL + geoserverAPICall, function (req, res) {
+                res.status(200).json(true);
+            });
+        }.bind(this));
+
+        _.forEach(this.geoserverRestDeleteAPI, function (geoserverAPICall) {
+            this.gsMockServer.delete(this.baseURL + geoserverAPICall, function (req, res) {
                 res.status(200).json(true);
             });
         }.bind(this));

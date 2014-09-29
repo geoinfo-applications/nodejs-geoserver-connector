@@ -7,6 +7,7 @@ var util = require("util");
 var GeoserverDispatcher = require("./GeoserverDispatcher.js");
 var GeoserverResolver = require("./GeoserverResolver.js");
 var GeoserverFeatureType = require("./GeoserverFeatureType.js");
+var GeoserverLayer = require("./GeoserverLayer.js");
 var GeoserverStyle = require("./GeoserverStyle.js");
 
 function GeoserverRepository(config) {
@@ -314,6 +315,7 @@ GeoserverRepository.prototype = {
 };
 
 GeoserverFeatureType.call(GeoserverRepository.prototype);
+GeoserverLayer.call(GeoserverRepository.prototype);
 GeoserverStyle.call(GeoserverRepository.prototype);
 
 module.exports = GeoserverRepository;

@@ -160,14 +160,14 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
-            it("should delete Geoserver layer ", function (done) {
+            it("should delete Geoserver feature type ", function (done) {
 
                 gsRepository.deleteFeatureType(layer).then(function () {
                     done();
                 }).catch(done);
             });
 
-            it("should fail renaming layer if new name is not supplied ", function (done) {
+            it("should fail renaming feature type if new name is not supplied ", function (done) {
 
                 gsRepository.renameFeatureType(layer).catch(function (error) {
                     expect(error.message).to.match(/name required/);
@@ -187,6 +187,14 @@ describe("Geoserver instance", function () {
                     done();
                 }).catch(done);
             });
+
+            it("should get Geoserver feature layer details ", function (done) {
+
+                gsRepository.getLayer(layer).then(function () {
+                    done();
+                }).catch(done);
+            });
+
         });
 
         describe("testing Geoserver style functionalites", function () {
