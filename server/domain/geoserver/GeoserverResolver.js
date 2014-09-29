@@ -66,8 +66,8 @@ function GeoserverResolver(geoserverRepositoryConfig) {
 // TODO refactor !!!
 GeoserverResolver.prototype = {
 
-    methodIsNotCreate: function (method) {
-        return method !== "create";
+    methodIsCreate: function (method, config) {
+        return method === "create" || !config;
     },
 
     formatReturnUrl: function (restApiCall, parameters) {
@@ -112,12 +112,15 @@ GeoserverResolver.prototype = {
 
     resolveFeatureType: function (config, method) {
 
-        var restUrl = this.restAPI.getFeatureTypes;
-        var parameters = this.getFeatureTypeParameters(config);
+        var restUrl = this.restAPI.getFeatureType;
+        var parameters = [];
 
-        if (this.methodIsNotCreate(method)) {
-            restUrl = this.restAPI.getFeatureType;
-        } else {
+        if (config) {
+            parameters = this.getFeatureTypeParameters(config);
+        }
+
+        if (this.methodIsCreate(method, config)) {
+            restUrl = this.restAPI.getFeatureTypes;
             parameters.pop();
         }
 
@@ -126,12 +129,15 @@ GeoserverResolver.prototype = {
 
     resolveDatastore: function (config, method) {
 
-        var restUrl = this.restAPI.getDatastores;
-        var parameters = this.getDatastoreParameters(config);
+        var restUrl = this.restAPI.getDatastore;
+        var parameters = [];
 
-        if (this.methodIsNotCreate(method)) {
-            restUrl = this.restAPI.getDatastore;
-        } else {
+        if (config) {
+            parameters = this.getDatastoreParameters(config);
+        }
+
+        if (this.methodIsCreate(method, config)) {
+            restUrl = this.restAPI.getDatastores;
             parameters.pop();
         }
 
@@ -140,12 +146,15 @@ GeoserverResolver.prototype = {
 
     resolveWorkspace: function (config, method) {
 
-        var restUrl = this.restAPI.getWorkspaces;
-        var parameters = this.getWorkspaceParameters(config);
+        var restUrl = this.restAPI.getWorkspace;
+        var parameters = [];
 
-        if (this.methodIsNotCreate(method)) {
-            restUrl = this.restAPI.getWorkspace;
-        } else {
+        if (config) {
+            parameters = this.getWorkspaceParameters(config);
+        }
+
+        if (this.methodIsCreate(method, config)) {
+            restUrl = this.restAPI.getWorkspaces;
             parameters.pop();
         }
 
@@ -154,12 +163,15 @@ GeoserverResolver.prototype = {
 
     resolveStyle: function (config, method) {
 
-        var restUrl = this.restAPI.getGlobalStyles;
-        var parameters = this.getStyleParameters(config);
+        var restUrl = this.restAPI.getGlobalStyle;
+        var parameters = [];
 
-        if (this.methodIsNotCreate(method)) {
-            restUrl = this.restAPI.getGlobalStyle;
-        } else {
+        if (config) {
+            parameters = this.getStyleParameters(config);
+        }
+
+        if (this.methodIsCreate(method, config)) {
+            restUrl = this.restAPI.getGlobalStyles;
             parameters.pop();
         }
 
