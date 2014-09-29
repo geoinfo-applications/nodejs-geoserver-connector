@@ -10,10 +10,42 @@ module.exports = function GeoserverLayer() {
         });
     };
 
+    this.globalStyleExists = function (config) {
+        return this.geoserverObjectExists("style", config);
+    };
+
     this.modifyGlobalStyle = function (config) {
         return this.getGeoserverObject("style", config).then(function (styleObject) {
             return styleObject.style;
         });
+    };
+
+    this.createGlobalStyle = function (config) {
+        var deferred = Q.defer();
+
+        return this.featureTypeExists
+
+        var restUrl = this.resolver.get("style", config);
+
+        function response(err, resp, body) {
+            if (err || resp.statusCode !== 201) {
+                deferred.reject(new Error(err || body));
+            }
+            deferred.resolve(true);
+        }
+
+
+
+        styleConfig.style.workspace.name = gsObject.config.name;
+        var payload = JSON.stringify(styleConfig);
+
+        this.dispatcher.post({
+            url: gsObject.url,
+            body: payload,
+            callback: response
+        });
+
+        return deferred.promise;
     };
 
     this.getGlobalStyles = function () {

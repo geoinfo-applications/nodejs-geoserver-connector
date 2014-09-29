@@ -224,12 +224,27 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            // TODO mock styles
             it("should get a global style ", function (done) {
                 gsRepository.getGlobalStyle(style).then(function (styleObject) {
                     expect(styleObject.name).to.be.equal(style.name);
                     done();
                 });
+            });
+
+            it("should return false if global style does not exist ", function (done) {
+
+                gsRepository.globalStyleExists({name: "notExistingStyle"}).then(function (exists) {
+                    expect(exists).to.be.equal(false);
+                    done();
+                }).catch(done);
+            });
+
+            it("should return false if global style exist ", function (done) {
+
+                gsRepository.globalStyleExists(style).then(function (exists) {
+                    expect(exists).to.be.equal(true);
+                    done();
+                }).catch(done);
             });
 
             // TODO mock styles

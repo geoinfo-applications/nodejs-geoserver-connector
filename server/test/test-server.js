@@ -99,6 +99,11 @@ GeoserverMockServer.prototype = {
         });
 
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, function (req, res) {
+
+            if(req.params.style !== config.style.name){
+                res.status(404);
+            }
+
             var response = require("./domain/responses/getPublicStyle");
             response.style.name = config.style.name;
             res.json(response);
