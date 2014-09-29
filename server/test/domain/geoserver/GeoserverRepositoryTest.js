@@ -14,7 +14,7 @@ var config = require("../../config.js");
 
 describe("Geoserver instance", function () {
 
-    this.timeout(600);
+    this.timeout(60);
 
     describe("testing offline Geoserver access", function () {
 

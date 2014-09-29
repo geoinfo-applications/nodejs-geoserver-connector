@@ -19,28 +19,16 @@ module.exports = function GeoserverLayer() {
     };
 
     this.createGlobalStyle = function (config) {
+
         var deferred = Q.defer();
 
-        var restUrl = this.resolver.create("style", config);
+        var styleConfig = {
+            name: config.name,
+            filename: config.name + ".sld"
+        };
 
-        function response(err, resp, body) {
-            if (err || resp.statusCode !== 201) {
-                deferred.reject(new Error(err || body));
-            }
-            deferred.resolve(true);
-        }
+        return this.createGeoserverObject("style", styleConfig);
 
-
-        styleConfig.style.workspace.name = gsObject.config.name;
-        var payload = JSON.stringify(styleConfig);
-
-        this.dispatcher.post({
-            url: gsObject.url,
-            body: payload,
-            callback: response
-        });
-
-        return deferred.promise;
     };
 
     this.getGlobalStyles = function () {

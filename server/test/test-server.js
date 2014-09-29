@@ -31,6 +31,7 @@ function GeoserverMockServer() {
 
     this.geoserverRestPostAPI = {
         createLayer: "/workspaces/:ws/datastores/:ds/featuretypes.json",
+        createGlobalStyle: "/styles",
         createDatastore: "/workspaces/:ws/datastores",
         createWorkspace: "/workspaces",
         createWorkspaceStyles: "/workspaces/:ws/styles.json"
