@@ -10,27 +10,6 @@ module.exports = function GeoserverLayer() {
         });
     };
 
-    this.globalStyleExists = function (config) {
-        return this.geoserverObjectExists("style", config);
-    };
-
-    this.deleteGlobalStyle = function (config) {
-        return this.deleteGeoserverObject("style", config);
-    };
-
-    this.createGlobalStyle = function (config) {
-
-        var deferred = Q.defer();
-
-        var styleConfig = {
-            name: config.name,
-            filename: config.name + ".sld"
-        };
-
-        return this.createGeoserverObject("style", styleConfig);
-
-    };
-
     this.getGlobalStyles = function () {
 
         var deferred = Q.defer();
@@ -51,6 +30,34 @@ module.exports = function GeoserverLayer() {
         });
 
         return deferred.promise;
+    };
+
+    this.globalStyleExists = function (config) {
+        return this.geoserverObjectExists("style", config);
+    };
+
+    this.deleteGlobalStyle = function (config) {
+        return this.deleteGeoserverObject("style", config);
+    };
+
+    this.createGlobalStyle = function () {
+
+    };
+
+    this.uploadGlobalStyleContent = function (config) {
+
+
+    };
+
+    this.createGlobalStyleConfiguration = function (config) {
+
+        var styleConfig = {
+            name: config.name,
+            filename: config.name + ".sld"
+        };
+
+        return this.createGeoserverObject("style", styleConfig);
+
     };
 
     this.getWorkspaceStyle = function (styleName, config) {
@@ -195,10 +202,6 @@ module.exports = function GeoserverLayer() {
         });
 
         return deferred.promise;
-    };
-
-    this.uploadStyleContent = function (config) {
-        throw new Error();
     };
 
 };

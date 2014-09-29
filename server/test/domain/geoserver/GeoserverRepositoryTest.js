@@ -247,9 +247,9 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
-            it("should create new global style ", function (done) {
+            it("should create new global style configuration", function (done) {
 
-                gsRepository.createGlobalStyle(style).then(function (result) {
+                gsRepository.createGlobalStyleConfiguration(style).then(function (result) {
                     expect(result).to.be.equal(true);
                     done();
                 }).catch(done);
@@ -264,7 +264,7 @@ describe("Geoserver instance", function () {
             });
 
             // TODO mock styles
-            it.skip("should get public styles ", function (done) {
+            it.skip("should get global styles ", function (done) {
                 gsRepository.getPublicStyles().then(function () {
                     done();
                 });

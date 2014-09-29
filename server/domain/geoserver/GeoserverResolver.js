@@ -66,7 +66,7 @@ function GeoserverResolver(geoserverRepositoryConfig) {
 // TODO refactor !!!
 GeoserverResolver.prototype = {
 
-    methodNotCreate: function (method) {
+    methodIsNotCreate: function (method) {
         return method !== "create";
     },
 
@@ -115,7 +115,7 @@ GeoserverResolver.prototype = {
         var restUrl = this.restAPI.getFeatureTypes;
         var parameters = this.getFeatureTypeParameters(config);
 
-        if (this.methodNotCreate(method)) {
+        if (this.methodIsNotCreate(method)) {
             restUrl = this.restAPI.getFeatureType;
         } else {
             parameters.pop();
@@ -129,7 +129,7 @@ GeoserverResolver.prototype = {
         var restUrl = this.restAPI.getDatastores;
         var parameters = this.getDatastoreParameters(config);
 
-        if (this.methodNotCreate(method)) {
+        if (this.methodIsNotCreate(method)) {
             restUrl = this.restAPI.getDatastore;
         } else {
             parameters.pop();
@@ -143,7 +143,7 @@ GeoserverResolver.prototype = {
         var restUrl = this.restAPI.getWorkspaces;
         var parameters = this.getWorkspaceParameters(config);
 
-        if (this.methodNotCreate(method)) {
+        if (this.methodIsNotCreate(method)) {
             restUrl = this.restAPI.getWorkspace;
         } else {
             parameters.pop();
@@ -157,7 +157,7 @@ GeoserverResolver.prototype = {
         var restUrl = this.restAPI.getGlobalStyles;
         var parameters = this.getStyleParameters(config);
 
-        if (this.methodNotCreate(method)) {
+        if (this.methodIsNotCreate(method)) {
             restUrl = this.restAPI.getGlobalStyle;
         } else {
             parameters.pop();
