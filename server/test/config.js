@@ -35,7 +35,7 @@ config.layer = {
 
 config.style = {
     name: "teststyle",
-    sldFile: "teststyle.sld"
+    filename: "teststyle.sld"
 };
 
 

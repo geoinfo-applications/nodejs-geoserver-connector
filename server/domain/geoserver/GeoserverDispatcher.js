@@ -2,11 +2,7 @@
 
 var request = require("request");
 var _ = require("underscore");
-/*
- var Q = require("q");
 
- var util = require("util");
- */
 function GeoserverDispatcher(geoserverRepositoryConfig) {
 
     this.geoserverConfig = _.extend({}, geoserverRepositoryConfig);
