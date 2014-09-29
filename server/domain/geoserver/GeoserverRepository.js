@@ -6,6 +6,9 @@ var util = require("util");
 
 var GeoserverDispatcher = require("./GeoserverDispatcher.js");
 var GeoserverResolver = require("./GeoserverResolver.js");
+
+var GeoserverDatastore = require("./GeoserverDatastore.js");
+var GeoserverWorkspace = require("./GeoserverWorkspace.js");
 var GeoserverFeatureType = require("./GeoserverFeatureType.js");
 var GeoserverLayer = require("./GeoserverLayer.js");
 var GeoserverStyle = require("./GeoserverStyle.js");
@@ -235,96 +238,12 @@ GeoserverRepository.prototype = {
         return deferred.promise;
     },
 
-    createDatastore: function (config) {
 
-        var storeName = config && config.name || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-        var dbParams = config && config.connectionParameters || this.db;
-
-        return this.datastoreExists({name: storeName}).then(function (dsExists) {
-
-            if (dsExists) {
-                return true;
-            }
-
-            var datastoreConfig = {
-                dataStore: {
-                    name: storeName,
-                    enabled: true,
-                    workspace: { name: wsName },
-                    connectionParameters: dbParams
-                },
-                name: storeName
-            };
-
-            return this.createGeoserverObject("datastore", datastoreConfig);
-
-        }.bind(this));
-    },
-
-    createWorkspace: function (config) {
-
-        var wsName = config && config.name || this.geoserver.workspace;
-
-        return this.workspaceExists({name: wsName}).then(function (wsExists) {
-
-            if (wsExists) {
-                return true;
-            }
-
-            var wsConfig = {
-                workspace: {
-                    name: wsName
-                },
-                name: wsName
-            };
-
-            return this.createGeoserverObject("workspace", wsConfig);
-
-        }.bind(this));
-    },
-
-    datastoreExists: function (ds) {
-        return this.geoserverObjectExists("datastore", ds);
-    },
-
-    workspaceExists: function (ws) {
-        return this.geoserverObjectExists("workspace", ws);
-    },
-
-    deleteDatastore: function (config) {
-
-        var dsName = config && config.name || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-
-        return this.datastoreExists({ name: dsName, workspace: wsName }).then(function (dsExists) {
-
-            if (dsExists) {
-                return this.deleteGeoserverObject("datastore", config);
-            }
-
-            return config;
-
-        }.bind(this));
-    },
-
-    deleteWorkspace: function (config) {
-
-        var wsName = config && config.name || this.geoserver.workspace;
-
-        return this.workspaceExists({name: wsName}).then(function (wsExists) {
-
-            if (wsExists) {
-                return this.deleteGeoserverObject("workspace", config);
-            }
-
-            return config;
-
-        }.bind(this));
-    },
 
 };
 
+GeoserverWorkspace.call(GeoserverRepository.prototype);
+GeoserverDatastore.call(GeoserverRepository.prototype);
 GeoserverFeatureType.call(GeoserverRepository.prototype);
 GeoserverLayer.call(GeoserverRepository.prototype);
 GeoserverStyle.call(GeoserverRepository.prototype);
