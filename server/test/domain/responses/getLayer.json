@@ -1,0 +1,19 @@
+{
+    "layer": {
+        "name": "testgslayer",
+        "type": "VECTOR",
+        "defaultStyle": {
+            "name": "point",
+            "href": "http://localhost:9090/geoserver/rest/styles/point.json"
+        },
+        "resource": {
+            "@class": "featureType",
+            "name": "testgslayer",
+            "href": "http://localhost:9090/geoserver/rest/workspaces/geoportal/datastores/flat-test/featuretypes/testgslayer.json"
+        },
+        "attribution": {
+            "logoWidth": 0,
+            "logoHeight": 0
+        }
+    }
+}

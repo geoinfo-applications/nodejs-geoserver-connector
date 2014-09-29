@@ -4,7 +4,19 @@ var Q = require("q");
 
 module.exports = function GeoserverLayer() {
 
-    this.getPublicStyles = function () {
+    this.getGlobalStyle = function (config) {
+        return this.getGeoserverObject("style", config).then(function (styleObject) {
+            return styleObject.style;
+        });
+    };
+
+    this.modifyGlobalStyle = function (config) {
+        return this.getGeoserverObject("style", config).then(function (styleObject) {
+            return styleObject.style;
+        });
+    };
+
+    this.getGlobalStyles = function () {
 
         var deferred = Q.defer();
 
@@ -27,6 +39,11 @@ module.exports = function GeoserverLayer() {
     };
 
     this.getWorkspaceStyle = function (styleName, config) {
+
+        if (!styleName) {
+            return Q.reject(new Error("style name required"));
+        }
+
         return this.getWorkspaceStyles(config).then(function (styles) {
             if (styles && styles.some(styleName)) {
                 return true;
@@ -70,15 +87,22 @@ module.exports = function GeoserverLayer() {
         this.getLayer(config).then(function (layer) {
             deferred.resolve(layer.defaultStyle);
         }).catch(function (err) {
-            console.log(err);
+            console.error(err);
             deferred.reject(err);
         });
 
         return deferred.promise;
     };
 
-    this.setLayerDefaultStyle = function (config, style) {
-        throw new Error();
+    this.setLayerDefaultStyle = function (config, styleName ) {
+
+/*        return this.getLayer(config).then(function (layer) {
+            deferred.resolve(layer.defaultStyle);
+        }).catch(function (err) {
+            console.error(err);
+            deferred.reject(err);
+        });*/
+
     };
 
     this.getLayerStyles = function (config) {

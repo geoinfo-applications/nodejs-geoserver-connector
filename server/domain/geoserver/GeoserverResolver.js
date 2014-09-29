@@ -49,11 +49,11 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         getLayerStyles: "/layers/%s/styles",
         addLayerStyle: "/layers/%s/styles",	//POST
 
-        getStyles: "/styles",
-        createStyle: "/styles",		//POST
-        getStyle: "/styles/%s",
-        uploadStyleSLD: "/styles/%s",		//PUT
-        deleteStyle: "/styles/%s",
+        getGlobalStyles: "/styles",
+        createGlobalStyle: "/styles",		//POST
+        getGlobalStyle: "/styles/%s",
+        uploadGlobalStyleSLD: "/styles/%s",		//PUT
+        deleteGlobalStyle: "/styles/%s",
 
         getWorkspaceStyles: "/workspaces/%s/styles",
         createWorkspaceStyle: "/workspaces/%s/styles",	//POST
@@ -93,6 +93,11 @@ GeoserverResolver.prototype = {
         return [ workspaceName ];
     },
 
+    getStyleParameters: function (config) {
+        var styleName = config.name;
+        return [ styleName ];
+    },
+
     resolveLayer: function (config) {
         return this.formatReturnUrl(
             this.restAPI.getLayer,
@@ -117,6 +122,13 @@ GeoserverResolver.prototype = {
         return this.formatReturnUrl(
             this.restAPI.getWorkspace,
             this.getWorkspaceParameters(config)
+        );
+    },
+
+    resolveStyle: function (config) {
+        return this.formatReturnUrl(
+            this.restAPI.getGlobalStyle,
+            this.getStyleParameters(config)
         );
     },
 
@@ -205,8 +217,9 @@ GeoserverResolver.prototype = {
             return this.resolveDatastore(config);
         } else if (type === "workspace") {
             return this.resolveWorkspace(config);
+        } else if (type === "style") {
+            return this.resolveStyle(config);
         }
-
         var requestUrl, wsName, storeName;
         var requestParams = [];
 

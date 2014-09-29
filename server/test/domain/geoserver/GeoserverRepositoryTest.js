@@ -14,7 +14,7 @@ var config = require("../../config.js");
 
 describe("Geoserver instance", function () {
 
-    this.timeout(6000);
+    this.timeout(60000);
 
     describe("testing offline Geoserver access", function () {
 
@@ -94,7 +94,8 @@ describe("Geoserver instance", function () {
             }
         });
 
-        var layer = { name: "fooLayer", featureType: "fooLayer"};
+        var layer = config.layer;
+        var style = config.style;
 
         describe("testing Geoserver access functionalites", function () {
 
@@ -132,35 +133,35 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            it("should fetch Geoserver workspace ", function (done) {
+            it("should fetch workspace ", function (done) {
 
                 gsRepository.workspaceExists().then(function () {
                     done();
                 }).catch(done);
             });
 
-            it("should fetch Geoserver datastore ", function (done) {
+            it("should fetch datastore ", function (done) {
 
                 gsRepository.datastoreExists().then(function () {
                     done();
                 }).catch(done);
             });
 
-            it("should return true if Geoserver feature type exists", function (done) {
+            it("should return true if feature type exists", function (done) {
 
                 gsRepository.featureTypeExists(layer).then(function () {
                     done();
                 }).catch(done);
             });
 
-            it("should get Geoserver feature type details ", function (done) {
+            it("should get feature type details ", function (done) {
 
                 gsRepository.getFeatureType(layer).then(function () {
                     done();
                 }).catch(done);
             });
 
-            it("should delete Geoserver feature type ", function (done) {
+            it("should delete feature type ", function (done) {
 
                 gsRepository.deleteFeatureType(layer).then(function () {
                     done();
@@ -175,7 +176,7 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            it("should rename Geoserver feature type ", function (done) {
+            it("should rename feature type ", function (done) {
 
                 gsRepository.renameFeatureType(layer, "newLayerName").then(function () {
                     done();
@@ -188,9 +189,26 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
-            it("should get Geoserver feature layer details ", function (done) {
+            it("should get layer details ", function (done) {
 
-                gsRepository.getLayer(layer).then(function () {
+                gsRepository.getLayer(layer).then(function (layerDetails) {
+                    expect(layerDetails.name).to.be.equal(layer.name);
+                    done();
+                }).catch(done);
+            });
+
+            it("should return false if layer does not exist ", function (done) {
+
+                gsRepository.layerExists({name: "notExistingLayer"}).then(function (exists) {
+                    expect(exists).to.be.equal(false);
+                    done();
+                }).catch(done);
+            });
+
+            it("should return false if layer exist ", function (done) {
+
+                gsRepository.layerExists(layer).then(function (exists) {
+                    expect(exists).to.be.equal(true);
                     done();
                 }).catch(done);
             });
@@ -202,6 +220,14 @@ describe("Geoserver instance", function () {
             beforeEach(function (done) {
                 gsRepository = new GeoserverRepository(config.test);
                 gsRepository.initializeWorkspace().then(function () {
+                    done();
+                });
+            });
+
+            // TODO mock styles
+            it("should get a global style ", function (done) {
+                gsRepository.getGlobalStyle(style).then(function (styleObject) {
+                    expect(styleObject.name).to.be.equal(style.name);
                     done();
                 });
             });
@@ -229,6 +255,14 @@ describe("Geoserver instance", function () {
             });
 
             //TODO mock styles
+            it("should fail if workspace style name is not defined", function (done) {
+                gsRepository.getWorkspaceStyle().catch(function (error) {
+                    expect(error.message).to.match(/name required/);
+                    done();
+                });
+            });
+
+            //TODO mock styles
             it("should get workspace style ", function (done) {
                 gsRepository.getWorkspaceStyle("styleName").then(function (workspaceHasStyle) {
                     expect(workspaceHasStyle).to.be.equal(false);
@@ -236,20 +270,21 @@ describe("Geoserver instance", function () {
                 });
             });
 
-            it("should get default layer style ", function (done) {
-                gsRepository.getLayerDefaultStyle(layer).then(function () {
-                    done();
-                });
-            });
-
-            it("should get all layer styles ", function (done) {
-                gsRepository.getLayerStyles(layer).then(function () {
+            it("should get default layer style name", function (done) {
+                gsRepository.getLayerDefaultStyle(layer).then(function (defaultStyle) {
+                    expect(defaultStyle.name).to.be.equal(layer.defaultStyleName);
                     done();
                 });
             });
 
             it("should set default layer style ", function (done) {
                 gsRepository.setLayerDefaultStyle().then(function () {
+                    done();
+                });
+            });
+
+            it("should get all layer styles ", function (done) {
+                gsRepository.getLayerStyles(layer).then(function () {
                     done();
                 });
             });

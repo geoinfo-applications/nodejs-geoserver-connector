@@ -23,10 +23,9 @@ function GeoserverMockServer() {
     this.baseURL = "/" + gsOptions.context + "rest";
 
     this.geoserverRestGetAPI = {
-        getLayer: "/layers/:layer",
-        getStyles: "/styles.json",
         getWorkspaceStyles: "/workspaces/:ws/styles.json",
         getLayerStyles: "/layers/:layer/styles.json",
+        getGlobalStyles: "/styles.json",
         getLFeatureTypeDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
     };
 
@@ -48,6 +47,8 @@ function GeoserverMockServer() {
     };
 
     this.geoserverRestAPI = {
+        getLayer: "/layers/:layer",
+        getGlobalStyle: "/styles/:style",
         getInstanceDetails: "/about/version.json"
     };
 
@@ -84,6 +85,24 @@ GeoserverMockServer.prototype = {
                 res.status(200).json(true);
             });
         }.bind(this));
+
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getLayer, function (req, res) {
+
+            if(req.params.layer !== config.layer.name){
+                res.status(404);
+            }
+
+            var response = require("./domain/responses/getLayer");
+            response.layer.name = config.layer.name;
+            response.layer.defaultStyle.name = config.layer.defaultStyleName;
+            res.json(response);
+        });
+
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, function (req, res) {
+            var response = require("./domain/responses/getPublicStyle");
+            response.style.name = config.style.name;
+            res.json(response);
+        });
 
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getInstanceDetails, function (req, res) {
             res.json({

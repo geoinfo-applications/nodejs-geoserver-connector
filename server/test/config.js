@@ -2,8 +2,8 @@
 
 var config = {
 
-    test : {
-        db : {
+    test: {
+        db: {
             flat: {
                 host: "localhost",
                 port: 5433,
@@ -14,7 +14,7 @@ var config = {
             }
         },
 
-        geoserver : {
+        geoserver: {
             host: "localhost",
             port: 3003,
             context: "geoserver",
@@ -25,6 +25,17 @@ var config = {
             datastore: "flat-test"
         }
     }
+};
+
+config.layer = {
+    name: "fooLayer",
+    featureType: "fooLayer",
+    defaultStyleName: "point"
+};
+
+config.style = {
+    name: "teststyle",
+    sldFile: "teststyle.sld"
 };
 
 

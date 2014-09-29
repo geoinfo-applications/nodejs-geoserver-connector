@@ -130,7 +130,7 @@ GeoserverRepository.prototype = {
         var response = function (err, resp, body) {
 
             if (err) {
-                return deferred.reject(err);
+                return deferred.reject(new Error(err));
             }
 
             if (resp.statusCode !== 200) {
