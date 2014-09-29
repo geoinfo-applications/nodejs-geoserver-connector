@@ -14,7 +14,7 @@ var config = require("../../config.js");
 
 describe("Geoserver instance", function () {
 
-    this.timeout(60000);
+    this.timeout(600);
 
     describe("testing offline Geoserver access", function () {
 
@@ -243,6 +243,14 @@ describe("Geoserver instance", function () {
 
                 gsRepository.globalStyleExists(style).then(function (exists) {
                     expect(exists).to.be.equal(true);
+                    done();
+                }).catch(done);
+            });
+
+            it("should create new global style ", function (done) {
+
+                gsRepository.createGlobalStyle(style).then(function (result) {
+                    expect(result).to.be.equal(true);
                     done();
                 }).catch(done);
             });

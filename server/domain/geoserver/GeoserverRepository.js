@@ -176,21 +176,26 @@ GeoserverRepository.prototype = {
 
         var deferred = Q.defer();
 
-        var gsObject = this.resolver.create(type, config);
+        var restUrl = this.resolver.create(type, config);
 
         var payload = JSON.stringify(config);
 
-        var response = function (err, response, body) {
-            if (err || response.statusCode !== 201) {
-                console.error("Error creating Geoserver object", type, config.name);
-                deferred.reject("Error creating Geoserver object:" + body || err);
-            } else {
-                //console.log("Geoserver object created >", type, object.name);
-                deferred.resolve(config);
-            }
-        }.bind(config);
+        function response (err, resp, body) {
 
-        this.dispatcher.post({url: gsObject.url, body: payload, callback: response});
+            if (err) {
+                deferred.reject(err);
+            }
+
+            if (resp.statusCode !== 201) {
+                console.error("Error creating Geoserver object", type, body);
+                deferred.reject(new Error(body));
+            }
+
+            //console.info("Geoserver object created >", type, object.name);
+            deferred.resolve(true);
+        }
+
+        this.dispatcher.post({url: restUrl, body: payload, callback: response});
 
         return deferred.promise;
     },

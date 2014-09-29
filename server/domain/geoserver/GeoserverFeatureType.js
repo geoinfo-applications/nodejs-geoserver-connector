@@ -15,21 +15,17 @@ module.exports = function GeoserverFeatureType() {
         var storeName = config && config.datastore || this.geoserver.datastore;
         var wsName = config && config.workspace || this.geoserver.workspace;
 
-        return this.featureTypeExists({ name: featureTypeName, datastore: storeName, workspace: wsName }).then(function (lyExists) {
-
-            if (lyExists) {
-                return true;
+        return this.featureTypeExists(config).then(function (exists) {
+            if (exists) {
+                return new Error("featureType already exists" + featureTypeName);
             }
-
             var featureTypeConfig = {
                 featureType: { name: featureTypeName },
                 name: featureTypeName,
                 datastore: storeName,
                 workspace: wsName
             };
-
             return this.createGeoserverObject("featureType", featureTypeConfig);
-
         }.bind(this));
     };
 
@@ -39,16 +35,12 @@ module.exports = function GeoserverFeatureType() {
         var storeName = config && config.datastore || this.geoserver.datastore;
         var wsName = config && config.workspace || this.geoserver.workspace;
 
-        return this.featureTypeExists({ name: featureTypeName, datastore: storeName, workspace: wsName })
-            .then(function (exists) {
-
-                if (exists) {
-                    return this.deleteGeoserverObject("featureType", config, true);
-                }
-
-                return config;
-
-            }.bind(this));
+        return this.featureTypeExists(config).then(function (exists) {
+            if (exists) {
+                return this.deleteGeoserverObject("featureType", config, true);
+            }
+            return new Error("featureTypeName does not exist" + featureTypeName);
+        }.bind(this));
     };
 
     this.featureTypeExists = function (featureType) {
@@ -63,12 +55,12 @@ module.exports = function GeoserverFeatureType() {
 
         var featureTypeConfig = _.extend({}, config);
 
-        var renameFeatureType = function (newFeatureTypeConfig) {
+        var renameFeatureType = function (newConfig) {
 
             var deferred = Q.defer();
 
             var restUrl = this.resolver.get("featureType", featureTypeConfig);
-            var payload = JSON.stringify(newFeatureTypeConfig);
+            var payload = JSON.stringify(newConfig);
 
             function response(err, resp, body) {
 
@@ -86,7 +78,7 @@ module.exports = function GeoserverFeatureType() {
             this.dispatcher.put({
                 url: restUrl,
                 body: payload,
-                callback: response.bind(newFeatureTypeConfig)
+                callback: response.bind(newConfig)
             });
 
             return deferred.promise;
@@ -94,11 +86,11 @@ module.exports = function GeoserverFeatureType() {
         }.bind(this);
 
         function updateFeatureTypeConfig(config) {
-            var newFeatureTypeConfig = {};
-            newFeatureTypeConfig.featureType = _.extend({}, config.featureType);
-            newFeatureTypeConfig.featureType.name = newFeatureTypeName;
-            newFeatureTypeConfig.featureType.nativeName = newFeatureTypeName;
-            return renameFeatureType(newFeatureTypeConfig);
+            var newConfig = {};
+            newConfig.featureType = _.extend({}, config.featureType);
+            newConfig.featureType.name = newFeatureTypeName;
+            newConfig.featureType.nativeName = newFeatureTypeName;
+            return renameFeatureType(newConfig);
         }
 
         return this.getFeatureType(featureTypeConfig)

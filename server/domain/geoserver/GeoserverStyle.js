@@ -21,9 +21,7 @@ module.exports = function GeoserverLayer() {
     this.createGlobalStyle = function (config) {
         var deferred = Q.defer();
 
-        return this.featureTypeExists
-
-        var restUrl = this.resolver.get("style", config);
+        var restUrl = this.resolver.create("style", config);
 
         function response(err, resp, body) {
             if (err || resp.statusCode !== 201) {
@@ -31,7 +29,6 @@ module.exports = function GeoserverLayer() {
             }
             deferred.resolve(true);
         }
-
 
 
         styleConfig.style.workspace.name = gsObject.config.name;
@@ -124,14 +121,14 @@ module.exports = function GeoserverLayer() {
         return deferred.promise;
     };
 
-    this.setLayerDefaultStyle = function (config, styleName ) {
+    this.setLayerDefaultStyle = function (config, styleName) {
 
-/*        return this.getLayer(config).then(function (layer) {
-            deferred.resolve(layer.defaultStyle);
-        }).catch(function (err) {
-            console.error(err);
-            deferred.reject(err);
-        });*/
+        /*        return this.getLayer(config).then(function (layer) {
+         deferred.resolve(layer.defaultStyle);
+         }).catch(function (err) {
+         console.error(err);
+         deferred.reject(err);
+         });*/
 
     };
 

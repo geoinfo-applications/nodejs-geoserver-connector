@@ -25,14 +25,14 @@ function GeoserverMockServer() {
     this.geoserverRestGetAPI = {
         getWorkspaceStyles: "/workspaces/:ws/styles.json",
         getLayerStyles: "/layers/:layer/styles.json",
-        getGlobalStyles: "/styles.json",
+        getGlobalStyles: "/styles",
         getLFeatureTypeDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
     };
 
     this.geoserverRestPostAPI = {
         createLayer: "/workspaces/:ws/datastores/:ds/featuretypes.json",
-        createDatastore: "/workspaces/:ws/datastores.json",
-        createWorkspace: "/workspaces.json",
+        createDatastore: "/workspaces/:ws/datastores",
+        createWorkspace: "/workspaces",
         createWorkspaceStyles: "/workspaces/:ws/styles.json"
     };
 
