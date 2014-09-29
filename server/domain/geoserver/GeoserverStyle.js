@@ -14,10 +14,8 @@ module.exports = function GeoserverLayer() {
         return this.geoserverObjectExists("style", config);
     };
 
-    this.modifyGlobalStyle = function (config) {
-        return this.getGeoserverObject("style", config).then(function (styleObject) {
-            return styleObject.style;
-        });
+    this.deleteGlobalStyle = function (config) {
+        return this.deleteGeoserverObject("style", config);
     };
 
     this.createGlobalStyle = function (config) {

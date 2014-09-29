@@ -125,7 +125,7 @@ GeoserverResolver.prototype = {
         );
     },
 
-    resolveStyle: function (config) {
+    resolveStyle: function (config ) {
         return this.formatReturnUrl(
             this.restAPI.getGlobalStyle,
             this.getStyleParameters(config)
@@ -207,10 +207,15 @@ GeoserverResolver.prototype = {
 
     },
 
-    "get": function (type, config) {
+    "delete" : function (type, config) {
+
+        return this.get(type, config, "delete");
+    },
+
+    "get": function (type, config, method) {
 
         if (type === "layer") {
-            return this.resolveLayer(config);
+            return this.resolveLayer(config)
         } else if (type === "featureType") {
             return this.resolveFeatureType(config);
         } else if (type === "datastore") {
@@ -218,8 +223,9 @@ GeoserverResolver.prototype = {
         } else if (type === "workspace") {
             return this.resolveWorkspace(config);
         } else if (type === "style") {
-            return this.resolveStyle(config);
+            return this.resolveStyle(config, method);
         }
+        /*
         var requestUrl, wsName, storeName;
         var requestParams = [];
 
@@ -253,6 +259,7 @@ GeoserverResolver.prototype = {
             url: util.format.apply(null, requestParams),
             config: config
         };
+        */
     }
 };
 

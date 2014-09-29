@@ -195,14 +195,20 @@ GeoserverRepository.prototype = {
         return deferred.promise;
     },
 
-    deleteGeoserverObject: function (type, config, recursiveDelete) {
+    deleteGeoserverObject: function (type, config, options) {
 
         var deferred = Q.defer();
 
-        var restUrl = this.resolver.get(type, config);
+        var restUrl = this.resolver.delete(type, config);
 
-        var recursive = recursiveDelete || false;
-        restUrl += "?recurse=" + recursive;
+        if (type === "style") {
+            var purge = options && options.purge || true
+            restUrl += "?purge=" + purge;
+
+        } else if (type.indexOf("featureType", "datastore", "workspace")) {
+            var recurse = options && options.recurse || false
+            restUrl += "?recurse=" + recurse;
+        }
 
         function response(err, resp, body) {
 

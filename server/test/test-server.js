@@ -39,6 +39,7 @@ function GeoserverMockServer() {
     this.geoserverRestDeleteAPI = {
         deleteLayer: "/layers/:layer",
         deleteFeatureType: "/workspaces/:ws/datastores/:ds/featuretypes/:layer",
+        getDeleteStyle: "/styles/:style",
         deleteWorkspaceStyle: "/workspaces/:ws/styles/:style"
     };
 

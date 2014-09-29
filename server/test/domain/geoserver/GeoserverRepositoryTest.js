@@ -239,12 +239,20 @@ describe("Geoserver instance", function () {
                 }).catch(done);
             });
 
-            it("should return false if global style exist ", function (done) {
+            it("should return true if global style exist ", function (done) {
 
                 gsRepository.globalStyleExists(style).then(function (exists) {
                     expect(exists).to.be.equal(true);
                     done();
                 }).catch(done);
+            });
+
+
+            it("should delete global style", function (done) {
+                gsRepository.deleteGlobalStyle(style).then(function (result) {
+                    expect(result).to.be.equal(true);
+                    done();
+                });
             });
 
             // TODO mock styles
@@ -263,8 +271,10 @@ describe("Geoserver instance", function () {
                 });
             });
 
+            // TODO mock styles
             it("should get all workspace styles ", function (done) {
                 gsRepository.getWorkspaceStyles({ name: "testWorkspace"}).then(function () {
+                    expect(styles).to.be.instanceof(Array);
                     done();
                 });
             });
