@@ -130,7 +130,7 @@ GeoserverRepository.prototype = {
 
         var restUrl = this.resolver.get(type, config);
 
-        var response = function (err, resp, body) {
+        var response = function (err, resp) {
 
             if (err) {
                 return deferred.reject(new Error(err));
@@ -141,8 +141,7 @@ GeoserverRepository.prototype = {
             }
 
             deferred.resolve(true);
-
-        }
+        };
 
         this.dispatcher.get({url: restUrl, callback: response});
 
@@ -183,7 +182,7 @@ GeoserverRepository.prototype = {
 
         var payload = JSON.stringify(config);
 
-        function response (err, resp, body) {
+        function response(err, resp, body) {
 
             if (err) {
                 deferred.reject(err);
@@ -210,11 +209,11 @@ GeoserverRepository.prototype = {
         var restUrl = this.resolver.delete(type, config);
 
         if (type === "style") {
-            var purge = options && options.purge || true
+            var purge = options && options.purge || true;
             restUrl += "?purge=" + purge;
 
         } else if (type.indexOf("featureType", "datastore", "workspace")) {
-            var recurse = options && options.recurse || false
+            var recurse = options && options.recurse || false;
             restUrl += "?recurse=" + recurse;
         }
 

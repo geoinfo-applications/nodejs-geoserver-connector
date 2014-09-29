@@ -1,13 +1,7 @@
 "use strict";
 
-//var request = require("request");
-var expect = require("chai").expect;
 var fs = require("fs");
-//var pass = require("../../TestUtils").pass;
-//var fail = require("../../TestUtils").fail;
-
-//var util = require("util");
-var Q = require("q");
+var expect = require("chai").expect;
 
 var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
 var GeoserverMockServer = require("../../test-server.js");
@@ -275,7 +269,7 @@ describe("Geoserver instance", function () {
 
             it("should upload global style SLD file", function (done) {
 
-                fs.readFile(__dirname + "/../data/teststyle.sld", 'ascii', function (err, sldContent) {
+                fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
 
                     var styleConfig = {
                         name: style.name,
@@ -291,7 +285,7 @@ describe("Geoserver instance", function () {
 
             it("should  create global style ", function (done) {
 
-                fs.readFile(__dirname + "/../data/teststyle.sld", 'ascii', function (err, sldContent) {
+                fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
 
                     var styleConfig = {
                         name: style.name,
@@ -380,7 +374,6 @@ describe("Geoserver instance", function () {
                     .then(function () {
                         done();
                     }).catch(done);
-                ;
             });
 
         });

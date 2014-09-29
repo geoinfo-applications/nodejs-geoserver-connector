@@ -72,7 +72,7 @@ function GeoserverMockServer() {
             var response = require("./domain/responses/getStyles");
             res.json(response);
         }
-    }
+    };
 
 }
 

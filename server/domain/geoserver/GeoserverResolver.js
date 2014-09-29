@@ -167,7 +167,7 @@ GeoserverResolver.prototype = {
         return this.formatReturnUrl(restUrl, parameters);
     },
 
-    resolveStyle: function (config, method, isWorkspaceStyle) {
+    resolveStyle: function (config, method) {
 
         var restUrl = this.restAPI.getGlobalStyle;
         var parameters = [];
@@ -199,7 +199,7 @@ GeoserverResolver.prototype = {
         }
 
         if (type === "layer") {
-            return this.resolveLayer(config, method)
+            return this.resolveLayer(config, method);
         } else if (type === "featureType") {
             return this.resolveFeatureType(config, method);
         } else if (type === "datastore") {

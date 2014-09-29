@@ -32,8 +32,6 @@ module.exports = function GeoserverFeatureType() {
     this.deleteFeatureType = function (config) {
 
         var featureTypeName = config && config.name;
-        var storeName = config && config.datastore || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
 
         return this.featureTypeExists(config).then(function (exists) {
             if (exists) {
@@ -47,6 +45,8 @@ module.exports = function GeoserverFeatureType() {
         return this.geoserverObjectExists("featureType", featureType);
     };
 
+
+    //TODO cleanup - reuse gs global methods
     this.renameFeatureType = function (config, newFeatureTypeName) {
 
         if (!newFeatureTypeName) {

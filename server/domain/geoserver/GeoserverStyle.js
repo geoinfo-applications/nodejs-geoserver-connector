@@ -30,7 +30,7 @@ module.exports = function GeoserverLayer() {
     this.createGlobalStyle = function (config) {
 
         var uploadSLDContent = function () {
-            return this.uploadGlobalStyleContent(config)
+            return this.uploadGlobalStyleContent(config);
         }.apply(this, config);
 
         return this.createGlobalStyleConfiguration(config)
