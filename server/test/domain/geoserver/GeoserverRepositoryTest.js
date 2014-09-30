@@ -9,7 +9,7 @@ var config = require("../../config.js");
 
 describe("Geoserver instance ", function () {
 
-    this.timeout(60000);
+    this.timeout(500);
 
     describe("testing offline Geoserver access ", function () {
 
@@ -494,6 +494,25 @@ describe("Geoserver instance ", function () {
                         done();
                     }).catch(done);
                 });
+
+                it("should add style to layer ", function (done) {
+                    gsRepository.setLayerDefaultStyle().then(function () {
+                        done();
+                    }).catch(done);
+                });
+
+                it("should remove style from layer ", function (done) {
+                    gsRepository.setLayerDefaultStyle().then(function () {
+                        done();
+                    }).catch(done);
+                });
+
+                it("should remove and delete layer style ", function (done) {
+                    gsRepository.setLayerDefaultStyle().then(function () {
+                        done();
+                    }).catch(done);
+                });
+
             });
 
         });

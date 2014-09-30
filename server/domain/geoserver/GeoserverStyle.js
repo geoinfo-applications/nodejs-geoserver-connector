@@ -113,8 +113,8 @@ module.exports = function GeoserverLayer() {
 
     this.getLayerStyles = function (config) {
 
-        if (!config || !config.name) {
-            return Q.reject(new Error("layer name required"));
+        if (nameDoesntExists(config)) {
+            return rejectRequest("layer name required");
         }
 
         return this.getLayer(config).then(function (layer) {
@@ -122,16 +122,21 @@ module.exports = function GeoserverLayer() {
         });
     };
 
-    this.setLayerDefaultStyle = function (config, styleName) {
-        throw new Error();
-        /*        return this.getLayer(config).then(function (layer) {
-         deferred.resolve(layer.defaultStyle);
-         }).catch(function (err) {
-         console.error(err);
-         deferred.reject(err);
-         });*/
-
-    };
+//    this.setLayerDefaultStyle = function (config) {
+//        throw new Error();
+//    };
+//
+//    this.addLayerStyle = function (config) {
+//        throw new Error();
+//    };
+//
+//    this.removeLayerStyle = function (config) {
+//        throw new Error();
+//    };
+//
+//    this.deleteLayerStyle = function (config) {
+//        throw new Error();
+//    };
 
     this.defineGlobalStyle = function (config) {
         if (config) {
