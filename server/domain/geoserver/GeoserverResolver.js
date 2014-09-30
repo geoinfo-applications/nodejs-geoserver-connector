@@ -14,25 +14,25 @@ function GeoserverResolver(geoserverRepositoryConfig) {
     this.restAPI = {
 
         getWorkspaces: "/workspaces.json",
-        getWorkspace: "/workspaces/%s",
+        getWorkspace: "/workspaces/%s.json",
 
         getDatastores: "/workspaces/%s/datastores.json",
-        getDatastore: "/workspaces/%s/datastores/%s",
+        getDatastore: "/workspaces/%s/datastores/%s.json",
 
         getFeatureTypes: "/workspaces/%s/datastores/%s/featuretypes.json",
-        getFeatureType: "/workspaces/%s/datastores/%s/featuretypes/%s",
+        getFeatureType: "/workspaces/%s/datastores/%s/featuretypes/%s.json",
 
-        getLayers: "/layers",
-        getLayer: "/layers/%s",
+        getLayers: "/layers.json",
+        getLayer: "/layers/%s.json",
 
         getLayerStyles: "/layers/%s/styles.json",
-        getLayerStyle: "/layers/%s/styles/%s",
+        getLayerStyle: "/layers/%s/styles/%s.json",
 
         getGlobalStyles: "/styles.json",
-        getGlobalStyle: "/styles/%s",
+        getGlobalStyle: "/styles/%s.json",
 
         getWorkspaceStyles: "/workspaces/%s/styles.json",
-        getWorkspaceStyle: "/workspaces/%s/styles/%s",
+        getWorkspaceStyle: "/workspaces/%s/styles/%s.json",
     };
 
 }
