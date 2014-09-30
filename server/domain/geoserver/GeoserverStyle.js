@@ -23,67 +23,23 @@ module.exports = function GeoserverLayer() {
         return this.geoserverObjectExists("style", config);
     };
 
-    this.deleteGlobalStyle = function (config) {
-        return this.deleteGeoserverObject("style", config);
-    };
-
     this.createGlobalStyle = function (config) {
-
-        var uploadSLDContent = function () {
-            return this.uploadGlobalStyleContent(config);
-        }.apply(this, config);
-
-        return this.createGlobalStyleConfiguration(config)
-            .then(uploadSLDContent);
+        config.styleType = "style";
+        return this.createStyle(config);
     };
 
     this.createGlobalStyleConfiguration = function (config) {
-
-        if (!config || !config.name) {
-            return Q.reject(new Error("style name required"));
-        }
-
-        var styleConfig = {
-            name: config.name,
-            filename: config.name + ".sld"
-        };
-
-        return this.createGeoserverObject("style", styleConfig);
+        config.styleType = "style";
+        return this.createStyleConfiguration(config);
     };
 
     this.uploadGlobalStyleContent = function (config) {
+        config.styleType = "style";
+        return this.uploadStyleContent(config);
+    };
 
-        var styleName = config && config.name;
-        var sldBody = config && config.sldBody;
-        var styleConfig = { name: styleName };
-
-        if (!sldBody || !styleName) {
-            return Q.reject(new Error("style name and sld content required"));
-        }
-
-        var restUrl = this.resolver.get("style", styleConfig);
-
-        var deferred = Q.defer();
-
-        function response(err, resp, body) {
-
-            if (err) {
-                deferred.reject(err);
-            }
-
-            if (resp.statusCode !== 200) {
-                console.error("Error uploading style SLD file", body);
-                deferred.reject(new Error(body));
-            }
-
-            //console.info("SLD file uploaded>", body);
-            deferred.resolve(true);
-        }
-
-        this.dispatcher.put({url: restUrl, body: sldBody, callback: response});
-
-        return deferred.promise;
-
+    this.deleteGlobalStyle = function (config) {
+        return this.deleteGeoserverObject("style", config);
     };
 
     this.getWorkspaceStyle = function (config) {
@@ -106,8 +62,13 @@ module.exports = function GeoserverLayer() {
             });
     };
 
-    this.createWorkspaceStyle = function (styleName, config) {
+    this.workspaceStyleExists = function (config) {
+        return this.geoserverObjectExists("workspaceStyle", config);
+    };
 
+    this.createWorkspaceStyle = function (config) {
+        config.styleType = "workspaceStyle";
+        return this.createStyle(config);
     };
 
     this.deleteWorkspaceStyle = function (styleName, config) {
@@ -147,5 +108,64 @@ module.exports = function GeoserverLayer() {
 
     };
 
+
+    this.createStyle = function (config) {
+
+        var uploadSLDContent = function () {
+            return this.uploadStyleContent(config);
+        }.apply(this, config);
+
+        return this.createStyleConfiguration(config)
+            .then(uploadSLDContent);
+    };
+
+    this.createStyleConfiguration = function (config) {
+
+        if (!config || !config.name) {
+            return Q.reject(new Error("style name required"));
+        }
+
+        var styleConfig = {
+            name: config.name,
+            filename: config.name + ".sld"
+        };
+
+        return this.createGeoserverObject(config.styleType, styleConfig);
+    };
+
+    this.uploadStyleContent = function (config) {
+
+        var styleName = config && config.name;
+        var sldBody = config && config.sldBody;
+        var styleConfig = { name: styleName };
+
+        if (!sldBody || !styleName) {
+            return Q.reject(new Error("style name and sld content required"));
+        }
+
+        var restUrl = this.resolver.get(config.styleType, styleConfig);
+
+        var deferred = Q.defer();
+
+        function response(err, resp, body) {
+
+            if (err) {
+                deferred.reject(err);
+            }
+
+            if (resp.statusCode !== 200) {
+                console.error("Error uploading style SLD file", body);
+                deferred.reject(new Error(body));
+            }
+
+            //console.info("SLD file uploaded>", body);
+            deferred.resolve(true);
+        }
+
+        this.dispatcher.put({url: restUrl, body: sldBody, callback: response});
+
+        return deferred.promise;
+
+    };
 
 };

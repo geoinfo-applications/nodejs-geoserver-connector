@@ -63,7 +63,7 @@ function GeoserverMockServer() {
         style: require("./domain/responses/getStyle"),
         styles: require("./domain/responses/getStyles"),
         layer: require("./domain/responses/getLayer")
-    }
+    };
 
 }
 
@@ -133,14 +133,14 @@ GeoserverMockServer.prototype = {
 
         this.gsMockServer.put(this.baseURL + this.geoserverRestAPI.uploadGlobalStyle, function (req, res) {
 
-            var parseString = new require('xml2js').Parser().parseString;
+            var parseString = new require("xml2js").Parser().parseString;
 
-            var buf = '';
-            req.setEncoding('utf8');
-            req.on('data', function (chunk) {
-                buf += chunk
+            var buf = "";
+            req.setEncoding("utf8");
+            req.on("data", function (chunk) {
+                buf += chunk;
             });
-            req.on('end', function () {
+            req.on("end", function () {
                 parseString(buf, function (err, sldContent) {
 
                     if (err || isNotValidSldContent()) {

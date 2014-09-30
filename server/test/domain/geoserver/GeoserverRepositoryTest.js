@@ -346,14 +346,30 @@ describe("Geoserver instance ", function () {
                     }).catch(done);
                 });
 
+                it("should return false if workspace style does not exist ", function (done) {
+
+                    gsRepository.workspaceStyleExists({name: "notExistingStyle"}).then(function (exists) {
+                        expect(exists).to.be.equal(false);
+                        done();
+                    }).catch(done);
+                });
+
+                it("should return true if workspace style exists ", function (done) {
+
+                    gsRepository.workspaceStyleExists(style).then(function (exists) {
+                        expect(exists).to.be.equal(true);
+                        done();
+                    }).catch(done);
+                });
+
                 it("should create new workspace style ", function (done) {
-                    gsRepository.createWorkspaceStyle("newStyle").then(function () {
+                    gsRepository.createWorkspaceStyle(style).then(function () {
                         done();
                     }).catch(done);
                 });
 
                 it("should upload new workspace SLD file ", function (done) {
-                    gsRepository.uploadStyleContent().then(function () {
+                    gsRepository.uploadWorkspaceStyleContent().then(function () {
                         done();
                     }).catch(done);
                 });
