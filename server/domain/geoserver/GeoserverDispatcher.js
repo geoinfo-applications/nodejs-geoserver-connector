@@ -28,7 +28,7 @@ GeoserverDispatcher.prototype = {
             method: config.method || "GET",
             body: config.body || undefined,
             headers: {
-                "Content-type": "text/json"
+                "Content-type": "application/json"
             },
             timeout: this.timeout,
             auth: {
