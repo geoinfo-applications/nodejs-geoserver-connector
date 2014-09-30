@@ -145,20 +145,19 @@ GeoserverMockServer.prototype = {
 
                     if (err || isNotValidSldContent()) {
                         res.status(404).json(false);
+                    } else {
+                        res.status(200).json(true);
                     }
 
                     function isNotValidSldContent() {
                         try {
                             var rootElement = sldContent.StyledLayerDescriptor;
                             var namedLayer = rootElement.NamedLayer[0];
-                            return namedLayer.Name[0] === config.layer.name;
+                            return namedLayer.Name[0] !== config.layer.name;
                         } catch (err) {
                             return false;
                         }
                     }
-
-                    res.status(200).json(true);
-
                 });
             });
         });
