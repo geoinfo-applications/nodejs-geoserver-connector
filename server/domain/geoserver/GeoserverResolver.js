@@ -11,11 +11,6 @@ function GeoserverResolver(geoserverRepositoryConfig) {
     this.datastore = this.geoserverConfig.datastore;
     this.workspace = this.geoserverConfig.workspace;
 
-    this.baseRestAPI = {
-        datastores: "/workspaces/%s/datastores",
-        datastore: "/workspaces/%s/datastores/%s"
-    };
-
     this.restAPI = {
 
         getWorkspaces: "/workspaces",

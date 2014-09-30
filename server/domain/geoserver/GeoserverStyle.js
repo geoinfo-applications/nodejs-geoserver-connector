@@ -2,7 +2,7 @@
 
 var Q = require("q");
 
-function nameDoesntExists(config) {
+function nameDoesntExist(config) {
     if (!config || !config.name) {
         return true;
     }
@@ -16,7 +16,7 @@ module.exports = function GeoserverLayer() {
 
     this.getGlobalStyle = function (config) {
 
-        if (nameDoesntExists(config)) {
+        if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
         return this.getGeoserverObject(this.types.STYLE, config)
@@ -33,7 +33,7 @@ module.exports = function GeoserverLayer() {
     };
 
     this.globalStyleExists = function (config) {
-        if (nameDoesntExists(config)) {
+        if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
         return this.geoserverObjectExists(this.types.STYLE, config);
@@ -55,11 +55,14 @@ module.exports = function GeoserverLayer() {
     };
 
     this.deleteGlobalStyle = function (config) {
+        if (nameDoesntExist(config)) {
+            return rejectRequest("layer name required");
+        }
         return this.deleteGeoserverObject(this.types.STYLE, config);
     };
 
     this.getWorkspaceStyle = function (config) {
-        if (nameDoesntExists(config)) {
+        if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
         return this.getGeoserverObject(this.types.WORKSPACESTYLE, config)
@@ -76,7 +79,7 @@ module.exports = function GeoserverLayer() {
     };
 
     this.workspaceStyleExists = function (config) {
-        if (nameDoesntExists(config)) {
+        if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
         return this.geoserverObjectExists(this.types.WORKSPACESTYLE, config);
@@ -98,12 +101,15 @@ module.exports = function GeoserverLayer() {
     };
 
     this.deleteWorkspaceStyle = function (config) {
+        if (nameDoesntExist(config)) {
+            return rejectRequest("layer name required");
+        }
         return this.deleteGeoserverObject(this.types.WORKSPACESTYLE, config);
     };
 
     this.getLayerDefaultStyle = function (config) {
 
-        if (nameDoesntExists(config)) {
+        if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
         return this.getLayer(config).then(function (layer) {
@@ -113,7 +119,7 @@ module.exports = function GeoserverLayer() {
 
     this.getLayerStyles = function (config) {
 
-        if (nameDoesntExists(config)) {
+        if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
 
@@ -162,7 +168,7 @@ module.exports = function GeoserverLayer() {
 
     this.createStyleConfiguration = function (config) {
 
-        if (nameDoesntExists(config)) {
+        if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
 

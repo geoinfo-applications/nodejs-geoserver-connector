@@ -122,7 +122,7 @@ module.exports = function GeoserverFeatureType() {
         var deferred = Q.defer();
 
         var restUrl = this.resolver.get(this.types.FEATURETYPE, featureTypeConfig);
-        restUrl.url += "?recalculate=nativebbox,latlonbbox";
+        restUrl += "?recalculate=nativebbox,latlonbbox";
 
         var payload = JSON.stringify(featureTypeConfig);
 
