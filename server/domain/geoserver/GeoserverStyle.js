@@ -15,7 +15,6 @@ function rejectRequest(errorMessage) {
 module.exports = function GeoserverLayer() {
 
     this.getGlobalStyle = function (config) {
-
         if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
@@ -173,8 +172,10 @@ module.exports = function GeoserverLayer() {
         }
 
         var styleConfig = {
-            name: config.name,
-            filename: config.name + ".sld"
+            style: {
+                name: config.name,
+                filename: config.name + ".sld"
+            }
         };
 
         return this.createGeoserverObject(config.styleType, styleConfig);
