@@ -24,13 +24,13 @@ module.exports = function GeoserverDatastore() {
                 name: storeName
             };
 
-            return this.createGeoserverObject("datastore", datastoreConfig);
+            return this.createGeoserverObject(this.types.DATASTORE, datastoreConfig);
 
         }.bind(this));
     };
 
     this.datastoreExists = function (config) {
-        return this.geoserverObjectExists("datastore", config);
+        return this.geoserverObjectExists(this.types.DATASTORE, config);
     };
 
     this.deleteDatastore = function (config) {
@@ -41,7 +41,7 @@ module.exports = function GeoserverDatastore() {
         return this.datastoreExists({ name: dsName, workspace: wsName }).then(function (dsExists) {
 
             if (dsExists) {
-                return this.deleteGeoserverObject("datastore", config);
+                return this.deleteGeoserverObject(this.types.DATASTORE, config);
             }
 
             return config;

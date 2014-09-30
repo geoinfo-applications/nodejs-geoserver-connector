@@ -19,13 +19,13 @@ module.exports = function GeoserverWorkspace() {
                 name: wsName
             };
 
-            return this.createGeoserverObject("workspace", workspaceConfig);
+            return this.createGeoserverObject(this.types.WORKSPACE, workspaceConfig);
 
         }.bind(this));
     };
 
     this.workspaceExists = function (ws) {
-        return this.geoserverObjectExists("workspace", ws);
+        return this.geoserverObjectExists(this.types.WORKSPACE, ws);
     };
 
     this.deleteWorkspace = function (config) {
@@ -33,7 +33,7 @@ module.exports = function GeoserverWorkspace() {
         return this.workspaceExists(config).then(function (exists) {
 
             if (exists) {
-                return this.deleteGeoserverObject("workspace", config);
+                return this.deleteGeoserverObject(this.types.WORKSPACE, config);
             }
 
             return config;

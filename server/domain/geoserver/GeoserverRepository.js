@@ -56,6 +56,15 @@ function GeoserverRepository(config) {
 
     this.geoserverDetails = null;
     this.isEnabled = false;
+
+    this.types = {
+        LAYER: "Layer",
+        FEATURETYPE: "FeatureType",
+        DATASTORE: "Datastore",
+        WORKSPACE: "Workspace",
+        STYLE: "Style",
+        WORKSPACESTYLE: "WorkspaceStyle"
+    };
 }
 
 GeoserverRepository.prototype = {
@@ -208,11 +217,11 @@ GeoserverRepository.prototype = {
 
         var restUrl = this.resolver.delete(type, config);
 
-        if (type === "style") {
+        if (type === this.types.STYLE) {
             var purge = options && options.purge || true;
             restUrl += "?purge=" + purge;
 
-        } else if (type.indexOf("featureType", "datastore", "workspace")) {
+        } else if (type.indexOf(this.types.FEATURETYPE, this.types.DATASTORE, this.types.WORKSPACE)) {
             var recurse = options && options.recurse || false;
             restUrl += "?recurse=" + recurse;
         }

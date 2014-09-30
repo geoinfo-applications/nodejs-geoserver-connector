@@ -198,19 +198,7 @@ GeoserverResolver.prototype = {
             method = "get";
         }
 
-        if (type === "layer") {
-            return this.resolveLayer(config, method);
-        } else if (type === "featureType") {
-            return this.resolveFeatureType(config, method);
-        } else if (type === "datastore") {
-            return this.resolveDatastore(config, method);
-        } else if (type === "workspace") {
-            return this.resolveWorkspace(config, method);
-        } else if (type === "workspaceStyle") {
-            return this.resolveWorkspaceStyle(config, method);
-        } else if (type === "style") {
-            return this.resolveStyle(config, method);
-        }
+        return this["resolve" + type](config, method);
     }
 };
 

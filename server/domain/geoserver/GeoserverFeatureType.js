@@ -6,7 +6,7 @@ var _ = require("underscore");
 module.exports = function GeoserverFeatureType() {
 
     this.getFeatureType = function (config) {
-        return this.getGeoserverObject("featureType", config);
+        return this.getGeoserverObject(this.types.FEATURETYPE, config);
     };
 
     this.createFeatureType = function (config) {
@@ -25,7 +25,7 @@ module.exports = function GeoserverFeatureType() {
                 datastore: storeName,
                 workspace: wsName
             };
-            return this.createGeoserverObject("featureType", featureTypeConfig);
+            return this.createGeoserverObject(this.types.FEATURETYPE, featureTypeConfig);
         }.bind(this));
     };
 
@@ -35,14 +35,14 @@ module.exports = function GeoserverFeatureType() {
 
         return this.featureTypeExists(config).then(function (exists) {
             if (exists) {
-                return this.deleteGeoserverObject("featureType", config, true);
+                return this.deleteGeoserverObject(this.types.FEATURETYPE, config, true);
             }
             return new Error("featureTypeName does not exist" + featureTypeName);
         }.bind(this));
     };
 
     this.featureTypeExists = function (featureType) {
-        return this.geoserverObjectExists("featureType", featureType);
+        return this.geoserverObjectExists(this.types.FEATURETYPE, featureType);
     };
 
 
@@ -59,7 +59,7 @@ module.exports = function GeoserverFeatureType() {
 
             var deferred = Q.defer();
 
-            var restUrl = this.resolver.get("featureType", featureTypeConfig);
+            var restUrl = this.resolver.get(this.types.FEATURETYPE, featureTypeConfig);
             var payload = JSON.stringify(newConfig);
 
             function response(err, resp, body) {
@@ -121,7 +121,7 @@ module.exports = function GeoserverFeatureType() {
 
         var deferred = Q.defer();
 
-        var restUrl = this.resolver.get("featureType", featureTypeConfig);
+        var restUrl = this.resolver.get(this.types.FEATURETYPE, featureTypeConfig);
         restUrl.url += "?recalculate=nativebbox,latlonbbox";
 
         var payload = JSON.stringify(featureTypeConfig);

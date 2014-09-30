@@ -220,6 +220,36 @@ describe("Geoserver instance ", function () {
 
             describe("global styles", function () {
 
+                it("should fail if global style name is not defined ", function (done) {
+                    gsRepository.getGlobalStyle().catch(function (error) {
+                        expect(error.message).to.match(/name required/);
+                        done();
+                    });
+                });
+
+                it("should get a global style ", function (done) {
+                    gsRepository.getGlobalStyle(style).then(function (styleObject) {
+                        expect(styleObject.name).to.be.equal(style.name);
+                        done();
+                    }).catch(done);
+                });
+
+                it("should get all global styles ", function (done) {
+                    gsRepository.getGlobalStyles().then(function (styles) {
+                        expect(styles).to.be.instanceof(Array);
+                        expect(styles.length).to.be.equal(4);
+                        expect(styles[0].name).to.be.equal("point");
+                        done();
+                    }).catch(done);
+                });
+
+                it("should return false if global style name is not defined ", function (done) {
+                    gsRepository.createGlobalStyleConfiguration().catch(function (error) {
+                        expect(error.message).to.match(/name required/);
+                        done();
+                    });
+                });
+
                 it("should return false if global style does not exist ", function (done) {
 
                     gsRepository.globalStyleExists({name: "notExistingStyle"}).then(function (exists) {
@@ -236,22 +266,6 @@ describe("Geoserver instance ", function () {
                     }).catch(done);
                 });
 
-                it("should get a global style ", function (done) {
-                    gsRepository.getGlobalStyle(style).then(function (styleObject) {
-                        expect(styleObject.name).to.be.equal(style.name);
-                        done();
-                    });
-                });
-
-                it("should get all global styles ", function (done) {
-                    gsRepository.getGlobalStyles().then(function (styles) {
-                        expect(styles).to.be.instanceof(Array);
-                        expect(styles.length).to.be.equal(4);
-                        expect(styles[0].name).to.be.equal("point");
-                        done();
-                    }).catch(done);
-                });
-
                 it("should create new global style configuration", function (done) {
 
                     gsRepository.createGlobalStyleConfiguration(style).then(function (result) {
@@ -260,7 +274,7 @@ describe("Geoserver instance ", function () {
                     }).catch(done);
                 });
 
-                it("should fail if style name is not defined", function (done) {
+                it("should fail uploading global style if name is not defined", function (done) {
 
                     gsRepository.uploadGlobalStyleContent({sldBody: "<xml />"})
                         .catch(function (error) {
@@ -269,7 +283,7 @@ describe("Geoserver instance ", function () {
                         }).catch(done);
                 });
 
-                it("should fail if sld body is not defined", function (done) {
+                it("should fail uploading global style if sld body is not defined", function (done) {
 
                     gsRepository.uploadGlobalStyleContent(style).catch(function (error) {
                         expect(error.message).to.match(/content required/);
@@ -277,7 +291,16 @@ describe("Geoserver instance ", function () {
                     }).catch(done);
                 });
 
-                it("should upload global style SLD file", function (done) {
+                it("should fail uploading global style if config is not defined", function (done) {
+
+                    gsRepository.uploadGlobalStyleContent()
+                        .catch(function (error) {
+                            expect(error.message).to.match(/content required/);
+                            done();
+                        }).catch(done);
+                });
+
+                it("should replace existing global style SLD file", function (done) {
 
                     fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
 
@@ -320,18 +343,18 @@ describe("Geoserver instance ", function () {
 
             describe("workspace styles", function () {
 
+                it("should fail if workspace style name is not defined", function (done) {
+                    gsRepository.getWorkspaceStyle().catch(function (error) {
+                        expect(error.message).to.match(/name required/);
+                        done();
+                    }).catch(done);
+                });
+
                 it("should get workspace style ", function (done) {
                     gsRepository.getWorkspaceStyle(style).then(function (workspaceStyle) {
                         expect(workspaceStyle).to.be.instanceof(Object);
                         expect(workspaceStyle.name).to.be.equal(style.name);
                         expect(workspaceStyle.filename).to.be.equal(style.filename);
-                        done();
-                    }).catch(done);
-                });
-
-                it("should fail if workspace style name is not defined", function (done) {
-                    gsRepository.getWorkspaceStyle().catch(function (error) {
-                        expect(error.message).to.match(/name required/);
                         done();
                     }).catch(done);
                 });
@@ -362,29 +385,81 @@ describe("Geoserver instance ", function () {
                     }).catch(done);
                 });
 
+                it("should return false if workspace style name is not defined ", function (done) {
+                    gsRepository.createWorkspaceStyleConfiguration().catch(function (error) {
+                        expect(error.message).to.match(/name required/);
+                        done();
+                    });
+                });
+
                 it("should create new workspace style ", function (done) {
-                    gsRepository.createWorkspaceStyle(style).then(function () {
+                    gsRepository.createWorkspaceStyleConfiguration(style).then(function () {
                         done();
                     }).catch(done);
                 });
 
-                it("should upload new workspace SLD file ", function (done) {
-                    gsRepository.uploadWorkspaceStyleContent().then(function () {
+                it("should fail uploading workspace style if name is not defined", function (done) {
+
+                    gsRepository.uploadWorkspaceStyleContent({sldBody: "<xml />"})
+                        .catch(function (error) {
+                            expect(error.message).to.match(/content required/);
+                            done();
+                        });
+                });
+
+                it("should fail uploading workspace style if sld body is not defined", function (done) {
+
+                    gsRepository.uploadWorkspaceStyleContent(style).catch(function (error) {
+                        expect(error.message).to.match(/content required/);
                         done();
-                    }).catch(done);
+                    });
+                });
+
+                it("should fail uploading workspace style if config is not defined", function (done) {
+
+                    gsRepository.uploadWorkspaceStyleContent()
+                        .catch(function (error) {
+                            expect(error.message).to.match(/content required/);
+                            done();
+                        });
+                });
+
+                it("should replace existing workspace style SLD file", function (done) {
+
+                    fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
+
+                        var styleConfig = {
+                            name: style.name,
+                            sldBody: sldContent
+                        };
+
+                        gsRepository.uploadWorkspaceStyleContent(styleConfig).then(function (result) {
+                            expect(result).to.be.equal(true);
+                            done();
+                        }).catch(done);
+                    });
+                });
+
+                it("should create new global style configuration and upload SLD file content ", function (done) {
+
+                    fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
+
+                        var styleConfig = {
+                            name: style.name,
+                            sldBody: sldContent
+                        };
+
+                        gsRepository.createWorkspaceStyle(styleConfig).then(function (result) {
+                            expect(result).to.be.equal(true);
+                            done();
+                        }).catch(done);
+                    });
                 });
 
                 it("should delete workspace style ", function (done) {
-                    gsRepository.deleteWorkspaceStyle("newStyle").then(function () {
+                    gsRepository.deleteWorkspaceStyle(style).then(function () {
                         done();
-                    }).catch(done);
-                });
-
-                it("should delete workspace style and SLD file", function (done) {
-                    gsRepository.deleteWorkspaceStyle("newStyle", { deleteStyleFile: true })
-                        .then(function () {
-                            done();
-                        }).catch(done);
+                    });
                 });
 
             });

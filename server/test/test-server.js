@@ -56,7 +56,8 @@ function GeoserverMockServer() {
         getWorkspaceStyles: "/workspaces/:ws/styles",
         getInstanceDetails: "/about/version.json",
 
-        uploadGlobalStyle: "/styles/:style"
+        uploadGlobalStyle: "/styles/:style",
+        uploadWorkspaceStyle: "/workspaces/:ws/styles/:style"
     };
 
     this.files = {
@@ -125,13 +126,7 @@ GeoserverMockServer.prototype = {
             res.json(response);
         }.bind(this);
 
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getLayer, getLayer.bind(this));
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, getStyle);
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyle, getStyle);
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyles, getStyles);
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyles, getStyles);
-
-        this.gsMockServer.put(this.baseURL + this.geoserverRestAPI.uploadGlobalStyle, function (req, res) {
+        var putStyle = function (req, res) {
 
             var parseString = new require("xml2js").Parser().parseString;
 
@@ -160,7 +155,18 @@ GeoserverMockServer.prototype = {
                     }
                 });
             });
-        });
+        }.bind(this);
+
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getLayer, getLayer.bind(this));
+
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, getStyle);
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyle, getStyle);
+
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyles, getStyles);
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyles, getStyles);
+
+        this.gsMockServer.put(this.baseURL + this.geoserverRestAPI.uploadGlobalStyle, putStyle );
+        this.gsMockServer.put(this.baseURL + this.geoserverRestAPI.uploadWorkspaceStyle, putStyle );
 
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getInstanceDetails, function (req, res) {
             res.json({
