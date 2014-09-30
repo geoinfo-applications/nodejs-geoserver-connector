@@ -25,16 +25,16 @@ function GeoserverMockServer() {
     this.baseURL = "/" + gsOptions.context + "rest";
 
     this.geoserverRestGetAPI = {
-        getLayerStyles: "/layers/:layer/styles",
+        getLayerStyles: "/layers/:layer/styles.json",
         getFeatureTypeDetails: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
     };
 
     this.geoserverRestPostAPI = {
         createLayer: "/workspaces/:ws/datastores/:ds/featuretypes",
-        createGlobalStyle: "/styles",
-        createDatastore: "/workspaces/:ws/datastores",
-        createWorkspace: "/workspaces",
-        createWorkspaceStyles: "/workspaces/:ws/styles"
+        createGlobalStyle: "/styles.json",
+        createDatastore: "/workspaces/:ws/datastores.json",
+        createWorkspace: "/workspaces.json",
+        createWorkspaceStyles: "/workspaces/:ws/styles.json"
     };
 
     this.geoserverRestDeleteAPI = {
@@ -51,9 +51,9 @@ function GeoserverMockServer() {
     this.geoserverRestAPI = {
         getLayer: "/layers/:layer",
         getGlobalStyle: "/styles/:style",
-        getGlobalStyles: "/styles",
+        getGlobalStyles: "/styles.json",
         getWorkspaceStyle: "/workspaces/:ws/styles/:style",
-        getWorkspaceStyles: "/workspaces/:ws/styles",
+        getWorkspaceStyles: "/workspaces/:ws/styles.json",
         getInstanceDetails: "/about/version.json",
 
         uploadGlobalStyle: "/styles/:style",
