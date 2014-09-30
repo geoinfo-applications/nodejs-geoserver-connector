@@ -39,6 +39,10 @@ module.exports = function GeoserverLayer() {
 
     this.createGlobalStyleConfiguration = function (config) {
 
+        if (!config || !config.name) {
+            return Q.reject(new Error("style name required"));
+        }
+
         var styleConfig = {
             name: config.name,
             filename: config.name + ".sld"
@@ -49,11 +53,12 @@ module.exports = function GeoserverLayer() {
 
     this.uploadGlobalStyleContent = function (config) {
 
-        var styleConfig = { name: config.name };
-        var sldBody = config.sldBody;
+        var styleName = config && config.name;
+        var sldBody = config && config.sldBody;
+        var styleConfig = { name: styleName };
 
-        if (!sldBody) {
-            return Q.reject(new Error("sld content required"));
+        if (!sldBody || !styleName) {
+            return Q.reject(new Error("style name and sld content required"));
         }
 
         var restUrl = this.resolver.get("style", styleConfig);
@@ -109,27 +114,26 @@ module.exports = function GeoserverLayer() {
 
     };
 
-
     this.getLayerDefaultStyle = function (config) {
 
         if (!config || !config.name) {
             return Q.reject(new Error("layer name required"));
         }
 
-        var deferred = Q.defer();
-
-        this.getLayer(config).then(function (layer) {
-            deferred.resolve(layer.defaultStyle);
-        }).catch(function (err) {
-            console.error(err);
-            deferred.reject(err);
+        return this.getLayer(config).then(function (layer) {
+            return layer.defaultStyle;
         });
-
-        return deferred.promise;
     };
 
     this.getLayerStyles = function (config) {
-        throw new Error();
+
+        if (!config || !config.name) {
+            return Q.reject(new Error("layer name required"));
+        }
+
+        return this.getLayer(config).then(function (layer) {
+            return layer.styles.style;
+        });
     };
 
     this.setLayerDefaultStyle = function (config, styleName) {
