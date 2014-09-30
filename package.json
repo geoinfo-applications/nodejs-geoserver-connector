@@ -16,6 +16,7 @@
   },
   "engineStrict": true,
   "dependencies": {
+    "body-parser": "^1.9.0",
     "q": "^1.0.1",
     "request": "^2.39.0",
     "underscore": "^1.6.0"

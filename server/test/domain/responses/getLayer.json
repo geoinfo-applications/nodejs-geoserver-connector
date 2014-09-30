@@ -6,6 +6,31 @@
             "name": "point",
             "href": "http://localhost:9090/geoserver/rest/styles/point.json"
         },
+        "styles": {
+            "@class": "linked-hash-set",
+            "style": [
+                {
+                    "name": "giant_polygon",
+                    "href": "http://172.30.3.159:8080/geoserver/rest/styles/giant_polygon.json"
+                },
+                {
+                    "name": "dem",
+                    "href": "http://172.30.3.159:8080/geoserver/rest/styles/dem.json"
+                },
+                {
+                    "name": "capitals",
+                    "href": "http://172.30.3.159:8080/geoserver/rest/styles/capitals.json"
+                },
+                {
+                    "name": "green",
+                    "href": "http://172.30.3.159:8080/geoserver/rest/styles/green.json"
+                },
+                {
+                    "name": "cite_lakes",
+                    "href": "http://172.30.3.159:8080/geoserver/rest/styles/cite_lakes.json"
+                }
+            ]
+        },
         "resource": {
             "@class": "featureType",
             "name": "testgslayer",

@@ -28,8 +28,8 @@ var config = {
 };
 
 config.layer = {
-    name: "fooLayer",
-    featureType: "fooLayer",
+    name: "testLayer",
+    featureType: "testLayer",
     defaultStyleName: "point"
 };
 
