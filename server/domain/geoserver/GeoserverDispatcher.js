@@ -37,10 +37,13 @@ GeoserverDispatcher.prototype = {
         }, callback);
 
         function addRequestHeaders() {
-            var headers = { "Accept": "application/json" };
-            if(config.contentType){
-                headers["Content-type"] = config.contentType;
-            }
+
+            var defaultContentType = "application/json";
+
+            var headers = {
+                "Accept": defaultContentType,
+                "Content-type" : config.contentType || defaultContentType
+            };
             return headers;
         }
     },

@@ -231,7 +231,7 @@ GeoserverRepository.prototype = {
             }
 
             if (resp.statusCode !== 200) {
-                console.log("Error deleting Geoserver object >", body);
+                console.log("Error deleting Geoserver object >", type, body);
                 return deferred.reject(new Error(body));
             }
 
