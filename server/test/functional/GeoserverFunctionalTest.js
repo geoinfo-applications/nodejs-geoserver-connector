@@ -92,8 +92,13 @@ describe("Geoserver functional tests ", function () {
         });
 
         function cleanWorkspace() {
-            return gsRepository.deleteWorkspace().then(function () {
-                return gsRepository.deleteWorkspace(newWorkspace);
+
+            return gsRepository.deleteGlobalStyle(style).then(function () {
+                return gsRepository.deleteWorkspaceStyle(style).then(function () {
+                    return gsRepository.deleteWorkspace().then(function () {
+                        return gsRepository.deleteWorkspace(newWorkspace);
+                    });
+                });
             });
         }
 
@@ -250,7 +255,6 @@ describe("Geoserver functional tests ", function () {
                 });
             });
 
-
             it("should not return any styles for new workspace", function (done) {
 
                 gsRepository.getWorkspaceStyles().then(function (styles) {
@@ -259,6 +263,21 @@ describe("Geoserver functional tests ", function () {
                 }).catch(done);
             });
 
+            it("should create a workspace style", function (done) {
+
+                fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
+
+                    var styleConfig = {
+                        name: style.name,
+                        sldBody: sldContent
+                    };
+
+                    gsRepository.createWorkspaceStyle(styleConfig).then(function (result) {
+                        expect(result).to.be.equal(true);
+                        done();
+                    }).catch(done);
+                });
+            });
 
         });
 
