@@ -22,7 +22,7 @@ module.exports = function (grunt) {
         watch: {
             scripts: {
                 files: jsFiles,
-                tasks: ["jshint", "mochaTest:unit_tests"],
+                tasks: ["jshint"],
                 options: {
                     spawn: false,
                     interrupt: true
@@ -45,8 +45,9 @@ module.exports = function (grunt) {
         mochaTest: {
             unit_tests: {
                 options: {
-                    reporter: "dot",
-                    bail: "true",
+                    color: true,
+                    reporter: "spec",
+                    bail: "false",
                     slow: 2,
                     require: "server/test/test-server.js"
                 },
@@ -54,7 +55,8 @@ module.exports = function (grunt) {
             },
             functional_tests: {
                 options: {
-                    reporter: "dot",
+                    color: true,
+                    reporter: "spec",
                     //bail: "true",
                     slow: 2,
                     require: "server/test/test-server.js"

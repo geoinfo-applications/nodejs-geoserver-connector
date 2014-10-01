@@ -24,7 +24,7 @@ var config = {
             datastore: "flat-test"
         }
     },
-    funcitonal_test: {
+    functional_test: {
         db: {
             flat: {
                 host: "localhost",
@@ -39,7 +39,7 @@ var config = {
             host: "localhost",
             port: 9090,
             context: "geoserver",
-            timeout: 5000,
+            timeout: 50000,
             user: "admin",
             pass: "geoserver",
             workspace: "geoportal",

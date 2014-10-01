@@ -5,9 +5,9 @@ var expect = require("chai").expect;
 
 var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
 var GeoserverMockServer = require("../../test-server.js");
-var config = require("../../config.js");
+var config = require("../../config");
 
-describe("Geoserver instance ", function () {
+describe("Geoserver unit tests", function () {
 
     this.timeout(500000);
 
@@ -519,6 +519,5 @@ describe("Geoserver instance ", function () {
 
     });
 
-})
-;
+});
 
