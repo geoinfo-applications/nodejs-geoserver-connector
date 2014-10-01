@@ -13,26 +13,28 @@ function GeoserverResolver(geoserverRepositoryConfig) {
 
     this.restAPI = {
 
-        getWorkspaces: "/workspaces.json",
-        getWorkspace: "/workspaces/%s.json",
+        about: "/about/version",
 
-        getDatastores: "/workspaces/%s/datastores.json",
-        getDatastore: "/workspaces/%s/datastores/%s.json",
+        getWorkspaces: "/workspaces",
+        getWorkspace: "/workspaces/%s",
 
-        getFeatureTypes: "/workspaces/%s/datastores/%s/featuretypes.json",
-        getFeatureType: "/workspaces/%s/datastores/%s/featuretypes/%s.json",
+        getDatastores: "/workspaces/%s/datastores",
+        getDatastore: "/workspaces/%s/datastores/%s",
 
-        getLayers: "/layers.json",
-        getLayer: "/layers/%s.json",
+        getFeatureTypes: "/workspaces/%s/datastores/%s/featuretypes",
+        getFeatureType: "/workspaces/%s/datastores/%s/featuretypes/%s",
 
-        getLayerStyles: "/layers/%s/styles.json",
-        getLayerStyle: "/layers/%s/styles/%s.json",
+        getLayers: "/layers",
+        getLayer: "/layers/%s",
 
-        getGlobalStyles: "/styles.json",
-        getGlobalStyle: "/styles/%s.json",
+        getLayerStyles: "/layers/%s/styles",
+        getLayerStyle: "/layers/%s/styles/%s",
 
-        getWorkspaceStyles: "/workspaces/%s/styles.json",
-        getWorkspaceStyle: "/workspaces/%s/styles/%s.json",
+        getGlobalStyles: "/styles",
+        getGlobalStyle: "/styles/%s",
+
+        getWorkspaceStyles: "/workspaces/%s/styles",
+        getWorkspaceStyle: "/workspaces/%s/styles/%s",
     };
 
 }

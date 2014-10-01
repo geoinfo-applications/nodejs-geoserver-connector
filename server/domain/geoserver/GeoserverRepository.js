@@ -35,11 +35,6 @@ function GeoserverRepository(config) {
     this.baseURL = util.format("http://%s:%d/" + this.geoserver.context + "rest",
         this.geoserver.host, this.geoserver.port);
 
-    this.geoserverRestAPI = {
-        infoURL: "/about/version.json",
-        publicStyles: "styles.json"
-    };
-
     this.timeout = this.geoserver.timeout || 5000;
 
     this.dispatcher = new GeoserverDispatcher({
@@ -104,7 +99,7 @@ GeoserverRepository.prototype = {
         }
 
         this.dispatcher.get({
-            url: this.baseURL + this.geoserverRestAPI.infoURL,
+            url: this.baseURL + this.resolver.restAPI.about,
             callback: response
         });
 
