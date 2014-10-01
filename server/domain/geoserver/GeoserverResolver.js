@@ -30,8 +30,8 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         getLayerStyles: "/layers/%s/styles",
         getLayerStyle: "/layers/%s/styles/%s",
 
-        getGlobalStyles: "/styles",
-        getGlobalStyle: "/styles/%s",
+        getStyles: "/styles",
+        getStyle: "/styles/%s",
 
         getWorkspaceStyles: "/workspaces/%s/styles",
         getWorkspaceStyle: "/workspaces/%s/styles/%s",
@@ -45,7 +45,9 @@ GeoserverResolver.prototype = {
         return method === "create" || !config;
     },
 
-    formatReturnUrl: function (restApiCall, parameters) {
+    formatReturnUrl: function (restApiCall, _parameters) {
+
+        var parameters = _parameters.slice(0);
         var fullRestUrl = this.baseURL + restApiCall;
 
         parameters.unshift(fullRestUrl);
@@ -84,11 +86,17 @@ GeoserverResolver.prototype = {
         return [ styleName ];
     },
 
-    resolveLayer: function (config) {
-        return this.formatReturnUrl(
-            this.restAPI.getLayer,
-            this.getLayerParameters(config)
-        );
+    resolveLayer: function (config, method) {
+
+        var restUrl = this.restAPI.getLayer;
+        var parameters = this.getLayerParameters(config);
+
+        if (method === "create") {
+            restUrl = this.restAPI.getLayers;
+            parameters.pop();
+        }
+
+        return this.formatReturnUrl(restUrl, parameters);
     },
 
     resolveFeatureType: function (config, method) {
@@ -146,7 +154,7 @@ GeoserverResolver.prototype = {
 
     resolveStyle: function (config, method) {
 
-        var restUrl = this.restAPI.getGlobalStyle;
+        var restUrl = this.restAPI.getStyle;
         var parameters = [];
 
         if (config) {
@@ -154,7 +162,7 @@ GeoserverResolver.prototype = {
         }
 
         if (this.methodIsCreateOrConfigNotExist(method, config)) {
-            restUrl = this.restAPI.getGlobalStyles;
+            restUrl = this.restAPI.getStyles;
             parameters.pop();
         }
 
