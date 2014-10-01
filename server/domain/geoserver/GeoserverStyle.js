@@ -57,7 +57,12 @@ module.exports = function GeoserverLayer() {
         if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
-        return this.deleteGeoserverObject(this.types.STYLE, config);
+        return this.globalStyleExists(config).then(function (exists) {
+            if (exists) {
+                return this.deleteGeoserverObject(this.types.STYLE, config);
+            }
+            return true;
+        }.bind(this))
     };
 
     this.getWorkspaceStyle = function (config) {
@@ -103,6 +108,14 @@ module.exports = function GeoserverLayer() {
         if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
+
+        return this.workspaceStyleExists(config).then(function (exists) {
+            if (exists) {
+                return this.deleteGeoserverObject(this.types.WORKSPACESTYLE, config);
+            }
+            return true;
+        }.bind(this))
+
         return this.deleteGeoserverObject(this.types.WORKSPACESTYLE, config);
     };
 
@@ -159,7 +172,7 @@ module.exports = function GeoserverLayer() {
 
         var uploadSLDContent = function () {
             return this.uploadStyleContent(config);
-        }.apply(this, config);
+        }.bind(this, config);
 
         return this.createStyleConfiguration(config)
             .then(uploadSLDContent);
@@ -215,7 +228,7 @@ module.exports = function GeoserverLayer() {
             url: restUrl,
             body: sldBody,
             callback: response,
-            contentType: "text/xml"
+            contentType: "application/vnd.ogc.sld+xml"
         });
 
         return deferred.promise;
