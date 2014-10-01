@@ -29,6 +29,18 @@ module.exports = function (grunt) {
             },
         },
 
+        plato: {
+            reports: {
+                options: {
+                    jshint: false,
+                    exclude: /^(node_modules|coverage|reports)\//
+                },
+                files: {
+                    reports: ["**/*.js"]
+                }
+            }
+        },
+
         mochaTest: {
             unit_tests: {
                 options: {
