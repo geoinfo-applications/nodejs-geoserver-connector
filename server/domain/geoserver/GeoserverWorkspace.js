@@ -24,8 +24,8 @@ module.exports = function GeoserverWorkspace() {
         }.bind(this));
     };
 
-    this.workspaceExists = function (ws) {
-        return this.geoserverObjectExists(this.types.WORKSPACE, ws);
+    this.workspaceExists = function (config) {
+        return this.geoserverObjectExists(this.types.WORKSPACE, config);
     };
 
     this.deleteWorkspace = function (config) {
@@ -36,7 +36,7 @@ module.exports = function GeoserverWorkspace() {
                 return this.deleteGeoserverObject(this.types.WORKSPACE, config, {recurse: true});
             }
 
-            return config;
+            return true;
 
         }.bind(this));
     };

@@ -38,13 +38,13 @@ module.exports = function GeoserverDatastore() {
         var dsName = config && config.name || this.geoserver.datastore;
         var wsName = config && config.workspace || this.geoserver.workspace;
 
-        return this.datastoreExists({ name: dsName, workspace: wsName }).then(function (dsExists) {
+        return this.datastoreExists({ name: dsName, workspace: wsName }).then(function (exists) {
 
-            if (dsExists) {
+            if (exists) {
                 return this.deleteGeoserverObject(this.types.DATASTORE, config, {recurse: true});
             }
 
-            return config;
+            return true;
 
         }.bind(this));
     };
