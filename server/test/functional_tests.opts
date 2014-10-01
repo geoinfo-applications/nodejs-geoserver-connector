@@ -1,7 +1,5 @@
---slow 5
+--slow 75
 --bail
 --colors
--R dot
---require test-server.js
---files "!domain/**/*.js"
+--reporter spec
 --recursive

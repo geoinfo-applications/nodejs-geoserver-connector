@@ -45,23 +45,36 @@ module.exports = function (grunt) {
         mochaTest: {
             unit_tests: {
                 options: {
-                    color: true,
                     reporter: "spec",
-                    bail: "false",
-                    slow: 2,
-                    require: "server/test/test-server.js"
+                    slow: 10
                 },
-                src: ["!**/startGeoserverMockupServer.js", "!**/functional/**", "server/test/domain/**/*.js" ]
+                src: ["!**/startGeoserverMockupServer.js", "server/test/domain/**/*.js", "!server/test/functional/**/*.js" ]
             },
             functional_tests: {
                 options: {
                     color: true,
                     reporter: "spec",
-                    //bail: "true",
-                    slow: 2,
-                    require: "server/test/test-server.js"
+                    slow: 100
                 },
-                src: ["!**/startGeoserverMockupServer.js", "!server/test/domain/**/*.js", "server/functional/**/*.js" ]
+                src: ["!**/startGeoserverMockupServer.js", "!server/test/domain/**/*.js", "server/test/functional/**/*.js" ]
+            }
+        },
+
+        mochacli: {
+            options: {
+                require: "server/test/test-server.js"
+            },
+            unit: {
+                options: {
+                    opts: "server/test/unit_tests.opts"
+                },
+                src: [ "server/test/domain/**/*.js"]
+            },
+            functional: {
+                options: {
+                    opts: "server/test/functional_tests.opts"
+                },
+                src: [ "server/test/functional/**/*.js"]
             }
         },
 
