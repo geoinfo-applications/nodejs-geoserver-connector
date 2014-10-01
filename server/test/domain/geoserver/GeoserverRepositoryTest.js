@@ -211,6 +211,19 @@ describe("Geoserver unit tests", function () {
 
         describe("testing Geoserver style functionalites", function () {
 
+            var sldContent;
+
+            before(function (done) {
+                fs.readFile(__dirname + "/../../data/teststyle.sld", "ascii", function (err, sldFileContent) {
+                    sldContent = sldFileContent;
+                    done();
+                });
+            });
+
+            after(function () {
+                sldContent = null;
+            });
+
             beforeEach(function (done) {
                 gsRepository = new GeoserverRepository(config.unit_test);
                 gsRepository.initializeWorkspace().then(function () {
@@ -302,34 +315,28 @@ describe("Geoserver unit tests", function () {
 
                 it("should replace existing global style SLD file", function (done) {
 
-                    fs.readFile(__dirname + "/../../data/teststyle.sld", "ascii", function (err, sldContent) {
+                    var styleConfig = {
+                        name: style.name,
+                        sldBody: sldContent
+                    };
 
-                        var styleConfig = {
-                            name: style.name,
-                            sldBody: sldContent
-                        };
-
-                        gsRepository.uploadGlobalStyleContent(styleConfig).then(function (result) {
-                            expect(result).to.be.equal(true);
-                            done();
-                        }).catch(done);
-                    });
+                    gsRepository.uploadGlobalStyleContent(styleConfig).then(function (result) {
+                        expect(result).to.be.equal(true);
+                        done();
+                    }).catch(done);
                 });
 
-                it("should create global style configuration and upload SLD file content ", function (done) {
+                it("should create new global style configuration and upload SLD file content ", function (done) {
 
-                    fs.readFile(__dirname + "/../../data/teststyle.sld", "ascii", function (err, sldContent) {
+                    var styleConfig = {
+                        name: style.name,
+                        sldBody: sldContent
+                    };
 
-                        var styleConfig = {
-                            name: style.name,
-                            sldBody: sldContent
-                        };
-
-                        gsRepository.createGlobalStyle(styleConfig).then(function (result) {
-                            expect(result).to.be.equal(true);
-                            done();
-                        }).catch(done);
-                    });
+                    gsRepository.createGlobalStyle(styleConfig).then(function (result) {
+                        expect(result).to.be.equal(true);
+                        done();
+                    }).catch(done);
                 });
 
                 it("should delete global style", function (done) {
@@ -407,7 +414,7 @@ describe("Geoserver unit tests", function () {
                         });
                 });
 
-                it("should fail uploading workspace style if sld body is not defined", function (done) {
+                it("should fail uploading workspace style if SLD body is not defined", function (done) {
 
                     gsRepository.uploadWorkspaceStyleContent(style).catch(function (error) {
                         expect(error.message).to.match(/content required/);
@@ -426,34 +433,28 @@ describe("Geoserver unit tests", function () {
 
                 it("should replace existing workspace style SLD file", function (done) {
 
-                    fs.readFile(__dirname + "/../../data/teststyle.sld", "ascii", function (err, sldContent) {
+                    var styleConfig = {
+                        name: style.name,
+                        sldBody: sldContent
+                    };
 
-                        var styleConfig = {
-                            name: style.name,
-                            sldBody: sldContent
-                        };
-
-                        gsRepository.uploadWorkspaceStyleContent(styleConfig).then(function (result) {
-                            expect(result).to.be.equal(true);
-                            done();
-                        }).catch(done);
-                    });
+                    gsRepository.uploadWorkspaceStyleContent(styleConfig).then(function (result) {
+                        expect(result).to.be.equal(true);
+                        done();
+                    }).catch(done);
                 });
 
-                it("should create new global style configuration and upload SLD file content ", function (done) {
+                it("should create new workspace style configuration and upload SLD file content ", function (done) {
 
-                    fs.readFile(__dirname + "/../../data/teststyle.sld", "ascii", function (err, sldContent) {
+                    var styleConfig = {
+                        name: style.name,
+                        sldBody: sldContent
+                    };
 
-                        var styleConfig = {
-                            name: style.name,
-                            sldBody: sldContent
-                        };
-
-                        gsRepository.createWorkspaceStyle(styleConfig).then(function (result) {
-                            expect(result).to.be.equal(true);
-                            done();
-                        }).catch(done);
-                    });
+                    gsRepository.createWorkspaceStyle(styleConfig).then(function (result) {
+                        expect(result).to.be.equal(true);
+                        done();
+                    }).catch(done);
                 });
 
                 it("should delete workspace style ", function (done) {
@@ -489,29 +490,29 @@ describe("Geoserver unit tests", function () {
                     }).catch(done);
                 });
 
-                it("should set default layer style ", function (done) {
-                    gsRepository.setLayerDefaultStyle().then(function () {
-                        done();
-                    }).catch(done);
-                });
+                /*                it("should set default layer style ", function (done) {
+                 gsRepository.setLayerDefaultStyle().then(function () {
+                 done();
+                 }).catch(done);
+                 });
 
-                it("should add style to layer ", function (done) {
-                    gsRepository.setLayerDefaultStyle().then(function () {
-                        done();
-                    }).catch(done);
-                });
+                 it("should add style to layer ", function (done) {
+                 gsRepository.setLayerDefaultStyle().then(function () {
+                 done();
+                 }).catch(done);
+                 });
 
-                it("should remove style from layer ", function (done) {
-                    gsRepository.setLayerDefaultStyle().then(function () {
-                        done();
-                    }).catch(done);
-                });
+                 it("should remove style from layer ", function (done) {
+                 gsRepository.setLayerDefaultStyle().then(function () {
+                 done();
+                 }).catch(done);
+                 });
 
-                it("should remove and delete layer style ", function (done) {
-                    gsRepository.setLayerDefaultStyle().then(function () {
-                        done();
-                    }).catch(done);
-                });
+                 it("should remove and delete layer style ", function (done) {
+                 gsRepository.setLayerDefaultStyle().then(function () {
+                 done();
+                 }).catch(done);
+                 });*/
 
             });
 
