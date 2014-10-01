@@ -27,10 +27,7 @@ GeoserverDispatcher.prototype = {
             uri: geoserverRestCall,
             method: config.method || "GET",
             body: config.body || undefined,
-            headers: {
-                "Content-type": "application/json",
-                "Accept": "application/json"
-            },
+            headers: addRequestHeaders(),
             timeout: this.timeout,
             auth: {
                 user: this.user,
@@ -38,6 +35,14 @@ GeoserverDispatcher.prototype = {
                 sendImmediately: true
             }
         }, callback);
+
+        function addRequestHeaders() {
+            var headers = { "Accept": "application/json" };
+            if(config.contentType){
+                headers["Content-type"] = config.contentType;
+            }
+            return headers;
+        }
     },
 
     "post": function (config) {

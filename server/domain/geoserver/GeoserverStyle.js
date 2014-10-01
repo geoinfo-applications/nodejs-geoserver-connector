@@ -163,6 +163,7 @@ module.exports = function GeoserverLayer() {
 
         return this.createStyleConfiguration(config)
             .then(uploadSLDContent);
+
     };
 
     this.createStyleConfiguration = function (config) {
@@ -210,7 +211,12 @@ module.exports = function GeoserverLayer() {
             deferred.resolve(true);
         }
 
-        this.dispatcher.put({url: restUrl, body: sldBody, callback: response});
+        this.dispatcher.put({
+            url: restUrl,
+            body: sldBody,
+            callback: response,
+            contentType: "text/xml"
+        });
 
         return deferred.promise;
 
