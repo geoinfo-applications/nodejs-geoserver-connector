@@ -70,9 +70,6 @@ describe("Geoserver functional tests ", function () {
         var newDatastore = { name: "newDatastore" };
         var nonExistingLayer = { name: "newLayer" };
 
-        var layer = config.layer;
-        var style = config.style;
-
         beforeEach(function (done) {
             return cleanWorkspace().then(function () {
                 return gsRepository.initializeWorkspace().then(function () {
@@ -131,7 +128,7 @@ describe("Geoserver functional tests ", function () {
             it("should return true if workspace already exists", function (done) {
 
                 gsRepository.createWorkspace().then(function (result) {
-                    expect(result).to.be.true;
+                    expect(result).to.be.equal(true);
                     done();
                 }).catch(done);
             });

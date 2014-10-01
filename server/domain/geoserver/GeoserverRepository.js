@@ -69,7 +69,7 @@ GeoserverRepository.prototype = {
         var self = this;
 
         function response(err, resp, body) {
-            if (responseHasError(err, resp)) {
+            if (responseHasError()) {
                 logError(err, body);
                 deferred.reject(err);
             } else {

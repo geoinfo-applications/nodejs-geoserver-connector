@@ -62,7 +62,7 @@ module.exports = function GeoserverLayer() {
                 return this.deleteGeoserverObject(this.types.STYLE, config);
             }
             return true;
-        }.bind(this))
+        }.bind(this));
     };
 
     this.getWorkspaceStyle = function (config) {
@@ -114,9 +114,7 @@ module.exports = function GeoserverLayer() {
                 return this.deleteGeoserverObject(this.types.WORKSPACESTYLE, config);
             }
             return true;
-        }.bind(this))
-
-        return this.deleteGeoserverObject(this.types.WORKSPACESTYLE, config);
+        }.bind(this));
     };
 
     this.getLayerDefaultStyle = function (config) {

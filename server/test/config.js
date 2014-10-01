@@ -43,7 +43,7 @@ var config = {
             user: "admin",
             pass: "geoserver",
             workspace: "geoportal",
-            datastore: "flat-test"
+            datastore: "func-test"
         }
     }
 };
