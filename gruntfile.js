@@ -6,13 +6,14 @@ module.exports = function (grunt) {
     var jsFiles = [
         "**/*.js",
         "!node_modules/**",
+        "!reports/**",
         "!coverage/**"
     ];
 
     // Project Configuration
     grunt.initConfig({
         jshint: {
-            jsFiles : jsFiles,
+            jsFiles: jsFiles,
             options: {
                 jshintrc: true
             }
@@ -21,7 +22,7 @@ module.exports = function (grunt) {
         watch: {
             scripts: {
                 files: jsFiles,
-                tasks: ["jshint"],
+                tasks: ["jshint", "mochaTest:unit_tests"],
                 options: {
                     spawn: false,
                     interrupt: true
@@ -44,12 +45,21 @@ module.exports = function (grunt) {
         mochaTest: {
             unit_tests: {
                 options: {
-                    reporter: "spec",
+                    reporter: "dot",
                     bail: "true",
-                    slow: 2
-                    //,require: "server/test/test-server.js"
+                    slow: 2,
+                    require: "server/test/test-server.js"
                 },
-                src: ["!**/startGeoserverMockupServer.js", "server/test/**/*.js" ]
+                src: ["!**/startGeoserverMockupServer.js", "!**/functional/**", "server/test/domain/**/*.js" ]
+            },
+            functional_tests: {
+                options: {
+                    reporter: "dot",
+                    //bail: "true",
+                    slow: 2,
+                    require: "server/test/test-server.js"
+                },
+                src: ["!**/startGeoserverMockupServer.js", "!server/test/domain/**/*.js", "server/functional/**/*.js" ]
             }
         },
 
@@ -69,8 +79,7 @@ module.exports = function (grunt) {
     });
 
     require("load-grunt-tasks")(grunt);
-
-    grunt.registerTask("test", [ "jshint",  "mochaTest:unit_tests" ]);
+    grunt.registerTask("test", [ "jshint", "mochaTest:unit_tests", "mochaTest:functional_tests" ]);
 
 
 };

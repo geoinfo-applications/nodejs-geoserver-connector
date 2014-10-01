@@ -8,7 +8,7 @@ var config = require("./config.js");
 
 function GeoserverMockServer() {
 
-    var options = config.test.geoserver;
+    var options = config.unit_test.geoserver;
 
     this.gsMockServer = express();
     this.gsMockServer.use(bodyParser.urlencoded({ extended: false }));
@@ -61,9 +61,65 @@ function GeoserverMockServer() {
     };
 
     this.files = {
-        style: require("./domain/responses/getStyle"),
-        styles: require("./domain/responses/getStyles"),
-        layer: require("./domain/responses/getLayer")
+        style: require("./responses/getStyle"),
+        styles: require("./responses/getStyles"),
+        layer: require("./responses/getLayer")
+    };
+
+    this.handlers = {
+        getStyle: function (req, res) {
+            if (req.params.style !== config.style.name) {
+                res.status(404);
+            }
+            var response = this.files.style;
+            response.style.name = config.style.name;
+            response.style.filename = config.style.filename;
+            res.json(this.files.style);
+        }.bind(this),
+        getStyles: function (req, res) {
+            res.json(this.files.styles);
+        }.bind(this),
+        putStyle: function (req, res) {
+
+            var parseString = new require("xml2js").Parser().parseString;
+
+            var buf = "";
+            req.setEncoding("utf8");
+            req.on("data", function (chunk) {
+                buf += chunk;
+            });
+            req.on("end", function () {
+                parseString(buf, function (err, sldContent) {
+
+                    if (err || isNotValidSldContent()) {
+                        res.status(404).json(false);
+                    } else {
+                        res.status(200).json(true);
+                    }
+
+                    function isNotValidSldContent() {
+                        try {
+                            var rootElement = sldContent.StyledLayerDescriptor;
+                            var namedLayer = rootElement.NamedLayer[0];
+                            return namedLayer.Name[0] !== config.layer.name;
+                        } catch (err) {
+                            return false;
+                        }
+                    }
+                });
+            });
+        }.bind(this),
+        getLayer: function (req, res) {
+            if (req.params.layer !== config.layer.name) {
+                res.status(404);
+            }
+
+            var response = this.files.layer;
+            response.layer.name = config.layer.name;
+            response.layer.defaultStyle.name = config.layer.defaultStyleName;
+            response.layer.styles = this.files.styles.styles;
+            res.json(response);
+        }.bind(this)
     };
 
 }
@@ -100,73 +156,16 @@ GeoserverMockServer.prototype = {
             });
         }.bind(this));
 
-        var getStyle = function (req, res) {
-            if (req.params.style !== config.style.name) {
-                res.status(404);
-            }
-            var response = this.files.style;
-            response.style.name = config.style.name;
-            response.style.filename = config.style.filename;
-            res.json(this.files.style);
-        }.bind(this);
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getLayer, this.handlers.getLayer);
 
-        var getStyles = function (req, res) {
-            res.json(this.files.styles);
-        }.bind(this);
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, this.handlers.getStyle);
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyle, this.handlers.getStyle);
 
-        var getLayer = function (req, res) {
-            if (req.params.layer !== config.layer.name) {
-                res.status(404);
-            }
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyles, this.handlers.getStyles);
+        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyles, this.handlers.getStyles);
 
-            var response = this.files.layer;
-            response.layer.name = config.layer.name;
-            response.layer.defaultStyle.name = config.layer.defaultStyleName;
-            response.layer.styles = this.files.styles.styles;
-            res.json(response);
-        }.bind(this);
-
-        var putStyle = function (req, res) {
-
-            var parseString = new require("xml2js").Parser().parseString;
-
-            var buf = "";
-            req.setEncoding("utf8");
-            req.on("data", function (chunk) {
-                buf += chunk;
-            });
-            req.on("end", function () {
-                parseString(buf, function (err, sldContent) {
-
-                    if (err || isNotValidSldContent()) {
-                        res.status(404).json(false);
-                    } else {
-                        res.status(200).json(true);
-                    }
-
-                    function isNotValidSldContent() {
-                        try {
-                            var rootElement = sldContent.StyledLayerDescriptor;
-                            var namedLayer = rootElement.NamedLayer[0];
-                            return namedLayer.Name[0] !== config.layer.name;
-                        } catch (err) {
-                            return false;
-                        }
-                    }
-                });
-            });
-        }.bind(this);
-
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getLayer, getLayer.bind(this));
-
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, getStyle);
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyle, getStyle);
-
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyles, getStyles);
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyles, getStyles);
-
-        this.gsMockServer.put(this.baseURL + this.geoserverRestAPI.uploadGlobalStyle, putStyle );
-        this.gsMockServer.put(this.baseURL + this.geoserverRestAPI.uploadWorkspaceStyle, putStyle );
+        this.gsMockServer.put(this.baseURL + this.geoserverRestAPI.uploadGlobalStyle, this.handlers.putStyle);
+        this.gsMockServer.put(this.baseURL + this.geoserverRestAPI.uploadWorkspaceStyle, this.handlers.putStyle);
 
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getInstanceDetails, function (req, res) {
             res.json({

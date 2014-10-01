@@ -27,7 +27,7 @@ describe("Geoserver instance ", function () {
         });
 
         beforeEach(function (done) {
-            gsRepository = new GeoserverRepository(config.test);
+            gsRepository = new GeoserverRepository(config.unit_test);
             done();
         });
 
@@ -94,7 +94,7 @@ describe("Geoserver instance ", function () {
         describe("testing Geoserver access functionalites", function () {
 
             beforeEach(function (done) {
-                gsRepository = new GeoserverRepository(config.test);
+                gsRepository = new GeoserverRepository(config.unit_test);
                 done();
             });
 
@@ -121,7 +121,7 @@ describe("Geoserver instance ", function () {
         describe("testing Geoserver CRUD methods", function () {
 
             beforeEach(function (done) {
-                gsRepository = new GeoserverRepository(config.test);
+                gsRepository = new GeoserverRepository(config.unit_test);
                 gsRepository.initializeWorkspace().then(function () {
                     done();
                 });
@@ -212,7 +212,7 @@ describe("Geoserver instance ", function () {
         describe("testing Geoserver style functionalites", function () {
 
             beforeEach(function (done) {
-                gsRepository = new GeoserverRepository(config.test);
+                gsRepository = new GeoserverRepository(config.unit_test);
                 gsRepository.initializeWorkspace().then(function () {
                     done();
                 });
@@ -302,7 +302,7 @@ describe("Geoserver instance ", function () {
 
                 it("should replace existing global style SLD file", function (done) {
 
-                    fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
+                    fs.readFile(__dirname + "/../../data/teststyle.sld", "ascii", function (err, sldContent) {
 
                         var styleConfig = {
                             name: style.name,
@@ -318,7 +318,7 @@ describe("Geoserver instance ", function () {
 
                 it("should create global style configuration and upload SLD file content ", function (done) {
 
-                    fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
+                    fs.readFile(__dirname + "/../../data/teststyle.sld", "ascii", function (err, sldContent) {
 
                         var styleConfig = {
                             name: style.name,
@@ -426,7 +426,7 @@ describe("Geoserver instance ", function () {
 
                 it("should replace existing workspace style SLD file", function (done) {
 
-                    fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
+                    fs.readFile(__dirname + "/../../data/teststyle.sld", "ascii", function (err, sldContent) {
 
                         var styleConfig = {
                             name: style.name,
@@ -442,7 +442,7 @@ describe("Geoserver instance ", function () {
 
                 it("should create new global style configuration and upload SLD file content ", function (done) {
 
-                    fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
+                    fs.readFile(__dirname + "/../../data/teststyle.sld", "ascii", function (err, sldContent) {
 
                         var styleConfig = {
                             name: style.name,

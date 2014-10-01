@@ -69,7 +69,7 @@ GeoserverRepository.prototype = {
         var self = this;
 
         function response(err, resp, body) {
-            if (isResponseError(err, resp)) {
+            if (responseHasError(err, resp)) {
                 logError(err, body);
                 deferred.reject(err);
             } else {
@@ -77,10 +77,11 @@ GeoserverRepository.prototype = {
                 logInstanceInitialization();
                 deferred.resolve();
             }
-        }
 
-        function isResponseError(err, response) {
-            return !!err || (response && response.statusCode !== 200);
+            function responseHasError() {
+                return !!err || (resp && resp.statusCode !== 200);
+            }
+
         }
 
         function logError(error, requestBody) {
@@ -95,7 +96,9 @@ GeoserverRepository.prototype = {
         }
 
         function logInstanceInitialization() {
-            console.log("Geoserver instance initialized @ " + self.baseURL);
+            if (process.env.NODE_ENV === "production") {
+                console.info("Geoserver instance initialized @ " + self.baseURL);
+            }
         }
 
         this.dispatcher.get({

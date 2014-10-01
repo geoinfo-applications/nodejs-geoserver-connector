@@ -1,0 +1,7 @@
+--slow 5
+--bail
+--colors
+-R dot
+--require test-server.js
+--files "!domain/**/*.js"
+--recursive
