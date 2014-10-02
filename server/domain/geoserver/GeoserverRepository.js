@@ -133,26 +133,11 @@ GeoserverRepository.prototype = {
 
     geoserverObjectExists: function (type, config) {
 
-        var deferred = Q.defer();
-
-        var restUrl = this.resolver.get(type, config);
-
-        var response = function (err, resp) {
-
-            if (err) {
-                return deferred.reject(err);
-            }
-
-            if (resp.statusCode !== 200) {
-                return deferred.resolve(false);
-            }
-
-            deferred.resolve(true);
-        };
-
-        this.dispatcher.get({url: restUrl, callback: response});
-
-        return deferred.promise;
+        return this.getGeoserverObject(type, config).then(function () {
+            return true;
+        }).catch(function () {
+            return false;
+        });
     },
 
     getGeoserverObject: function (type, config) {
@@ -242,7 +227,7 @@ GeoserverRepository.prototype = {
         this.dispatcher.delete({ url: restUrl, callback: response.bind(config)});
 
         return deferred.promise;
-    },
+    }
 
 };
 
