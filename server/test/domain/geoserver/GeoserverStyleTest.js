@@ -14,7 +14,7 @@ describe("Geoserver Styles tests", function () {
     var testUtils = new TestUtils(config.unit_test);
     var gsRepository = testUtils.gsRepository;
 
-    var geoserverMockServer, mockServer;
+    var geoserverMockServer;
 
     var layer = config.layer;
     var style = config.style;
@@ -23,18 +23,11 @@ describe("Geoserver Styles tests", function () {
     before(function (done) {
         geoserverMockServer = new GeoserverMockServer();
         geoserverMockServer.addDefaultRequestHandlers();
-
-        mockServer = geoserverMockServer.getServer().listen(3003, function () {
-            done();
-        });
+        geoserverMockServer.listen(done);
     });
 
     after(function () {
-        try {
-            mockServer.close();
-        } catch (e) {
-            // already closed
-        }
+        geoserverMockServer.tearDown();
     });
 
     beforeEach(function (done) {
@@ -45,7 +38,7 @@ describe("Geoserver Styles tests", function () {
     });
 
     afterEach(function () {
-        gsRepository = null;
+        testUtils.tearDownRepository();
     });
 
     describe("global styles", function () {
@@ -304,7 +297,7 @@ describe("Geoserver Styles tests", function () {
 
     });
 
-    describe("layer styles", function () {
+    describe.only("layer styles", function () {
 
         it("should fail if layer name is not defined", function (done) {
             gsRepository.getLayerStyles().catch(function (error) {
@@ -329,29 +322,29 @@ describe("Geoserver Styles tests", function () {
             }).catch(done);
         });
 
-        /*                it("should set default layer style ", function (done) {
-         gsRepository.setLayerDefaultStyle().then(function () {
-         done();
-         }).catch(done);
-         });
+        it("should set default layer style ", function (done) {
+            gsRepository.setLayerDefaultStyle(layer, style.name).then(function () {
+                done();
+            }).catch(done);
+        });
 
-         it("should add style to layer ", function (done) {
-         gsRepository.setLayerDefaultStyle().then(function () {
-         done();
-         }).catch(done);
-         });
-
-         it("should remove style from layer ", function (done) {
-         gsRepository.setLayerDefaultStyle().then(function () {
-         done();
-         }).catch(done);
-         });
-
-         it("should remove and delete layer style ", function (done) {
-         gsRepository.setLayerDefaultStyle().then(function () {
-         done();
-         }).catch(done);
-         });*/
+//         it("should add style to layer ", function (done) {
+//         gsRepository.setLayerDefaultStyle().then(function () {
+//         done();
+//         }).catch(done);
+//         });
+//
+//         it("should remove style from layer ", function (done) {
+//         gsRepository.setLayerDefaultStyle().then(function () {
+//         done();
+//         }).catch(done);
+//         });
+//
+//         it("should remove and delete layer style ", function (done) {
+//         gsRepository.setLayerDefaultStyle().then(function () {
+//         done();
+//         }).catch(done);
+//         });
 
     });
 

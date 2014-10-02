@@ -14,15 +14,17 @@ function GeoserverMockServer() {
     this.gsMockServer.use(bodyParser.urlencoded({ extended: false }));
     this.gsMockServer.use(timeout(180 * 1000));
 
-    var gsOptions = _.extend({}, options);
-    if (gsOptions.context) {
-        if (!/^.*\/$/.test(gsOptions.context)) {
-            gsOptions.context += "/";
+    this.mockServer;
+
+    this.gsOptions = _.extend({}, options);
+    if (this.gsOptions.context) {
+        if (!/^.*\/$/.test(this.gsOptions.context)) {
+            this.gsOptions.context += "/";
         }
     } else {
-        gsOptions.context = "";
+        this.gsOptions.context = "";
     }
-    this.baseURL = "/" + gsOptions.context + "rest";
+    this.baseURL = "/" + this.gsOptions.context + "rest";
 
     this.geoserverRestGetAPI = {
         getLayerStyles: "/layers/:layer/styles",
@@ -153,8 +155,20 @@ function GeoserverMockServer() {
 
 GeoserverMockServer.prototype = {
 
-    getServer: function () {
-        return this.gsMockServer;
+    listen: function (done) {
+        this.mockServer = this.gsMockServer.listen(this.gsOptions.port, function () {
+            done();
+        });
+    },
+
+    tearDown: function () {
+        try {
+            this.mockServer.close();
+            this.mockServer = null;
+        } catch (err) {
+            // already closed
+            console.err(err);
+        }
     },
 
     addDefaultRequestHandlers: function () {
