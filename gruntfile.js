@@ -26,8 +26,8 @@ module.exports = function (grunt) {
                 options: {
                     spawn: false,
                     interrupt: true
-                },
-            },
+                }
+            }
         },
 
         plato: {
@@ -48,21 +48,28 @@ module.exports = function (grunt) {
                     reporter: "spec",
                     slow: 10
                 },
-                src: ["!**/startGeoserverMockupServer.js", "server/test/domain/**/*.js", "!server/test/functional/**/*.js" ]
+                src: [
+                    "!**/startGeoserverMockupServer.js",
+                    "server/test/**/*.js",
+                    "!server/test/functional/**/*.js"
+                ]
             },
             functional_tests: {
                 options: {
-                    color: true,
                     reporter: "spec",
                     slow: 100
                 },
-                src: ["!**/startGeoserverMockupServer.js", "!server/test/domain/**/*.js", "server/test/functional/**/*.js" ]
+                src: [
+                    "!**/startGeoserverMockupServer.js",
+                    "!**/domain/**/*.js",
+                    "server/test/**/*.js"
+                ]
             }
         },
 
         mochacli: {
             options: {
-                require: "server/test/test-server.js"
+                require: ["server/test/test-server.js", "server/test/TestUtils.js"]
             },
             unit: {
                 options: {
@@ -85,7 +92,7 @@ module.exports = function (grunt) {
                     reporter: "spec",
                     excludes: ["**/integration/"],
                     recursive: true,
-                    coverageFolder: "./coverage/server",
+                    coverageFolder: "./coverage/server"
                     //require: ["./server/test/test-server.js"]
                 }
             }
@@ -94,6 +101,7 @@ module.exports = function (grunt) {
     });
 
     require("load-grunt-tasks")(grunt);
+    grunt.registerTask("coverage", [ "jshint", "mocha_istanbul", "plato" ]);
     grunt.registerTask("test", [ "jshint", "mochaTest:unit_tests", "mochaTest:functional_tests" ]);
 
 
