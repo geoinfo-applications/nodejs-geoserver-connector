@@ -1,3 +1,0 @@
-                //var parser = new require('xml2js').Parser();
-                //parser.parseString(sldContent, function (err, contentSerialized) {
-                //});

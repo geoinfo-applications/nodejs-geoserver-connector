@@ -1,9 +1,9 @@
 "use strict";
 
-var fs = require("fs");
 var expect = require("chai").expect;
 
 var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+var TestUtils = require("../../TestUtils.js");
 var GeoserverMockServer = require("../../test-server.js");
 var config = require("../../config");
 
@@ -11,9 +11,12 @@ describe("Geoserver unit tests", function () {
 
     this.timeout(500000);
 
-    describe("testing offline Geoserver access ", function () {
+    var testUtils = new TestUtils(config.unit_test);
+    var gsRepository = testUtils.gsRepository;
 
-        var gsRepository, geoserverMockServer, mockServer;
+    var geoserverMockServer, mockServer;
+
+    describe("testing offline Geoserver access ", function () {
 
         before(function (done) {
 
@@ -23,16 +26,14 @@ describe("Geoserver unit tests", function () {
             mockServer = geoserverMockServer.getServer().listen(3003, function () {
                 done();
             });
-
         });
 
-        beforeEach(function (done) {
-            gsRepository = new GeoserverRepository(config.unit_test);
-            done();
+        beforeEach(function () {
+            testUtils.createRepository();
         });
 
         afterEach(function () {
-            gsRepository = null;
+            testUtils.tearDownRepository();
         });
 
         after(function () {
@@ -64,8 +65,6 @@ describe("Geoserver unit tests", function () {
     });
 
     describe("testing online Geoserver access", function () {
-
-        var gsRepository, geoserverMockServer, mockServer;
 
         var layer = config.layer;
         var style = config.style;
@@ -214,10 +213,10 @@ describe("Geoserver unit tests", function () {
             var sldContent;
 
             before(function (done) {
-                fs.readFile(__dirname + "/../../data/teststyle.sld", "ascii", function (err, sldFileContent) {
+                testUtils.readStyleContent(function (sldFileContent) {
                     sldContent = sldFileContent;
                     done();
-                });
+                }, done);
             });
 
             after(function () {

@@ -1,51 +1,31 @@
 "use strict";
 
-var fs = require("fs");
+var _ = require("underscore");
+var qthrottle = require("../qthrottle/Throttle.js");
 var expect = require("chai").expect;
 
-var GeoserverRepository = require("../../../server/domain/geoserver/GeoserverRepository");
+var TestUtils = require("../TestUtils.js");
 var config = require("../config");
 
 describe("Geoserver functional tests ", function () {
 
-    this.timeout(200000);
+    this.timeout(60 * 1000);
 
-    var gsRepository;
+    var testUtils = new TestUtils(config.functional_test);
+    var gsRepository = testUtils.gsRepository;
 
     var layer = config.layer;
     var style = config.style;
 
-    function createRepository() {
-        gsRepository = new GeoserverRepository(config.functional_test);
-    }
-
-    function tearDownRepository() {
-        gsRepository = null;
-    }
-
-    before(function () {
-        createRepository();
-    });
-
-    after(function () {
-        tearDownRepository();
-    });
-
-    describe("testing Geoserver access", function () {
+    describe("testing access ", function () {
 
         beforeEach(function (done) {
-            cleanWorkspace(done);
+            testUtils.cleanWorkspace(done);
         });
 
         afterEach(function (done) {
-            cleanWorkspace(done);
+            testUtils.cleanWorkspace(done);
         });
-
-        function cleanWorkspace(done) {
-            return gsRepository.deleteWorkspace().then(function () {
-                done();
-            });
-        }
 
         it("GS repository should be disabled if Geoserver instance is not initialized", function (done) {
             expect(gsRepository.isEnabled).to.be.equal(false);
@@ -59,47 +39,25 @@ describe("Geoserver functional tests ", function () {
                 expect(gsInstance.geoserverDetails["@name"]).to.be.equal("GeoServer");
                 done();
             }).catch(done);
-
         });
 
     });
 
-    describe("Geoserver objects manipulation test", function () {
+    describe("objects manipulation test ", function () {
 
-        var newWorkspace = { name: "newWorkspace" };
-        var newDatastore = { name: "newDatastore" };
-        var nonExistingLayer = { name: "newLayer" };
+        var newWorkspace = testUtils.newWorkspace;
+        var newDatastore = testUtils.newDatastore;
+        var nonExistingLayer = config.nonExistingLayer;
 
         beforeEach(function (done) {
-            return cleanWorkspace().then(function () {
-                return gsRepository.initializeWorkspace().then(function () {
-                    done();
-                });
-            }).catch(function (err) {
-                done(err);
-            });
+            testUtils.initializeWorkspace(done);
         });
 
         afterEach(function (done) {
-            return cleanWorkspace().then(function () {
-                done();
-            }).catch(function (err) {
-                done(err);
-            });
+            testUtils.cleanWorkspaces(done);
         });
 
-        function cleanWorkspace() {
-
-            return gsRepository.deleteGlobalStyle(style).then(function () {
-                return gsRepository.deleteWorkspaceStyle(style).then(function () {
-                    return gsRepository.deleteWorkspace().then(function () {
-                        return gsRepository.deleteWorkspace(newWorkspace);
-                    });
-                });
-            });
-        }
-
-        describe("Geoserver workspaces", function () {
+        describe("workspaces ", function () {
 
             it("should return false if non-default workspace does not exist ", function (done) {
 
@@ -109,9 +67,7 @@ describe("Geoserver functional tests ", function () {
                     } else {
                         done();
                     }
-                }).catch(function (err) {
-                    done(err);
-                });
+                }).catch(done);
             });
 
             it("should return true if default workspace exists ", function (done) {
@@ -151,7 +107,7 @@ describe("Geoserver functional tests ", function () {
 
         });
 
-        describe("Geoserver datastores", function () {
+        describe("datastores ", function () {
 
             it("should return true if default GS datastore exists in default workspace", function (done) {
 
@@ -191,9 +147,9 @@ describe("Geoserver functional tests ", function () {
 
         });
 
-        describe("Geoserver layers", function () {
+        describe("feature type ", function () {
 
-            it("should return false if layer does not exist in default store", function (done) {
+            it("should return false if feature type does not exist in default store", function (done) {
 
                 return gsRepository.featureTypeExists(layer).then(function (exists) {
                     if (exists) {
@@ -204,10 +160,25 @@ describe("Geoserver functional tests ", function () {
                 }).catch(done);
             });
 
-            it("should fail if layer does not exist in flat DB", function (done) {
+            it("should fail if feature type does not exist in flat DB", function (done) {
 
                 return gsRepository.createFeatureType(nonExistingLayer).fail(function (err) {
-                    if (err.message === "Trying to create new feature type inside the store, but no attributes were specified") {
+                    if (err.message === "Trying to create new feature type inside the store," +
+                        " but no attributes were specified" ||
+                        err.message === ":null" /* database is not accessible */) {
+                        done();
+                    } else {
+                        done(new Error(err));
+                    }
+                }).catch(done);
+            });
+
+            it("should get a layer without workspace prefix", function (done) {
+
+                return gsRepository.get(nonExistingLayer).fail(function (err) {
+                    if (err.message === "Trying to create new feature type inside the store," +
+                        " but no attributes were specified" ||
+                        err.message === ":null" /* database is not accessible */) {
                         done();
                     } else {
                         done(new Error(err));
@@ -217,9 +188,52 @@ describe("Geoserver functional tests ", function () {
 
         });
 
-        describe("Geoserver styles", function () {
+        describe("layer ", function () {
+
+            it("should get a layer without workspace prefix", function (done) {
+
+                return gsRepository.get(nonExistingLayer).fail(function (err) {
+                    if (err.message === "Trying to create new feature type inside the store," +
+                        " but no attributes were specified" ||
+                        err.message === ":null" /* database is not accessible */) {
+                        done();
+                    } else {
+                        done(new Error(err));
+                    }
+                }).catch(done);
+            });
+
+        });
+
+        describe("styles ", function () {
 
             var existingGlobalStyle = { name: "point" };
+            var sldContent;
+
+            beforeEach(function (done) {
+                testUtils.readStyleContent(function (sldFileContent) {
+                    sldContent = sldFileContent;
+                    initializeStyleWorkspace(done);
+                });
+            });
+
+            afterEach(function (done) {
+                return cleanStyles(done);
+            });
+
+            function initializeStyleWorkspace(done) {
+                return cleanStyles().then(function () {
+                    testUtils.initializeWorkspace(done);
+                });
+            }
+
+            function cleanStyles(done) {
+                return gsRepository.deleteGlobalStyle(style).then(function () {
+                    return gsRepository.deleteWorkspaceStyle(style).then(function () {
+                        testUtils.cleanWorkspaces(done);
+                    });
+                });
+            }
 
             it("should return global styles", function (done) {
 
@@ -238,18 +252,15 @@ describe("Geoserver functional tests ", function () {
 
             it("should create a global style", function (done) {
 
-                fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
+                var styleConfig = {
+                    name: style.name,
+                    sldBody: sldContent
+                };
 
-                    var styleConfig = {
-                        name: style.name,
-                        sldBody: sldContent
-                    };
-
-                    gsRepository.createGlobalStyle(styleConfig).then(function (result) {
-                        expect(result).to.be.equal(true);
-                        done();
-                    }).catch(done);
-                });
+                gsRepository.createGlobalStyle(styleConfig).then(function (result) {
+                    expect(result).to.be.equal(true);
+                    done();
+                }).catch(done);
             });
 
             it("should not return any styles for new workspace", function (done) {
@@ -262,20 +273,83 @@ describe("Geoserver functional tests ", function () {
 
             it("should create a workspace style", function (done) {
 
-                fs.readFile(__dirname + "/../data/teststyle.sld", "ascii", function (err, sldContent) {
+                var styleConfig = {
+                    name: style.name,
+                    sldBody: sldContent
+                };
 
-                    var styleConfig = {
-                        name: style.name,
-                        sldBody: sldContent
-                    };
-
-                    gsRepository.createWorkspaceStyle(styleConfig).then(function (result) {
-                        expect(result).to.be.equal(true);
-                        done();
-                    }).catch(done);
-                });
+                gsRepository.createWorkspaceStyle(styleConfig).then(function (result) {
+                    expect(result).to.be.equal(true);
+                    done();
+                }).catch(done);
             });
 
+        });
+
+    });
+
+    describe("test-loading styles create ", function () {
+
+        var sldContent;
+        var styleIds = _.range(1, 100);
+        // do not set value 1, endless loop
+        var throttleValue = 20;
+
+        before(function (done) {
+            testUtils.readStyleContent(function (sldFileContent) {
+                sldContent = sldFileContent;
+                done();
+            }, done);
+        });
+
+        beforeEach(function (done) {
+            initializeStyleWorkspace(done);
+        });
+
+        afterEach(function (done) {
+            return cleanStyles().then(function () {
+                done();
+            }).catch(function (err) {
+                done(err);
+            });
+        });
+
+        function initializeStyleWorkspace(done) {
+            return cleanStyles().then(function () {
+                testUtils.initializeWorkspace(done);
+            });
+        }
+
+        function cleanStyles() {
+
+            return qthrottle(styleIds, throttleValue, deleteSyle)
+                .then(function () {
+                    return testUtils.cleanWorkspace();
+                });
+
+            function deleteSyle(styleId) {
+                var styleConfig = {
+                    name: style.name + styleId
+                };
+                return gsRepository.deleteGlobalStyle(styleConfig);
+            }
+        }
+
+        it("generating global styles ", function (done) {
+
+            qthrottle(styleIds, throttleValue, createSyle)
+                .then(done)
+                .catch(function (err) {
+                    done(err);
+                });
+
+            function createSyle(styleId) {
+                var styleConfig = {
+                    name: style.name + styleId,
+                    sldBody: sldContent
+                };
+                return gsRepository.createGlobalStyle(styleConfig);
+            }
         });
 
     });
