@@ -17,7 +17,7 @@ var config = {
             host: "localhost",
             port: 3003,
             context: "geoserver",
-            timeout: 5000,
+            timeout: 60 * 1000,
             user: "admin",
             pass: "geoserver",
             workspace: "geoportal",
@@ -36,10 +36,10 @@ var config = {
             }
         },
         geoserver: {
-            host: "localhost",
-            port: 9090,
+            host: "172.30.3.168",
+            port: 8080,
             context: "geoserver",
-            timeout: 50000,
+            timeout: 60 * 1000,
             user: "admin",
             pass: "geoserver",
             workspace: "geoportal",
@@ -53,6 +53,8 @@ config.layer = {
     featureType: "testLayer",
     defaultStyleName: "point"
 };
+
+config.nonExistingLayer = { name: "newLayer" };
 
 config.style = {
     name: "teststyle",

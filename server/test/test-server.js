@@ -12,7 +12,7 @@ function GeoserverMockServer() {
 
     this.gsMockServer = express();
     this.gsMockServer.use(bodyParser.urlencoded({ extended: false }));
-    this.gsMockServer.use(timeout(200000));
+    this.gsMockServer.use(timeout(180 * 1000));
 
     var gsOptions = _.extend({}, options);
     if (gsOptions.context) {
@@ -26,14 +26,15 @@ function GeoserverMockServer() {
 
     this.geoserverRestGetAPI = {
         getLayerStyles: "/layers/:layer/styles",
-        getFeatureType: "/workspaces/:ws/datastores/:ds/featuretypes/:layer"
+        getFeatureType: "/workspaces/:ws/datastores/:ds/featuretypes/:layer",
+        getWorkspace: "/workspaces/:ws"
     };
 
     this.geoserverRestPostAPI = {
-        createLayer: "/workspaces/:ws/datastores/:ds/featuretypes",
-        createGlobalStyle: "/styles",
-        createDatastore: "/workspaces/:ws/datastores",
         createWorkspace: "/workspaces",
+        createDatastore: "/workspaces/:ws/datastores",
+        createFeatureType: "/workspaces/:ws/datastores/:ds/featuretypes",
+        createGlobalStyle: "/styles",
         createWorkspaceStyles: "/workspaces/:ws/styles"
     };
 
@@ -49,7 +50,7 @@ function GeoserverMockServer() {
     };
 
     this.geoserverRestAPI = {
-        getLayer: "/layers/:layer",
+        getLayer: "/layers/*",
         getGlobalStyle: "/styles/:style",
         getGlobalStyles: "/styles",
         getWorkspaceStyle: "/workspaces/:ws/styles/:style",
@@ -76,9 +77,11 @@ function GeoserverMockServer() {
             response.style.filename = config.style.filename;
             res.json(this.files.style);
         }.bind(this),
+
         getStyles: function (req, res) {
             res.json(this.files.styles);
         }.bind(this),
+
         putStyle: function (req, res) {
 
             var parseString = new require("xml2js").Parser().parseString;
@@ -109,16 +112,39 @@ function GeoserverMockServer() {
                 });
             });
         }.bind(this),
+
         getLayer: function (req, res) {
-            if (req.params.layer !== config.layer.name) {
-                res.status(404);
+
+            var layerParameters = req.params[0] && req.params[0].split(":");
+            var files = this.files;
+            var layerName;
+
+            if (layerParameters.length === 1) {
+                layerName = layerParameters[0];
+            } else if (layerParameters.length === 2) {
+                layerName = layerParameters[1];
+            } else {
+                res.status(501).end();
             }
 
-            var response = this.files.layer;
-            response.layer.name = config.layer.name;
-            response.layer.defaultStyle.name = config.layer.defaultStyleName;
-            response.layer.styles = this.files.styles.styles;
-            res.json(response);
+            if (layerName === config.layer.name) {
+                handleExistingLayer();
+            } else {
+                handleNonExistingLayer();
+            }
+
+            function handleExistingLayer() {
+                var response = files.layer;
+                response.layer.name = config.layer.name;
+                response.layer.defaultStyle.name = config.layer.defaultStyleName;
+                response.layer.styles = files.styles.styles;
+                res.status(200).json(response);
+            }
+
+            function handleNonExistingLayer() {
+                res.status(404).send("No such layer: " + layerName);
+            }
+
         }.bind(this)
     };
 

@@ -25,7 +25,7 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         getFeatureType: "/workspaces/%s/datastores/%s/featuretypes/%s",
 
         getLayers: "/layers",
-        getLayer: "/layers/%s",
+        getLayer: "/layers/%s:%s",
 
         getLayerStyles: "/layers/%s/styles",
         getLayerStyle: "/layers/%s/styles/%s",
@@ -55,7 +55,8 @@ GeoserverResolver.prototype = {
     },
 
     getLayerParameters: function (config) {
-        return [ config.name ];
+        var workspaceName = config && config.workspace || this.workspace;
+        return [ workspaceName, config.name ];
     },
 
     getFeatureTypeParameters: function (config) {
@@ -93,7 +94,7 @@ GeoserverResolver.prototype = {
 
         if (method === "create") {
             restUrl = this.restAPI.getLayers;
-            parameters.pop();
+            parameters = [];
         }
 
         return this.formatReturnUrl(restUrl, parameters);

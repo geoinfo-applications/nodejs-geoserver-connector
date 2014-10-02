@@ -34,7 +34,7 @@ describe("Geoserver Resolver unit tests ", function () {
         Workspace: [workspaceName],
         Datastore: [workspaceName, datastoreName],
         FeatureType: [workspaceName, datastoreName, featureTypeName],
-        Layer: [config.layer.name],
+        Layer: [workspaceName, config.layer.name],
         Style: [config.style.name],
         WorkspaceStyle: [workspaceName, config.style.name]
     };
@@ -137,10 +137,16 @@ describe("Geoserver Resolver unit tests ", function () {
             var resolvedUrl = resolver.create(type, config);
 
             var pathTemplate = resolver.restAPI["get" + type + "s"];
-            var typeParameters = [pathTemplate].concat(getParameters[type]);
-            typeParameters.pop();
+            var urlParameters = getParameters[type];
 
-            var expectedPath = util.format.apply(null, typeParameters);
+            if (type === geoserverTypes.LAYER) {
+                urlParameters = [];
+            } else {
+                urlParameters.pop();
+            }
+            var fullParameters = [pathTemplate].concat(urlParameters);
+
+            var expectedPath = util.format.apply(null, fullParameters);
             var expectedUrl = resolver.baseURL + expectedPath;
 
             expect(expectedUrl).to.be.equal(resolvedUrl);
