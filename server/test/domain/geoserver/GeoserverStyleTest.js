@@ -297,7 +297,7 @@ describe("Geoserver Styles tests", function () {
 
     });
 
-    describe.only("layer styles", function () {
+    describe("layer styles", function () {
 
         it("should fail if layer name is not defined", function (done) {
             gsRepository.getLayerStyles().catch(function (error) {

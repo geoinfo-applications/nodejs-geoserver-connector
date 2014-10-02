@@ -229,7 +229,7 @@ GeoserverRepository.prototype = {
             var purge = options && options.purge || true;
             restUrl += "?purge=" + purge;
 
-        } else if (type.indexOf(this.types.FEATURETYPE, this.types.DATASTORE, this.types.WORKSPACE)) {
+        } else if ([this.types.FEATURETYPE, this.types.DATASTORE, this.types.WORKSPACE].indexOf(type) > -1) {
             var recurse = options && options.recurse || false;
             restUrl += "?recurse=" + recurse;
         }

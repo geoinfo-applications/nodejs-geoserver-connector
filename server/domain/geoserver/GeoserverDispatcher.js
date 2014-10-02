@@ -31,7 +31,7 @@ GeoserverDispatcher.prototype = {
             uri: geoserverRestCall,
             method: config.method || "GET",
             body: config.body || undefined,
-            headers: addRequestHeaders.call(this.defaultContentType),
+            headers: addRequestHeaders.call(null, this.defaultContentType),
             timeout: this.timeout,
             auth: {
                 user: this.user,
