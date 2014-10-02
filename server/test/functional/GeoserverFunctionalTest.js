@@ -173,19 +173,6 @@ describe("Geoserver functional tests ", function () {
                 }).catch(done);
             });
 
-            it("should get a layer without workspace prefix", function (done) {
-
-                return gsRepository.get(nonExistingLayer).fail(function (err) {
-                    if (err.message === "Trying to create new feature type inside the store," +
-                        " but no attributes were specified" ||
-                        err.message === ":null" /* database is not accessible */) {
-                        done();
-                    } else {
-                        done(new Error(err));
-                    }
-                }).catch(done);
-            });
-
         });
 
         describe("styles ", function () {
