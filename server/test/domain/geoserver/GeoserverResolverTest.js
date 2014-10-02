@@ -65,6 +65,19 @@ describe("Geoserver Resolver unit tests ", function () {
         });
     });
 
+    it("should get correct parameters when only object name is passed", function () {
+
+        _.each(geoserverTypes, function (type) {
+
+            var config = geoserverTypesConfigs[type];
+
+            var resolvedParameters = resolver["get" + type + "Parameters"](config);
+            var expectedParameters = getParameters[type];
+
+            expect(resolvedParameters).to.be.eql(expectedParameters);
+        });
+    });
+
     it("should correctly format urls using format.apply method", function () {
 
         _.each(geoserverTypes, function (type) {
