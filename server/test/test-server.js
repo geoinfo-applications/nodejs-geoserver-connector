@@ -124,7 +124,8 @@ function GeoserverMockServer() {
             } else if (layerParameters.length === 2) {
                 layerName = layerParameters[1];
             } else {
-                res.status(501).end();
+                res.status(501).json("More then 2 parameters found");
+                return;
             }
 
             if (layerName === config.layer.name) {

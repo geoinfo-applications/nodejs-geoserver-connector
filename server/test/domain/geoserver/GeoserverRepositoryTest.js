@@ -182,9 +182,19 @@ describe("Geoserver unit tests", function () {
                 }).catch(done);
             });
 
-            it("should get layer details ", function (done) {
+            it("should get layer details using /layers/layerName format", function (done) {
 
                 gsRepository.getLayer(layer).then(function (layerDetails) {
+                    expect(layerDetails.name).to.be.equal(layer.name);
+                    done();
+                }).catch(done);
+            });
+
+            it("should get layer details using /layers/workspace:layerName format ", function (done) {
+
+                var layerWithWorkspace = { name: layer.name, wsName: "testWorkspace:" };
+
+                gsRepository.getLayer(layerWithWorkspace).then(function (layerDetails) {
                     expect(layerDetails.name).to.be.equal(layer.name);
                     done();
                 }).catch(done);
