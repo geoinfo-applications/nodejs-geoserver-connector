@@ -10,9 +10,13 @@ function GeoserverDispatcher(geoserverRepositoryConfig) {
     this.timeout = this.geoserverConfig.timeout;
     this.user = this.geoserverConfig.user;
     this.pass = this.geoserverConfig.pass;
+
+    this.defaultContentType = "application/json";
 }
 
 GeoserverDispatcher.prototype = {
+
+
 
     "get": function (config) {
 
@@ -27,7 +31,7 @@ GeoserverDispatcher.prototype = {
             uri: geoserverRestCall,
             method: config.method || "GET",
             body: config.body || undefined,
-            headers: addRequestHeaders(),
+            headers: addRequestHeaders.call(this.defaultContentType),
             timeout: this.timeout,
             auth: {
                 user: this.user,
@@ -36,10 +40,7 @@ GeoserverDispatcher.prototype = {
             }
         }, callback);
 
-        function addRequestHeaders() {
-
-            var defaultContentType = "application/json";
-
+        function addRequestHeaders(defaultContentType) {
             var headers = {
                 "Accept": defaultContentType,
                 "Content-type" : config.contentType || defaultContentType

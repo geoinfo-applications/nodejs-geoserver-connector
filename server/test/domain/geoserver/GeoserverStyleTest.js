@@ -322,7 +322,7 @@ describe("Geoserver Styles tests", function () {
             }).catch(done);
         });
 
-        it("should set default layer style ", function (done) {
+        it("should update default layer style ", function (done) {
             gsRepository.setLayerDefaultStyle(layer, style.name).then(function () {
                 done();
             }).catch(done);

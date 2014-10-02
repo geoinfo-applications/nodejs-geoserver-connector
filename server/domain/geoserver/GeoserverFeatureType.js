@@ -45,7 +45,6 @@ module.exports = function GeoserverFeatureType() {
         return this.geoserverObjectExists(this.types.FEATURETYPE, featureType);
     };
 
-
     //TODO cleanup - reuse gs global methods
     this.renameFeatureType = function (config, newFeatureTypeName) {
 

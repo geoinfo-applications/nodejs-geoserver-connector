@@ -14,7 +14,7 @@ function GeoserverMockServer() {
     this.gsMockServer.use(bodyParser.urlencoded({ extended: false }));
     this.gsMockServer.use(timeout(180 * 1000));
 
-    this.mockServer;
+    this.mockServer = null;
 
     this.gsOptions = _.extend({}, options);
     if (this.gsOptions.context) {
@@ -86,6 +86,10 @@ function GeoserverMockServer() {
 
         putStyle: function (req, res) {
 
+            if(!isContentTypeHeaderSLD(req)){
+                res.status(404).json("Content type must be set to application/vnd.ogc.sld+xml");
+            }
+
             var parseString = new require("xml2js").Parser().parseString;
 
             var buf = "";
@@ -115,6 +119,7 @@ function GeoserverMockServer() {
             });
         }.bind(this),
 
+        // TODO split this function
         getLayer: function (req, res) {
 
             var layerParameters = req.params[0] && req.params[0].split(":");
@@ -131,17 +136,26 @@ function GeoserverMockServer() {
             }
 
             if (layerName === config.layer.name) {
-                handleExistingLayer();
+
+                if(req.method === "GET"){
+                    getExistingLayer();
+                } else if(req.method === "PUT"){
+                    putExistingLayer();
+                }
             } else {
                 handleNonExistingLayer();
             }
 
-            function handleExistingLayer() {
+            function getExistingLayer() {
                 var response = files.layer;
                 response.layer.name = config.layer.name;
                 response.layer.defaultStyle.name = config.layer.defaultStyleName;
                 response.layer.styles = files.styles.styles;
                 res.status(200).json(response);
+            }
+
+            function putExistingLayer() {
+                res.status(200).json();
             }
 
             function handleNonExistingLayer() {
@@ -173,9 +187,17 @@ GeoserverMockServer.prototype = {
 
     addDefaultRequestHandlers: function () {
 
+        function checkJSONHeaders(req, res){
+            if (isContentTypeHeaderJSON(req) && isAcceptHeaderJSON(req)) {
+                res.status(200).json(true);
+            } else {
+                res.status(404).json("Content-type/Accept headers must be json");
+            }
+        }
+
         _.forEach(this.geoserverRestGetAPI, function (geoserverAPICall) {
             this.gsMockServer.get(this.baseURL + geoserverAPICall, function (req, res) {
-                res.status(200).json(true);
+                checkJSONHeaders(req, res);
             });
         }.bind(this));
 
@@ -193,11 +215,13 @@ GeoserverMockServer.prototype = {
 
         _.forEach(this.geoserverRestDeleteAPI, function (geoserverAPICall) {
             this.gsMockServer.delete(this.baseURL + geoserverAPICall, function (req, res) {
-                res.status(200).json(true);
+                checkJSONHeaders(req, res);
             });
         }.bind(this));
 
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getLayer, this.handlers.getLayer);
+        this.gsMockServer.route(this.baseURL + this.geoserverRestAPI.getLayer)
+            .get(this.handlers.getLayer)
+            .put(this.handlers.getLayer);
 
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, this.handlers.getStyle);
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyle, this.handlers.getStyle);
@@ -223,6 +247,18 @@ GeoserverMockServer.prototype = {
         });
     }
 };
+
+function isContentTypeHeaderJSON(req) {
+    return req.get("Content-Type") === "application/json";
+}
+
+function isContentTypeHeaderSLD(req) {
+    return req.get("Content-Type") === "application/vnd.ogc.sld+xml";
+}
+
+function isAcceptHeaderJSON(req) {
+    return req.get("Content-Type") === "application/json";
+}
 
 module.exports = GeoserverMockServer;
 

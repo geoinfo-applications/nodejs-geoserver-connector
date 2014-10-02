@@ -1,6 +1,7 @@
 "use strict";
 
 var Q = require("q");
+var _ = require("underscore");
 
 function nameDoesntExist(config) {
     if (!config || !config.name) {
@@ -138,9 +139,18 @@ module.exports = function GeoserverLayer() {
         });
     };
 
-//    this.setLayerDefaultStyle = function (config) {
-//        throw new Error();
-//    };
+    this.setLayerDefaultStyle = function (config, styleName) {
+
+        if (nameDoesntExist(config) || !styleName) {
+            return Q.reject(new Error("style config and sld name required"));
+        }
+
+        var updateLayerConfig = _.extend({}, config);
+        updateLayerConfig.defaultStyle = styleName;
+
+        return this.updateLayer(config);
+
+    };
 //
 //    this.addLayerStyle = function (config) {
 //        throw new Error();

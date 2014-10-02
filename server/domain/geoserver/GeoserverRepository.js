@@ -166,12 +166,37 @@ GeoserverRepository.prototype = {
         return deferred.promise;
     },
 
+    updateGeoserverObject: function (type, config) {
+
+        var deferred = Q.defer();
+
+        var restUrl = this.resolver.get(type, config);
+        var payload = JSON.stringify(config);
+
+        function response(err, resp, body) {
+
+            if (err) {
+                deferred.reject(err);
+            }
+
+            if (resp.statusCode !== 200) {
+                //warn.log("Geoserver object doesn't exist >", body);
+                return deferred.reject(new Error(body));
+            }
+
+            deferred.resolve(true);
+        }
+
+        this.dispatcher.put({ url: restUrl, body: payload, callback: response });
+
+        return deferred.promise;
+    },
+
     createGeoserverObject: function (type, config) {
 
         var deferred = Q.defer();
 
         var restUrl = this.resolver.create(type, config);
-
         var payload = JSON.stringify(config);
 
         function response(err, resp, body) {
