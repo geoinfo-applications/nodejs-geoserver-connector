@@ -114,7 +114,7 @@ module.exports = function (grunt) {
     require("load-grunt-tasks")(grunt);
 
     grunt.registerTask("code-check", [ "jshint", "jscs"]);
-    grunt.registerTask("coverage", [ "jshint", "mocha_istanbul", "plato" ]);
-    grunt.registerTask("test", [ "jshint", "mochaTest:unit_tests", "mochaTest:functional_tests" ]);
+    grunt.registerTask("coverage", [ "code-check", "mocha_istanbul", "plato" ]);
+    grunt.registerTask("test", [ "code-check", "mochaTest:unit_tests", "mochaTest:functional_tests" ]);
 
 };
