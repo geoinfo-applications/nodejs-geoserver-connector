@@ -4,6 +4,7 @@ var _ = require("underscore");
 var express = require("express");
 var timeout = require("connect-timeout");
 var bodyParser = require("body-parser");
+var xml2js = require("xml2js");
 var config = require("./config.js");
 
 function GeoserverMockServer() {
@@ -91,15 +92,13 @@ function GeoserverMockServer() {
                 res.status(404).json("Content type must be set to application/vnd.ogc.sld+xml");
             }
 
-            var parseString = new require("xml2js").Parser().parseString;
-
             var buf = "";
             req.setEncoding("utf8");
             req.on("data", function (chunk) {
                 buf += chunk;
             });
             req.on("end", function () {
-                parseString(buf, function (err, sldContent) {
+                xml2js.parseString(buf, function (err, sldContent) {
 
                     if (err || isNotValidSldContent()) {
                         res.status(404).json(false);
@@ -250,9 +249,11 @@ GeoserverMockServer.prototype = {
 
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getInstanceDetails, function (req, res) {
             res.json({
-                about: { resource: [
-                    { "@name": "GeoServer", Version: 2.5 }
-                ]}
+                about: {
+                    resource: [
+                        { "@name": "GeoServer", Version: 2.5 }
+                    ]
+                }
             });
         });
     },
@@ -277,4 +278,3 @@ function isAcceptHeaderJSON(req) {
 }
 
 module.exports = GeoserverMockServer;
-

@@ -11,6 +11,8 @@ var config = require("../../config");
 
 describe("Geoserver Resolver unit tests ", function () {
 
+    this.timeout(500);
+
     var functionalTestConfig = config.functional_test;
     var geoserverRepository = new GeoserverRepository(functionalTestConfig);
     var geoserverTypes = geoserverRepository.types;
@@ -24,19 +26,19 @@ describe("Geoserver Resolver unit tests ", function () {
     var geoserverTypesConfigs = {
         Workspace: { name: workspaceName },
         Datastore: { name: datastoreName },
-        FeatureType: { name: featureTypeName},
+        FeatureType: { name: featureTypeName },
         Layer: config.layer,
         Style: config.style,
         WorkspaceStyle: config.style
     };
 
     var getParameters = {
-        Workspace: [workspaceName],
-        Datastore: [workspaceName, datastoreName],
-        FeatureType: [workspaceName, datastoreName, featureTypeName],
-        Layer: [workspaceName, config.layer.name],
-        Style: [config.style.name],
-        WorkspaceStyle: [workspaceName, config.style.name]
+        Workspace: [ workspaceName ],
+        Datastore: [ workspaceName, datastoreName ],
+        FeatureType: [ workspaceName, datastoreName, featureTypeName ],
+        Layer: [ workspaceName, config.layer.name ],
+        Style: [ config.style.name ],
+        WorkspaceStyle: [ workspaceName, config.style.name ]
     };
 
     function createGeoserverResolver() {
@@ -61,7 +63,7 @@ describe("Geoserver Resolver unit tests ", function () {
 
     it("should contain resolving methods for all geoserver types ", function () {
         _.each(geoserverTypes, function (value) {
-            expect(resolver["resolve" + value]).not.to.equal(undefined);
+            expect(resolver.getResolvers["resolve" + value]).not.to.equal(undefined);
         });
     });
 
@@ -71,7 +73,7 @@ describe("Geoserver Resolver unit tests ", function () {
 
             var config = geoserverTypesConfigs[type];
 
-            var resolvedParameters = resolver["get" + type + "Parameters"](config);
+            var resolvedParameters = resolver.getParameters["get" + type + "Parameters"](config);
             var expectedParameters = getParameters[type];
 
             expect(resolvedParameters).to.be.eql(expectedParameters);

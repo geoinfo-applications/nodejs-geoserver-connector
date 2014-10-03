@@ -9,7 +9,7 @@ var config = require("../../config");
 
 describe("Geoserver unit tests", function () {
 
-    this.timeout(500000);
+    this.timeout(500);
 
     var testUtils = new TestUtils(config.unit_test);
     var gsRepository = testUtils.gsRepository;
@@ -59,6 +59,7 @@ describe("Geoserver unit tests", function () {
     describe("testing online Geoserver access", function () {
 
         var layer = config.layer;
+        var nonExistingLayer = config.nonExistingLayer;
 
         before(function (done) {
             geoserverMockServer = new GeoserverMockServer();
@@ -190,7 +191,7 @@ describe("Geoserver unit tests", function () {
 
             it("should return false if layer does not exist ", function (done) {
 
-                gsRepository.layerExists({name: "notExistingLayer"}).then(function (exists) {
+                gsRepository.layerExists(nonExistingLayer).then(function (exists) {
                     expect(exists).to.be.equal(false);
                     done();
                 }).catch(done);
@@ -209,4 +210,3 @@ describe("Geoserver unit tests", function () {
     });
 
 });
-

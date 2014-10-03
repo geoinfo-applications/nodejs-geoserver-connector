@@ -40,7 +40,7 @@ TestUtils.prototype = {
         this.rebuildRepository();
         return this.gsRepository.deleteWorkspace().then(function () {
             this.tearDownRepository();
-            if(done){
+            if (done) {
                 done();
             } else {
                 return new Q();
@@ -69,8 +69,4 @@ TestUtils.prototype = {
 };
 
 module.exports = TestUtils;
-
-
-
-
 

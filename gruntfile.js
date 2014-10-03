@@ -93,16 +93,28 @@ module.exports = function (grunt) {
                     excludes: ["**/integration/"],
                     recursive: true,
                     coverageFolder: "./coverage/server"
-                    //require: ["./server/test/test-server.js"]
+                    // require: ["./server/test/test-server.js"]
                 }
             }
+        },
+
+        jscs: {
+            src: jsFiles,
+            options: {
+                config: "./.jscsrc"
+            }
+        },
+
+        david: {
+            check: {}
         }
 
     });
 
     require("load-grunt-tasks")(grunt);
+
+    grunt.registerTask("code-check", [ "jshint", "jscs"]);
     grunt.registerTask("coverage", [ "jshint", "mocha_istanbul", "plato" ]);
     grunt.registerTask("test", [ "jshint", "mochaTest:unit_tests", "mochaTest:functional_tests" ]);
-
 
 };

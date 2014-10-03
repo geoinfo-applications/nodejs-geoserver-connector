@@ -19,8 +19,7 @@ module.exports = function (values, max, iterator) {
             iterator(list.pop())
                 .then(catchingFunction)
                 .fail(rejectFunction);
-        }
-        else if (outstanding === 0) {
+        } else if (outstanding === 0) {
             deferred.resolve();
         }
     }

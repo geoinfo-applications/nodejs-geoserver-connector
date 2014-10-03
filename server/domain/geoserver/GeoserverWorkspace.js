@@ -33,7 +33,7 @@ module.exports = function GeoserverWorkspace() {
         return this.workspaceExists(config).then(function (exists) {
 
             if (exists) {
-                return this.deleteGeoserverObject(this.types.WORKSPACE, config, {recurse: true});
+                return this.deleteGeoserverObject(this.types.WORKSPACE, config);
             }
 
             return true;

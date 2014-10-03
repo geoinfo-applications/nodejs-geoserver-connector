@@ -35,7 +35,7 @@ module.exports = function GeoserverFeatureType() {
 
         return this.featureTypeExists(config).then(function (exists) {
             if (exists) {
-                return this.deleteGeoserverObject(this.types.FEATURETYPE, config, {recurse: true});
+                return this.deleteGeoserverObject(this.types.FEATURETYPE, config);
             }
             return new Error("featureTypeName does not exist" + featureTypeName);
         }.bind(this));
@@ -45,7 +45,7 @@ module.exports = function GeoserverFeatureType() {
         return this.geoserverObjectExists(this.types.FEATURETYPE, featureType);
     };
 
-    //TODO cleanup - reuse gs global methods
+    // TODO cleanup - reuse gs global methods
     this.renameFeatureType = function (config, newFeatureTypeName) {
 
         if (!newFeatureTypeName) {

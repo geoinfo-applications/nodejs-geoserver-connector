@@ -41,7 +41,7 @@ module.exports = function GeoserverDatastore() {
         return this.datastoreExists({ name: dsName, workspace: wsName }).then(function (exists) {
 
             if (exists) {
-                return this.deleteGeoserverObject(this.types.DATASTORE, config, {recurse: true});
+                return this.deleteGeoserverObject(this.types.DATASTORE, config);
             }
 
             return true;

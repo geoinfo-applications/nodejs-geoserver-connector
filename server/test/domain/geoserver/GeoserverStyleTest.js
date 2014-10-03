@@ -9,7 +9,7 @@ var config = require("../../config");
 
 describe("Geoserver Styles tests", function () {
 
-    this.timeout(500000);
+    this.timeout(500);
 
     var testUtils = new TestUtils(config.unit_test);
     var gsRepository = testUtils.gsRepository;
@@ -86,7 +86,7 @@ describe("Geoserver Styles tests", function () {
 
         it("should return false if global style does not exist ", function (done) {
 
-            gsRepository.globalStyleExists({name: "notExistingStyle"}).then(function (exists) {
+            gsRepository.globalStyleExists({ name: "notExistingStyle" }).then(function (exists) {
                 expect(exists).to.be.equal(false);
                 done();
             }).catch(done);
@@ -110,7 +110,7 @@ describe("Geoserver Styles tests", function () {
 
         it("should fail uploading global style if name is not defined", function (done) {
 
-            gsRepository.uploadGlobalStyleContent({sldBody: "<xml />"})
+            gsRepository.uploadGlobalStyleContent({ sldBody: "<xml />" })
                 .catch(function (error) {
                     expect(error.message).to.match(/content required/);
                     done();
@@ -210,7 +210,7 @@ describe("Geoserver Styles tests", function () {
 
         it("should return false if workspace style does not exist ", function (done) {
 
-            gsRepository.workspaceStyleExists({name: "notExistingStyle"}).then(function (exists) {
+            gsRepository.workspaceStyleExists({ name: "notExistingStyle" }).then(function (exists) {
                 expect(exists).to.be.equal(false);
                 done();
             }).catch(done);
@@ -239,7 +239,7 @@ describe("Geoserver Styles tests", function () {
 
         it("should fail uploading workspace style if name is not defined", function (done) {
 
-            gsRepository.uploadWorkspaceStyleContent({sldBody: "<xml />"})
+            gsRepository.uploadWorkspaceStyleContent({ sldBody: "<xml />" })
                 .catch(function (error) {
                     expect(error.message).to.match(/content required/);
                     done();
@@ -349,5 +349,3 @@ describe("Geoserver Styles tests", function () {
     });
 
 });
-
-

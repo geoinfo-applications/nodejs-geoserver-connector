@@ -69,6 +69,7 @@ GeoserverRepository.prototype = {
         var self = this;
 
         function response(err, resp, body) {
+
             if (responseHasError()) {
                 logError(err, body);
                 deferred.reject(err);
@@ -112,11 +113,11 @@ GeoserverRepository.prototype = {
     initializeWorkspace: function () {
 
         var createDefaultWorkspace = function () {
-            return this.createWorkspace({name: this.geoserver.workspace});
+            return this.createWorkspace({ name: this.geoserver.workspace });
         }.bind(this);
 
         var createDefaultDatastore = function () {
-            return this.createDatastore({name: this.geoserver.datastore});
+            return this.createDatastore({ name: this.geoserver.datastore });
         }.bind(this);
 
         return this.isGeoserverRunning()
@@ -151,12 +152,10 @@ GeoserverRepository.prototype = {
             if (err) {
                 deferred.reject(err);
             }
-
             if (resp.statusCode !== 200) {
-                //warn.log("Geoserver object doesn't exist >", body);
+                // warn.log("Geoserver object doesn't exist >", body);
                 return deferred.reject(new Error(body));
             }
-
             var receivedObject = JSON.parse(body);
             deferred.resolve(receivedObject);
         }
@@ -173,19 +172,21 @@ GeoserverRepository.prototype = {
         var restUrl = this.resolver.get(type, config);
         var payload = JSON.stringify(config);
 
-        this.dispatcher.put({ url: restUrl, body: payload, callback: response });
+        this.dispatcher.put({
+            url: restUrl,
+            body: payload,
+            callback: response
+        });
 
         function response(err, resp, body) {
 
             if (err) {
                 deferred.reject(err);
             }
-
             if (resp.statusCode !== 200) {
-                //warn.log("Geoserver object doesn't exist >", body);
+                // warn.log("Geoserver object doesn't exist >", body);
                 return deferred.reject(new Error(body));
             }
-
             deferred.resolve(true);
         }
 
@@ -204,17 +205,19 @@ GeoserverRepository.prototype = {
             if (err) {
                 deferred.reject(err);
             }
-
             if (resp.statusCode !== 201) {
                 console.error("Error creating Geoserver object", type, body);
                 deferred.reject(new Error(body));
             }
-
-            //console.info("Geoserver object created >", type, object.name);
+            // console.info("Geoserver object created >", type, object.name);
             deferred.resolve(true);
         }
 
-        this.dispatcher.post({url: restUrl, body: payload, callback: response});
+        this.dispatcher.post({
+            url: restUrl,
+            body: payload,
+            callback: response
+        });
 
         return deferred.promise;
     },
@@ -229,8 +232,12 @@ GeoserverRepository.prototype = {
             var purge = options && options.purge || true;
             restUrl += "?purge=" + purge;
 
-        } else if ([this.types.FEATURETYPE, this.types.DATASTORE, this.types.WORKSPACE].indexOf(type) > -1) {
-            var recurse = options && options.recurse || false;
+        } else if ([
+            this.types.FEATURETYPE,
+            this.types.DATASTORE,
+            this.types.WORKSPACE
+        ].indexOf(type) > -1) {
+            var recurse = options && options.recurse || true;
             restUrl += "?recurse=" + recurse;
         }
 
@@ -239,17 +246,18 @@ GeoserverRepository.prototype = {
             if (err) {
                 return deferred.reject(err);
             }
-
             if (resp.statusCode !== 200) {
                 console.log("Error deleting Geoserver object >", type, body);
                 return deferred.reject(new Error(body));
             }
-
-            //console.info("Geoserver object deleted >", type, this.name);
+            // console.info("Geoserver object deleted >", type, this.name);
             deferred.resolve(true);
         }
 
-        this.dispatcher.delete({ url: restUrl, callback: response.bind(config)});
+        this.dispatcher.delete({
+            url: restUrl,
+            callback: response.bind(config)
+        });
 
         return deferred.promise;
     }

@@ -18,7 +18,7 @@ GeoserverDispatcher.prototype = {
 
 
 
-    "get": function (config) {
+    get: function (config) {
 
         var geoserverRestCall = config.url;
         var callback = config.callback;
@@ -42,24 +42,24 @@ GeoserverDispatcher.prototype = {
 
         function addRequestHeaders(defaultContentType) {
             var headers = {
-                "Accept": defaultContentType,
-                "Content-type" : config.contentType || defaultContentType
+                Accept: defaultContentType,
+                "Content-type": config.contentType || defaultContentType
             };
             return headers;
         }
     },
 
-    "post": function (config) {
+    post: function (config) {
         this.get(
             _.extend({ method: "POST" }, config));
     },
 
-    "put": function (config) {
+    put: function (config) {
         this.get(
             _.extend({ method: "PUT" }, config));
     },
 
-    "delete": function (config) {
+    delete: function (config) {
         this.get(_.extend({ method: "DELETE" }, config));
     }
 };

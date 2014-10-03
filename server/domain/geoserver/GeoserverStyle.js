@@ -1,7 +1,6 @@
 "use strict";
 
 var Q = require("q");
-var _ = require("underscore");
 
 function nameDoesntExist(config) {
     if (!config || !config.name) {
@@ -154,7 +153,8 @@ module.exports = function GeoserverLayer() {
 
         return this.updateLayer(updateLayerConfig);
     };
-//
+
+
 //    this.addLayerStyle = function (config) {
 //        throw new Error();
 //    };
@@ -231,7 +231,7 @@ module.exports = function GeoserverLayer() {
                 deferred.reject(new Error(body));
             }
 
-            //console.info("SLD file uploaded>", body);
+            // console.info("SLD file uploaded>", body);
             deferred.resolve(true);
         }
 
