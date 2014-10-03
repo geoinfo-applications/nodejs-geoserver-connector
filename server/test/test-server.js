@@ -12,6 +12,7 @@ function GeoserverMockServer() {
 
     this.gsMockServer = express();
     this.gsMockServer.use(bodyParser.urlencoded({ extended: false }));
+    this.gsMockServer.use(bodyParser.json());
     this.gsMockServer.use(timeout(180 * 1000));
 
     this.mockServer = null;
@@ -86,7 +87,7 @@ function GeoserverMockServer() {
 
         putStyle: function (req, res) {
 
-            if(!isContentTypeHeaderSLD(req)){
+            if (!isContentTypeHeaderSLD(req)) {
                 res.status(404).json("Content type must be set to application/vnd.ogc.sld+xml");
             }
 
@@ -119,34 +120,48 @@ function GeoserverMockServer() {
             });
         }.bind(this),
 
-        // TODO split this function
+        putLayer: function (req, res) {
+
+            try {
+                var defaultStyleName = req.body.layer.defaultStyle.name;
+                res.status(200).json(defaultStyleName);
+            } catch (err) {
+                res.status(501).send("Layer configuration object not valid");
+            }
+        },
+
         getLayer: function (req, res) {
 
-            var layerParameters = req.params[0] && req.params[0].split(":");
             var files = this.files;
             var layerName;
 
-            if (layerParameters.length === 1) {
-                layerName = layerParameters[0];
-            } else if (layerParameters.length === 2) {
-                layerName = layerParameters[1];
-            } else {
-                res.status(501).json("More then 2 parameters found");
+            try {
+                layerName = resolveLayerName();
+
+                if (layerName === config.layer.name) {
+                    handleExistingLayer();
+                } else {
+                    handleNonExistingLayer();
+                }
+
+            } catch (err) {
+                res.status(501).json(err);
                 return;
             }
 
-            if (layerName === config.layer.name) {
+            function resolveLayerName() {
+                var layerParameters = req.params[0] && req.params[0].split(":");
 
-                if(req.method === "GET"){
-                    getExistingLayer();
-                } else if(req.method === "PUT"){
-                    putExistingLayer();
+                if (layerParameters.length === 1) {
+                    return layerParameters[0];
+                } else if (layerParameters.length === 2) {
+                    return layerParameters[1];
+                } else {
+                    throw new Error("More then 2 parameters found");
                 }
-            } else {
-                handleNonExistingLayer();
             }
 
-            function getExistingLayer() {
+            function handleExistingLayer() {
                 var response = files.layer;
                 response.layer.name = config.layer.name;
                 response.layer.defaultStyle.name = config.layer.defaultStyleName;
@@ -154,18 +169,19 @@ function GeoserverMockServer() {
                 res.status(200).json(response);
             }
 
-            function putExistingLayer() {
-                res.status(200).json();
-            }
-
             function handleNonExistingLayer() {
                 res.status(404).send("No such layer: " + layerName);
             }
-
-        }.bind(this)
+        }
     };
 
+    _.functions(this.handlers).forEach(function (key) {
+        this.handlers[key] = this.handlers[key].bind(this);
+    }, this);
+
+
 }
+
 
 GeoserverMockServer.prototype = {
 
@@ -187,7 +203,7 @@ GeoserverMockServer.prototype = {
 
     addDefaultRequestHandlers: function () {
 
-        function checkJSONHeaders(req, res){
+        function checkJSONHeaders(req, res) {
             if (isContentTypeHeaderJSON(req) && isAcceptHeaderJSON(req)) {
                 res.status(200).json(true);
             } else {
@@ -221,7 +237,7 @@ GeoserverMockServer.prototype = {
 
         this.gsMockServer.route(this.baseURL + this.geoserverRestAPI.getLayer)
             .get(this.handlers.getLayer)
-            .put(this.handlers.getLayer);
+            .put(this.handlers.putLayer);
 
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, this.handlers.getStyle);
         this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyle, this.handlers.getStyle);
