@@ -40,7 +40,14 @@ module.exports = function GeoserverLayer() {
 
     this.createGlobalStyle = function (config) {
         this.defineGlobalStyle(config);
-        return this.createStyle(config);
+
+        return this.globalStyleExists(config).then(function (exists) {
+            if (exists) {
+                return this.uploadGlobalStyleContent(config);
+            } else {
+                return this.createStyle(config);
+            }
+        }.bind(this));
     };
 
     this.createGlobalStyleConfiguration = function (config) {
