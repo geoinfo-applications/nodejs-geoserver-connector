@@ -89,14 +89,22 @@ module.exports = function (grunt) {
             unit_tests: {
                 src: "./server/test/**",
                 options: {
-                    reporter: "spec",
-                    excludes: ["**/integration/"],
+                    reporter: "mocha-multi",
+                    //  excludes: ["**/integration/"],
                     recursive: true,
-                    coverageFolder: "./coverage/server"
-                    // require: ["./server/test/test-server.js"]
+                    coverageFolder: "./coverage/server",
+                    require: ["./server/test/test-server.js"]
                 }
             }
         },
+
+        env: {
+            dev: {
+                multi: "spec=- mocha-bamboo-reporter=-"
+            }
+        },
+
+        clean: ["./mocha.json"],
 
         jscs: {
             src: jsFiles,
@@ -114,7 +122,9 @@ module.exports = function (grunt) {
     require("load-grunt-tasks")(grunt);
 
     grunt.registerTask("code-check", [ "jshint", "jscs"]);
-    grunt.registerTask("coverage", [ "code-check", "mocha_istanbul", "plato" ]);
-    grunt.registerTask("test", [ "code-check", "mochaTest:unit_tests", "mochaTest:functional_tests" ]);
+    grunt.registerTask("coverage", [ "code-check", "env:dev", "mocha_istanbul", "plato" ]);
+    grunt.registerTask("mocha", [ "code-check", "mochaTest:unit_tests", "mochaTest:functional_tests" ]);
+    grunt.registerTask("test", [ "code-check", "env:dev", "mocha_istanbul" ]);
+    grunt.registerTask("update", ["npm-install", "clean", "david:check"]);
 
 };

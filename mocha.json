@@ -1,0 +1,371 @@
+{
+  "stats": {
+    "suites": 18,
+    "tests": 71,
+    "passes": 71,
+    "pending": 0,
+    "failures": 0,
+    "start": "2014-10-03T13:59:37.552Z",
+    "end": "2014-10-03T13:59:43.719Z",
+    "duration": 6167
+  },
+  "failures": [],
+  "passes": [
+    {
+      "title": "repository should be disabled if Geoserver instance is not initialized ",
+      "fullTitle": "Geoserver unit tests testing offline Geoserver access  repository should be disabled if Geoserver instance is not initialized ",
+      "duration": 0
+    },
+    {
+      "title": "should handle repository initialization timeout ",
+      "fullTitle": "Geoserver unit tests testing offline Geoserver access  should handle repository initialization timeout ",
+      "duration": 8
+    },
+    {
+      "title": "should correctly fetch Geoserver details ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver access functionalites should correctly fetch Geoserver details ",
+      "duration": 8
+    },
+    {
+      "title": "should correctly initialize new Geoserver instance ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver access functionalites should correctly initialize new Geoserver instance ",
+      "duration": 22
+    },
+    {
+      "title": "should fetch workspace ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should fetch workspace ",
+      "duration": 2
+    },
+    {
+      "title": "should fetch datastore ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should fetch datastore ",
+      "duration": 1
+    },
+    {
+      "title": "should return true if feature type exists",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should return true if feature type exists",
+      "duration": 2
+    },
+    {
+      "title": "should get feature type details ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should get feature type details ",
+      "duration": 1
+    },
+    {
+      "title": "should delete feature type ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should delete feature type ",
+      "duration": 9
+    },
+    {
+      "title": "should fail renaming feature type if new name is not supplied ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should fail renaming feature type if new name is not supplied ",
+      "duration": 1
+    },
+    {
+      "title": "should rename feature type ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should rename feature type ",
+      "duration": 3
+    },
+    {
+      "title": "should recalculate feature type BBOX ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should recalculate feature type BBOX ",
+      "duration": 5
+    },
+    {
+      "title": "should get layer details using /layers/layerName format",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should get layer details using /layers/layerName format",
+      "duration": 2
+    },
+    {
+      "title": "should get layer details using /layers/workspace:layerName format ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should get layer details using /layers/workspace:layerName format ",
+      "duration": 2
+    },
+    {
+      "title": "should return false if layer does not exist ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should return false if layer does not exist ",
+      "duration": 2
+    },
+    {
+      "title": "should return true if layer exist ",
+      "fullTitle": "Geoserver unit tests testing online Geoserver access testing Geoserver CRUD methods should return true if layer exist ",
+      "duration": 4
+    },
+    {
+      "title": "should contain resolving methods for all geoserver types ",
+      "fullTitle": "Geoserver Resolver unit tests  should contain resolving methods for all geoserver types ",
+      "duration": 0
+    },
+    {
+      "title": "should get correct parameters when only object name is passed",
+      "fullTitle": "Geoserver Resolver unit tests  should get correct parameters when only object name is passed",
+      "duration": 1
+    },
+    {
+      "title": "should correctly format urls using format.apply method",
+      "fullTitle": "Geoserver Resolver unit tests  should correctly format urls using format.apply method",
+      "duration": 0
+    },
+    {
+      "title": "should corectly resolve get methods ",
+      "fullTitle": "Geoserver Resolver unit tests  should corectly resolve get methods ",
+      "duration": 0
+    },
+    {
+      "title": "should corectly resolve delete methods ",
+      "fullTitle": "Geoserver Resolver unit tests  should corectly resolve delete methods ",
+      "duration": 0
+    },
+    {
+      "title": "should corectly resolve create methods ",
+      "fullTitle": "Geoserver Resolver unit tests  should corectly resolve create methods ",
+      "duration": 0
+    },
+    {
+      "title": "should fail if global style name is not defined ",
+      "fullTitle": "Geoserver Styles tests global styles should fail if global style name is not defined ",
+      "duration": 1
+    },
+    {
+      "title": "should get a global style ",
+      "fullTitle": "Geoserver Styles tests global styles should get a global style ",
+      "duration": 2
+    },
+    {
+      "title": "should get all global styles ",
+      "fullTitle": "Geoserver Styles tests global styles should get all global styles ",
+      "duration": 2
+    },
+    {
+      "title": "should return false if global style name is not defined ",
+      "fullTitle": "Geoserver Styles tests global styles should return false if global style name is not defined ",
+      "duration": 1
+    },
+    {
+      "title": "should return false if global style does not exist ",
+      "fullTitle": "Geoserver Styles tests global styles should return false if global style does not exist ",
+      "duration": 5
+    },
+    {
+      "title": "should return true if global style exist ",
+      "fullTitle": "Geoserver Styles tests global styles should return true if global style exist ",
+      "duration": 3
+    },
+    {
+      "title": "should create new global style configuration",
+      "fullTitle": "Geoserver Styles tests global styles should create new global style configuration",
+      "duration": 2
+    },
+    {
+      "title": "should fail uploading global style if name is not defined",
+      "fullTitle": "Geoserver Styles tests global styles should fail uploading global style if name is not defined",
+      "duration": 2
+    },
+    {
+      "title": "should fail uploading global style if sld body is not defined",
+      "fullTitle": "Geoserver Styles tests global styles should fail uploading global style if sld body is not defined",
+      "duration": 0
+    },
+    {
+      "title": "should fail uploading global style if config is not defined",
+      "fullTitle": "Geoserver Styles tests global styles should fail uploading global style if config is not defined",
+      "duration": 0
+    },
+    {
+      "title": "should replace existing global style SLD file",
+      "fullTitle": "Geoserver Styles tests global styles should replace existing global style SLD file",
+      "duration": 6
+    },
+    {
+      "title": "should create new global style configuration and upload SLD file content ",
+      "fullTitle": "Geoserver Styles tests global styles should create new global style configuration and upload SLD file content ",
+      "duration": 4
+    },
+    {
+      "title": "should delete global style",
+      "fullTitle": "Geoserver Styles tests global styles should delete global style",
+      "duration": 3
+    },
+    {
+      "title": "should fail if workspace style name is not defined",
+      "fullTitle": "Geoserver Styles tests workspace styles should fail if workspace style name is not defined",
+      "duration": 1
+    },
+    {
+      "title": "should get workspace style ",
+      "fullTitle": "Geoserver Styles tests workspace styles should get workspace style ",
+      "duration": 2
+    },
+    {
+      "title": "should fetch all workspace styles ",
+      "fullTitle": "Geoserver Styles tests workspace styles should fetch all workspace styles ",
+      "duration": 2
+    },
+    {
+      "title": "should return false if workspace style does not exist ",
+      "fullTitle": "Geoserver Styles tests workspace styles should return false if workspace style does not exist ",
+      "duration": 2
+    },
+    {
+      "title": "should return true if workspace style exists ",
+      "fullTitle": "Geoserver Styles tests workspace styles should return true if workspace style exists ",
+      "duration": 1
+    },
+    {
+      "title": "should return false if workspace style name is not defined ",
+      "fullTitle": "Geoserver Styles tests workspace styles should return false if workspace style name is not defined ",
+      "duration": 1
+    },
+    {
+      "title": "should create new workspace style ",
+      "fullTitle": "Geoserver Styles tests workspace styles should create new workspace style ",
+      "duration": 2
+    },
+    {
+      "title": "should fail uploading workspace style if name is not defined",
+      "fullTitle": "Geoserver Styles tests workspace styles should fail uploading workspace style if name is not defined",
+      "duration": 1
+    },
+    {
+      "title": "should fail uploading workspace style if SLD body is not defined",
+      "fullTitle": "Geoserver Styles tests workspace styles should fail uploading workspace style if SLD body is not defined",
+      "duration": 1
+    },
+    {
+      "title": "should fail uploading workspace style if config is not defined",
+      "fullTitle": "Geoserver Styles tests workspace styles should fail uploading workspace style if config is not defined",
+      "duration": 0
+    },
+    {
+      "title": "should replace existing workspace style SLD file",
+      "fullTitle": "Geoserver Styles tests workspace styles should replace existing workspace style SLD file",
+      "duration": 2
+    },
+    {
+      "title": "should create new workspace style configuration and upload SLD file content ",
+      "fullTitle": "Geoserver Styles tests workspace styles should create new workspace style configuration and upload SLD file content ",
+      "duration": 5
+    },
+    {
+      "title": "should delete workspace style ",
+      "fullTitle": "Geoserver Styles tests workspace styles should delete workspace style ",
+      "duration": 8
+    },
+    {
+      "title": "should fail if layer name is not defined",
+      "fullTitle": "Geoserver Styles tests layer styles should fail if layer name is not defined",
+      "duration": 1
+    },
+    {
+      "title": "should get default layer style name",
+      "fullTitle": "Geoserver Styles tests layer styles should get default layer style name",
+      "duration": 2
+    },
+    {
+      "title": "should get all layer styles ",
+      "fullTitle": "Geoserver Styles tests layer styles should get all layer styles ",
+      "duration": 1
+    },
+    {
+      "title": "should update default layer style ",
+      "fullTitle": "Geoserver Styles tests layer styles should update default layer style ",
+      "duration": 1
+    },
+    {
+      "title": "GS repository should be disabled if Geoserver instance is not initialized",
+      "fullTitle": "Geoserver functional tests  testing access  GS repository should be disabled if Geoserver instance is not initialized",
+      "duration": 1
+    },
+    {
+      "title": "should correctly fetch Geoserver details upon initialization",
+      "fullTitle": "Geoserver functional tests  testing access  should correctly fetch Geoserver details upon initialization",
+      "duration": 107
+    },
+    {
+      "title": "should return false if non-default workspace does not exist ",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  workspaces  should return false if non-default workspace does not exist ",
+      "duration": 4
+    },
+    {
+      "title": "should return true if default workspace exists ",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  workspaces  should return true if default workspace exists ",
+      "duration": 11
+    },
+    {
+      "title": "should return true if workspace already exists",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  workspaces  should return true if workspace already exists",
+      "duration": 9
+    },
+    {
+      "title": "should delete default GS workspace",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  workspaces  should delete default GS workspace",
+      "duration": 15
+    },
+    {
+      "title": "should create non-default GS workspace",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  workspaces  should create non-default GS workspace",
+      "duration": 26
+    },
+    {
+      "title": "should return true if default GS datastore exists in default workspace",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  datastores  should return true if default GS datastore exists in default workspace",
+      "duration": 14
+    },
+    {
+      "title": "should delete default GS datastore  in default workspace",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  datastores  should delete default GS datastore  in default workspace",
+      "duration": 19
+    },
+    {
+      "title": "should return false if non-default GS datastore does not exist in default workspace",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  datastores  should return false if non-default GS datastore does not exist in default workspace",
+      "duration": 4
+    },
+    {
+      "title": "should create non-default GS datastore",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  datastores  should create non-default GS datastore",
+      "duration": 27
+    },
+    {
+      "title": "should return false if feature type does not exist in default store",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  feature type  should return false if feature type does not exist in default store",
+      "duration": 11
+    },
+    {
+      "title": "should fail if feature type does not exist in flat DB",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  feature type  should fail if feature type does not exist in flat DB",
+      "duration": 17
+    },
+    {
+      "title": "should return global styles",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  styles  should return global styles",
+      "duration": 17
+    },
+    {
+      "title": "should get a global style ",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  styles  should get a global style ",
+      "duration": 7
+    },
+    {
+      "title": "should create a global style",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  styles  should create a global style",
+      "duration": 21
+    },
+    {
+      "title": "should not return any styles for new workspace",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  styles  should not return any styles for new workspace",
+      "duration": 13
+    },
+    {
+      "title": "should create a workspace style",
+      "fullTitle": "Geoserver functional tests  objects manipulation test  styles  should create a workspace style",
+      "duration": 19
+    },
+    {
+      "title": "generating global styles ",
+      "fullTitle": "Geoserver functional tests  test-loading styles create  generating global styles ",
+      "duration": 1740
+    }
+  ],
+  "skipped": []
+}
