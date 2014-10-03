@@ -145,11 +145,14 @@ module.exports = function GeoserverLayer() {
             return Q.reject(new Error("style config and sld name required"));
         }
 
-        var updateLayerConfig = _.extend({}, config);
-        updateLayerConfig.defaultStyle = styleName;
+        var updateLayerConfig = {
+            layer: {
+                defaultStyle: styleName
+            },
+            name: config.name
+        };
 
-        return this.updateLayer(config);
-
+        return this.updateLayer(updateLayerConfig);
     };
 //
 //    this.addLayerStyle = function (config) {

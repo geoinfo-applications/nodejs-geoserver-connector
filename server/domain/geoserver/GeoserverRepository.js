@@ -173,6 +173,8 @@ GeoserverRepository.prototype = {
         var restUrl = this.resolver.get(type, config);
         var payload = JSON.stringify(config);
 
+        this.dispatcher.put({ url: restUrl, body: payload, callback: response });
+
         function response(err, resp, body) {
 
             if (err) {
@@ -186,8 +188,6 @@ GeoserverRepository.prototype = {
 
             deferred.resolve(true);
         }
-
-        this.dispatcher.put({ url: restUrl, body: payload, callback: response });
 
         return deferred.promise;
     },
