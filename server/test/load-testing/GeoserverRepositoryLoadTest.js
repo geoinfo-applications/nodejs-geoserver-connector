@@ -5,7 +5,7 @@ var expect = require("chai").expect;
 var TestUtils = require("../TestUtils.js");
 var config = require("../config");
 
-describe("Geoserver load testing ", function () {
+describe.skip("Geoserver load testing ", function () {
 
     this.timeout(60 * 1000);
 

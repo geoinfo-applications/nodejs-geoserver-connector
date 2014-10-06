@@ -147,29 +147,6 @@ module.exports = function GeoserverLayer() {
         });
     };
 
-    this.setLayerDefaultWorkspaceStyle = function (config, styleName) {
-
-        if (!styleName) {
-            styleName = this.DEFAULT_STYLE;
-        }
-
-        if (nameDoesntExist(config)) {
-            return rejectRequest("layer name required");
-        }
-
-        var updateLayerConfig = {
-            layer: {
-                defaultStyle: {
-                    name: styleName,
-                    workspace: config.workspace || this.geoserver.workspace
-                }
-            },
-            name: config.name
-        };
-
-        return this.updateLayer(updateLayerConfig);
-    };
-
     this.setLayerDefaultStyle = function (config, styleName) {
 
         if (!styleName) {
@@ -184,6 +161,25 @@ module.exports = function GeoserverLayer() {
             layer: {
                 defaultStyle: {
                     name: styleName
+                }
+            },
+            name: config.name
+        };
+
+        return this.updateLayer(updateLayerConfig);
+    };
+
+    this.setLayerDefaultWorkspaceStyle = function (config, styleName) {
+
+        if (nameDoesntExist(config) && !styleName) {
+            return rejectRequest("layer and style name required");
+        }
+
+        var updateLayerConfig = {
+            layer: {
+                defaultStyle: {
+                    name: styleName,
+                    workspace: config.workspace || this.geoserver.workspace
                 }
             },
             name: config.name
@@ -239,6 +235,10 @@ module.exports = function GeoserverLayer() {
                 filename: config.name + ".sld"
             }
         };
+
+        if (config.workspace) {
+            styleConfig.workspace = this.geoserver.workspace;
+        }
 
         return this.createGeoserverObject(config.styleType, styleConfig);
     };
