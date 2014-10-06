@@ -149,7 +149,7 @@ module.exports = function GeoserverLayer() {
 
     this.setLayerDefaultWorkspaceStyle = function (config, styleName) {
 
-        if (!styleName || styleName === "DEFAULT") {
+        if (!styleName) {
             styleName = this.DEFAULT_STYLE;
         }
 
@@ -172,8 +172,12 @@ module.exports = function GeoserverLayer() {
 
     this.setLayerDefaultStyle = function (config, styleName) {
 
-        if (nameDoesntExist(config) || !styleName) {
-            return Q.reject(new Error("style config and sld name required"));
+        if (!styleName) {
+            styleName = this.DEFAULT_STYLE;
+        }
+
+        if (nameDoesntExist(config)) {
+            return Q.reject(new Error("style name required"));
         }
 
         var updateLayerConfig = {
