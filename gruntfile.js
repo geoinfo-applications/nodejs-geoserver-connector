@@ -34,10 +34,10 @@ module.exports = function (grunt) {
             reports: {
                 options: {
                     jshint: false,
-                    exclude: /^(node_modules|coverage|reports)\//
+                    exclude: /(^(node_modules|coverage|reports)\/)|.*(gruntfile.js|config.js)/
                 },
                 files: {
-                    reports: ["**/*.js"]
+                    reports: ["server/domain/**/*.js"]
                 }
             }
         },
@@ -49,9 +49,9 @@ module.exports = function (grunt) {
                     slow: 10
                 },
                 src: [
-                    "!**/startGeoserverMockupServer.js",
                     "server/test/**/*.js",
-                    "!server/test/functional/**/*.js"
+                    "!server/test/functional/**",
+                    "!server/test/load-testing/**"
                 ]
             },
             functional_tests: {
@@ -59,11 +59,14 @@ module.exports = function (grunt) {
                     reporter: "spec",
                     slow: 100
                 },
-                src: [
-                    "!**/startGeoserverMockupServer.js",
-                    "!**/domain/**/*.js",
-                    "server/test/**/*.js"
-                ]
+                src: [ "server/test/functional/*.js" ]
+            },
+            load_tests: {
+                options: {
+                    reporter: "spec",
+                    slow: 100
+                },
+                src: [ "server/test/load-testing/*.js" ]
             }
         },
 
@@ -87,15 +90,39 @@ module.exports = function (grunt) {
 
         mocha_istanbul: {
             unit_tests: {
-                src: "./server/test/**",
+                src: [ "./server/test/**" ],
                 options: {
                     reporter: "mocha-multi",
                     //  excludes: ["**/integration/"],
                     recursive: true,
+                    print: "summary",
                     coverageFolder: "./coverage/server",
-                    require: ["./server/test/test-server.js"]
+                    require: [ "./server/test/test-server.js" ]
                 }
             }
+        },
+
+        todo: {
+            options: {
+                marks: [
+                    {
+                        name: "FIX",
+                        pattern: /FIXME/,
+                        color: "red"
+                    },
+                    {
+                        name: "TODO",
+                        pattern: /TODO/,
+                        color: "red"
+                    },
+                    {
+                        name: "NOTE",
+                        pattern: /NOTE/,
+                        color: "blue"
+                    }
+                ]
+            },
+            src: [ "server/**/*.js" ]
         },
 
         env: {
@@ -121,10 +148,11 @@ module.exports = function (grunt) {
 
     require("load-grunt-tasks")(grunt);
 
-    grunt.registerTask("code-check", [ "jshint", "jscs"]);
+    grunt.registerTask("code-check", [ "jshint", "jscs", "todo" ]);
+    grunt.registerTask("istanbul", [ "env:dev", "mocha_istanbul" ]);
     grunt.registerTask("coverage", [ "code-check", "env:dev", "mocha_istanbul", "plato" ]);
-    grunt.registerTask("mocha", [ "code-check", "mochaTest:unit_tests", "mochaTest:functional_tests" ]);
+    grunt.registerTask("mocha", [ "code-check", "mochaTest" ]);
     grunt.registerTask("test", [ "code-check", "env:dev", "mocha_istanbul" ]);
-    grunt.registerTask("update", ["npm-install", "clean", "david:check"]);
+    grunt.registerTask("update", [ "npm-install", "clean", "todo", "david:check" ]);
 
 };
