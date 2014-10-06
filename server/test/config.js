@@ -32,7 +32,7 @@ var config = {
         },
         geoserver: {
             host: "localhost",
-            port: 8080,
+            port: 9090,
             context: "geoserver",
             timeout: 10 * 1000,
             user: "admin",
