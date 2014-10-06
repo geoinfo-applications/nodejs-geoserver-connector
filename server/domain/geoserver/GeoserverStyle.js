@@ -27,7 +27,7 @@ module.exports = function GeoserverLayer() {
     this.getGlobalStyles = function () {
         return this.getGeoserverObject(this.types.STYLE)
             .then(function (styleObject) {
-                return styleObject.styles.style;
+                return styleObject.styles.style || [];
             });
     };
 
@@ -72,6 +72,7 @@ module.exports = function GeoserverLayer() {
         }.bind(this));
     };
 
+
     this.getWorkspaceStyle = function (config) {
         if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
@@ -85,7 +86,7 @@ module.exports = function GeoserverLayer() {
     this.getWorkspaceStyles = function (config) {
         return this.getGeoserverObject(this.types.WORKSPACESTYLE, config)
             .then(function (styleObject) {
-                return styleObject.styles.style;
+                return styleObject.styles.style || [];
             });
     };
 
@@ -124,6 +125,7 @@ module.exports = function GeoserverLayer() {
         }.bind(this));
     };
 
+
     this.getLayerDefaultStyle = function (config) {
 
         if (nameDoesntExist(config)) {
@@ -145,6 +147,29 @@ module.exports = function GeoserverLayer() {
         });
     };
 
+    this.setLayerDefaultWorkspaceStyle = function (config, styleName) {
+
+        if (!styleName || styleName === "DEFAULT") {
+            styleName = this.DEFAULT_STYLE;
+        }
+
+        if (nameDoesntExist(config)) {
+            return rejectRequest("layer name required");
+        }
+
+        var updateLayerConfig = {
+            layer: {
+                defaultStyle: {
+                    name: styleName,
+                    workspace: config.workspace || this.geoserver.workspace
+                }
+            },
+            name: config.name
+        };
+
+        return this.updateLayer(updateLayerConfig);
+    };
+
     this.setLayerDefaultStyle = function (config, styleName) {
 
         if (nameDoesntExist(config) || !styleName) {
@@ -153,14 +178,15 @@ module.exports = function GeoserverLayer() {
 
         var updateLayerConfig = {
             layer: {
-                defaultStyle: styleName
+                defaultStyle: {
+                    name: styleName
+                }
             },
             name: config.name
         };
 
         return this.updateLayer(updateLayerConfig);
     };
-
 
 //    this.addLayerStyle = function (config) {
 //        throw new Error();
@@ -230,16 +256,16 @@ module.exports = function GeoserverLayer() {
         function response(err, resp, body) {
 
             if (err) {
-                deferred.reject(err);
+                return deferred.reject(err);
             }
 
             if (resp.statusCode !== 200) {
                 console.error("Error uploading style SLD file", body);
-                deferred.reject(new Error(body));
+                return deferred.reject(new Error(body));
             }
 
             // console.info("SLD file uploaded>", body);
-            deferred.resolve(true);
+            return deferred.resolve(true);
         }
 
         this.dispatcher.put({

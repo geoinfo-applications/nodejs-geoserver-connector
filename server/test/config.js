@@ -1,23 +1,25 @@
 "use strict";
 
+var dbConfig = {
+    host: "localhost",
+    port: 5433,
+    user: "ngp_geodata",
+    password: "geodat_1",
+    database: "test_prod_ngp_geodata",
+    charset: "utf8"
+};
+
 var config = {
 
     unit_test: {
         db: {
-            flat: {
-                host: "localhost",
-                port: 5433,
-                user: "ngp_geodata",
-                password: "geodat_1",
-                database: "test_prod_ngp_geodata",
-                charset: "utf8"
-            }
+            flat: dbConfig
         },
         geoserver: {
             host: "localhost",
             port: 3003,
             context: "geoserver",
-            timeout: 60 * 1000,
+            timeout: 2000,
             user: "admin",
             pass: "geoserver",
             workspace: "geoportal",
@@ -26,20 +28,13 @@ var config = {
     },
     functional_test: {
         db: {
-            flat: {
-                host: "localhost",
-                port: 5433,
-                user: "ngp_geodata",
-                password: "geodat_1",
-                database: "test_prod_ngp_geodata",
-                charset: "utf8"
-            }
+            flat: dbConfig
         },
         geoserver: {
-            host: "172.30.3.168",
+            host: "localhost",
             port: 8080,
             context: "geoserver",
-            timeout: 60 * 1000,
+            timeout: 10 * 1000,
             user: "admin",
             pass: "geoserver",
             workspace: "geoportal",
@@ -49,8 +44,8 @@ var config = {
 };
 
 config.layer = {
-    name: "testLayer",
-    featureType: "testLayer",
+    name: "testlayer",
+    featureType: "testlayer",
     defaultStyleName: "point"
 };
 

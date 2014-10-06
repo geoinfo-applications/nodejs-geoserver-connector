@@ -7,7 +7,7 @@
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <!-- a Named Layer is the basic building block of an SLD document -->
     <NamedLayer>
-        <Name>testLayer</Name>
+        <Name>testlayer</Name>
         <UserStyle>
             <!-- Styles can have names, titles and abstracts -->
             <Title>Default Point</Title>
@@ -15,23 +15,23 @@
             <!-- FeatureTypeStyles describe how to render different features -->
             <!-- A FeatureTypeStyle for rendering points -->
             <FeatureTypeStyle>
-                <Rule>
-                    <Name>rule1</Name>
-                    <Title>Red Square</Title>
-                    <Abstract>A 6 pixel square with a red fill and no stroke</Abstract>
-                    <PointSymbolizer>
-                        <Graphic>
-                            <Mark>
-                                <WellKnownName>square</WellKnownName>
-                                <Fill>
-                                    <CssParameter name="fill">#FF0000</CssParameter>
-                                </Fill>
-                            </Mark>
-                            <Size>6</Size>
-                        </Graphic>
-                    </PointSymbolizer>
-                </Rule>
-            </FeatureTypeStyle>
+                 <Rule>
+                     <Name>rule1</Name>
+                     <Title>Red Square</Title>
+                     <Abstract>A 6 pixel square with a red fill and no stroke</Abstract>
+                     <PointSymbolizer>
+                         <Graphic>
+                             <Mark>
+                                 <WellKnownName>circle</WellKnownName>
+                                 <Fill>
+                                     <CssParameter name="fill">#FF0000</CssParameter>
+                                 </Fill>
+                             </Mark>
+                             <Size>20</Size>
+                         </Graphic>
+                     </PointSymbolizer>
+                 </Rule>
+             </FeatureTypeStyle>
         </UserStyle>
     </NamedLayer>
 </StyledLayerDescriptor>

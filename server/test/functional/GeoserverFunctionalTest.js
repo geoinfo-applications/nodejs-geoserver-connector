@@ -1,7 +1,5 @@
 "use strict";
 
-var _ = require("underscore");
-var qthrottle = require("../qthrottle/Throttle.js");
 var expect = require("chai").expect;
 
 var TestUtils = require("../TestUtils.js");
@@ -16,6 +14,7 @@ describe("Geoserver functional tests ", function () {
 
     var layer = config.layer;
     var style = config.style;
+    var secondStyle = { name: style.name + "2" };
 
     describe("testing access ", function () {
 
@@ -178,29 +177,39 @@ describe("Geoserver functional tests ", function () {
         describe("styles ", function () {
 
             var existingGlobalStyle = { name: "point" };
-            var sldContent;
+
+            var styleConfig = {
+                name: style.name,
+                sldBody: null
+            };
+
+            before(function (done) {
+                testUtils.readStyleContent(function (sldFileContent) {
+                    styleConfig.sldBody = sldFileContent;
+                    done();
+                }, done);
+            });
 
             beforeEach(function (done) {
-                testUtils.readStyleContent(function (sldFileContent) {
-                    sldContent = sldFileContent;
-                    initializeStyleWorkspace(done);
-                });
+                initializeStyleWorkspace(done);
             });
 
             afterEach(function (done) {
-                return cleanStyles(done);
+                return cleanStyleWorkspace(done);
             });
 
             function initializeStyleWorkspace(done) {
-                return cleanStyles().then(function () {
+                return cleanStyleWorkspace().then(function () {
                     testUtils.initializeWorkspace(done);
                 });
             }
 
-            function cleanStyles(done) {
+            function cleanStyleWorkspace(done) {
                 return gsRepository.deleteGlobalStyle(style).then(function () {
                     return gsRepository.deleteWorkspaceStyle(style).then(function () {
-                        testUtils.cleanWorkspaces(done);
+                        return gsRepository.deleteWorkspaceStyle(secondStyle).then(function () {
+                            testUtils.cleanWorkspace(done);
+                        });
                     });
                 });
             }
@@ -222,104 +231,76 @@ describe("Geoserver functional tests ", function () {
 
             it("should create a global style", function (done) {
 
-                var styleConfig = {
-                    name: style.name,
-                    sldBody: sldContent
-                };
-
-                gsRepository.createGlobalStyle(styleConfig).then(function (result) {
-                    expect(result).to.be.equal(true);
-                    done();
+                return gsRepository.createGlobalStyle(styleConfig).then(function () {
+                    return gsRepository.getGlobalStyle(style).then(function (layerObject) {
+                        expect(layerObject.name).to.be.equal(style.name);
+                        done();
+                    });
                 }).catch(done);
             });
 
             it("should not return any styles for new workspace", function (done) {
 
                 gsRepository.getWorkspaceStyles().then(function (styles) {
-                    expect(styles).to.be.equal(undefined);
+                    expect(styles).to.be.instanceof(Array);
+                    expect(styles.length).to.be.equal(0);
                     done();
                 }).catch(done);
             });
 
             it("should create a workspace style", function (done) {
 
-                var styleConfig = {
-                    name: style.name,
-                    sldBody: sldContent
-                };
-
-                gsRepository.createWorkspaceStyle(styleConfig).then(function (result) {
-                    expect(result).to.be.equal(true);
-                    done();
+                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+                    return gsRepository.getWorkspaceStyle(style).then(function (styleObject) {
+                        expect(styleObject.name).to.be.equal(style.name);
+                        done();
+                    });
                 }).catch(done);
             });
 
-        });
+            it("should fail if style already exists in workspace", function (done) {
 
-    });
-
-    describe("test-loading styles create ", function () {
-
-        var sldContent;
-        var styleIds = _.range(1, 100);
-        // do not set value 1, endless loop
-        var throttleValue = 20;
-
-        before(function (done) {
-            testUtils.readStyleContent(function (sldFileContent) {
-                sldContent = sldFileContent;
-                done();
-            }, done);
-        });
-
-        beforeEach(function (done) {
-            initializeStyleWorkspace(done);
-        });
-
-        afterEach(function (done) {
-            return cleanStyles().then(function () {
-                done();
-            }).catch(function (err) {
-                done(err);
+                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+                    return gsRepository.createWorkspaceStyle(styleConfig).fail(function (err) {
+                        expect(err.message).to.match(/already exists in workspace/);
+                        done();
+                    });
+                }).catch(done);
             });
-        });
 
-        function initializeStyleWorkspace(done) {
-            return cleanStyles().then(function () {
-                testUtils.initializeWorkspace(done);
+            it("should get all workspace styles", function (done) {
+
+                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+
+                    var styleConfig2 = {
+                        name: secondStyle.name,
+                        sldBody: styleConfig.sldBody
+                    };
+
+                    return gsRepository.createWorkspaceStyle(styleConfig2).then(function () {
+                        return gsRepository.getWorkspaceStyles().then(function (workspaceStlyes) {
+                            expect(workspaceStlyes.length).to.be.equal(2);
+                            expect(workspaceStlyes[0].name).to.be.equal(style.name);
+                            expect(workspaceStlyes[1].name).to.be.equal(secondStyle.name);
+                            done();
+                        });
+                    });
+                }).catch(done);
             });
-        }
 
-        function cleanStyles() {
+            it("should delete a workspace style", function (done) {
 
-            return qthrottle(styleIds, throttleValue, deleteSyle)
-                .then(function () {
-                    return testUtils.cleanWorkspace();
-                });
+                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+                    return gsRepository.deleteWorkspaceStyle(style).then(function () {
+                        return gsRepository.getWorkspaceStyles().then(function (workspaceStlyes) {
+                            expect(workspaceStlyes).to.be.instanceof(Array);
+                            expect(workspaceStlyes.length).to.be.equal(0);
+                            done();
+                        });
+                    });
+                }).catch(done);
+            });
 
-            function deleteSyle(styleId) {
-                var styleConfig = {
-                    name: style.name + styleId
-                };
-                return gsRepository.deleteGlobalStyle(styleConfig);
-            }
-        }
-
-        it("generating global styles ", function (done) {
-
-            qthrottle(styleIds, throttleValue, createSyle)
-                .then(done)
-                .catch(function (err) {
-                    done(err);
-                });
-
-            function createSyle(styleId) {
-                var styleConfig = {
-                    name: style.name + styleId,
-                    sldBody: sldContent
-                };
-                return gsRepository.createGlobalStyle(styleConfig);
-            }
         });
 
     });

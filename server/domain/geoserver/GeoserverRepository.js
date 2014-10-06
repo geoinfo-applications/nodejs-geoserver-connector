@@ -60,6 +60,9 @@ function GeoserverRepository(config) {
         STYLE: "Style",
         WORKSPACESTYLE: "WorkspaceStyle"
     };
+    
+    this.DEFAULT_STYLE = "DEFAULT_STYLE";
+   
 }
 
 GeoserverRepository.prototype = {
@@ -72,11 +75,11 @@ GeoserverRepository.prototype = {
 
             if (responseHasError()) {
                 logError(err, body);
-                deferred.reject(err);
+                return deferred.reject(err);
             } else {
                 updateGeoserverStatus(body);
                 logInstanceInitialization();
-                deferred.resolve();
+                return deferred.resolve();
             }
 
             function responseHasError() {
@@ -150,14 +153,14 @@ GeoserverRepository.prototype = {
         function response(err, resp, body) {
 
             if (err) {
-                deferred.reject(err);
+                return deferred.reject(err);
             }
             if (resp.statusCode !== 200) {
                 // warn.log("Geoserver object doesn't exist >", body);
                 return deferred.reject(new Error(body));
             }
             var receivedObject = JSON.parse(body);
-            deferred.resolve(receivedObject);
+            return deferred.resolve(receivedObject);
         }
 
         this.dispatcher.get({ url: restUrl, callback: response });
@@ -181,13 +184,13 @@ GeoserverRepository.prototype = {
         function response(err, resp, body) {
 
             if (err) {
-                deferred.reject(err);
+                return deferred.reject(err);
             }
             if (resp.statusCode !== 200) {
                 // warn.log("Geoserver object doesn't exist >", body);
                 return deferred.reject(new Error(body));
             }
-            deferred.resolve(true);
+            return deferred.resolve(true);
         }
 
         return deferred.promise;
@@ -203,14 +206,14 @@ GeoserverRepository.prototype = {
         function response(err, resp, body) {
 
             if (err) {
-                deferred.reject(err);
+                return deferred.reject(err);
             }
             if (resp.statusCode !== 201) {
                 console.error("Error creating Geoserver object", type, body);
-                deferred.reject(new Error(body));
+                return deferred.reject(new Error(body));
             }
             // console.info("Geoserver object created >", type, object.name);
-            deferred.resolve(true);
+            return deferred.resolve(true);
         }
 
         this.dispatcher.post({
@@ -251,7 +254,7 @@ GeoserverRepository.prototype = {
                 return deferred.reject(new Error(body));
             }
             // console.info("Geoserver object deleted >", type, this.name);
-            deferred.resolve(true);
+            return deferred.resolve(true);
         }
 
         this.dispatcher.delete({
