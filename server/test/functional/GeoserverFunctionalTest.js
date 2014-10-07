@@ -1,5 +1,6 @@
 "use strict";
 
+var _ = require("underscore");
 var expect = require("chai").expect;
 
 var TestUtils = require("../TestUtils.js");
@@ -11,10 +12,6 @@ describe("Geoserver functional tests ", function () {
 
     var testUtils = new TestUtils(config.functional_test);
     var gsRepository = testUtils.gsRepository;
-
-    var layer = config.layer;
-    var style = config.style;
-    var secondStyle = { name: style.name + "2" };
 
     describe("testing access ", function () {
 
@@ -43,6 +40,8 @@ describe("Geoserver functional tests ", function () {
     });
 
     describe("objects manipulation test ", function () {
+
+        var layer = config.layer;
 
         var newWorkspace = testUtils.newWorkspace;
         var newDatastore = testUtils.newDatastore;
@@ -176,6 +175,9 @@ describe("Geoserver functional tests ", function () {
 
         describe("styles ", function () {
 
+            var style = config.style;
+            var secondStyle = { name: style.name + "2" };
+            var newWorkspaceStyle = { name: style.name, workspace: newWorkspace.name };
             var existingGlobalStyle = { name: "point" };
 
             var styleConfig = {
@@ -183,9 +185,12 @@ describe("Geoserver functional tests ", function () {
                 sldBody: null
             };
 
+            var newWorkspaceStyleConfig = _.clone(newWorkspaceStyle);
+
             before(function (done) {
                 testUtils.readStyleContent(function (sldFileContent) {
                     styleConfig.sldBody = sldFileContent;
+                    newWorkspaceStyleConfig.sldBody = sldFileContent;
                     done();
                 }, done);
             });
@@ -211,6 +216,12 @@ describe("Geoserver functional tests ", function () {
                             testUtils.cleanWorkspace(done);
                         });
                     });
+                });
+            }
+
+            function createStyleInNonDefaultWorkspace() {
+                return gsRepository.createWorkspace(newWorkspace).then(function () {
+                    return gsRepository.createWorkspaceStyle(newWorkspaceStyleConfig);
                 });
             }
 
@@ -248,13 +259,11 @@ describe("Geoserver functional tests ", function () {
                 }).catch(done);
             });
 
-            it("should create a workspace style", function (done) {
+            it("should fail creating workspace style if style is not supplied", function (done) {
 
-                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
-                    return gsRepository.getWorkspaceStyle(style).then(function (styleObject) {
-                        expect(styleObject.name).to.be.equal(style.name);
-                        done();
-                    });
+                return gsRepository.createWorkspaceStyle().fail(function (err) {
+                    expect(err.message).to.match(/layer name required/);
+                    done();
                 }).catch(done);
             });
 
@@ -268,20 +277,52 @@ describe("Geoserver functional tests ", function () {
                 }).catch(done);
             });
 
+            it("should create a workspace style in a default workspace", function (done) {
+
+                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+                    return gsRepository.getWorkspaceStyle(style).then(function (styleObject) {
+                        expect(styleObject.name).to.be.equal(style.name);
+                        done();
+                    });
+                }).catch(done);
+            });
+
+            it("should create a workspace style in a non-default workspace", function (done) {
+
+                return createStyleInNonDefaultWorkspace().then(function () {
+                    return gsRepository.getWorkspaceStyle(newWorkspaceStyle).then(function (styleObject) {
+                        expect(styleObject.name).to.be.equal(newWorkspaceStyle.name);
+                        done();
+                    });
+                }).catch(done);
+            });
+
+            it("should delete a workspace style in a non-default workspace", function (done) {
+
+                return createStyleInNonDefaultWorkspace().then(function () {
+                    return gsRepository.deleteWorkspaceStyle(newWorkspaceStyle).then(function () {
+                        return gsRepository.getWorkspaceStyles().then(function (workspaceStyles) {
+                            expect(workspaceStyles.length).to.be.equal(0);
+                            done();
+                        });
+                    });
+                }).catch(done);
+            });
+
             it("should get all workspace styles", function (done) {
 
                 return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
 
-                    var styleConfig2 = {
+                    var secondStyleConfig = {
                         name: secondStyle.name,
                         sldBody: styleConfig.sldBody
                     };
 
-                    return gsRepository.createWorkspaceStyle(styleConfig2).then(function () {
-                        return gsRepository.getWorkspaceStyles().then(function (workspaceStlyes) {
-                            expect(workspaceStlyes.length).to.be.equal(2);
-                            expect(workspaceStlyes[0].name).to.be.equal(style.name);
-                            expect(workspaceStlyes[1].name).to.be.equal(secondStyle.name);
+                    return gsRepository.createWorkspaceStyle(secondStyleConfig).then(function () {
+                        return gsRepository.getWorkspaceStyles().then(function (workspaceStyles) {
+                            expect(workspaceStyles.length).to.be.equal(2);
+                            expect(workspaceStyles[0].name).to.be.equal(style.name);
+                            expect(workspaceStyles[1].name).to.be.equal(secondStyle.name);
                             done();
                         });
                     });
@@ -304,6 +345,5 @@ describe("Geoserver functional tests ", function () {
         });
 
     });
-
 });
 

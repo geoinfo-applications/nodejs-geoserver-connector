@@ -237,7 +237,7 @@ module.exports = function GeoserverLayer() {
         };
 
         if (config.workspace) {
-            styleConfig.workspace = this.geoserver.workspace;
+            styleConfig.workspace = config.workspace;
         }
 
         return this.createGeoserverObject(config.styleType, styleConfig);
@@ -247,10 +247,15 @@ module.exports = function GeoserverLayer() {
 
         var styleName = config && config.name;
         var sldBody = config && config.sldBody;
-        var styleConfig = { name: styleName };
 
         if (!sldBody || !styleName) {
             return Q.reject(new Error("style name and sld content required"));
+        }
+
+        var styleConfig = { name: styleName };
+
+        if (config.workspace) {
+            styleConfig.workspace = config.workspace;
         }
 
         var restUrl = this.resolver.get(config.styleType, styleConfig);

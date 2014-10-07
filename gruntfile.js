@@ -37,7 +37,7 @@ module.exports = function (grunt) {
                     exclude: /(^(node_modules|coverage|reports)\/)|.*(gruntfile.js|config.js)/
                 },
                 files: {
-                    reports: ["server/domain/**/*.js"]
+                    reports: ["server/**/*.js"]
                 }
             }
         },

@@ -41,12 +41,14 @@ TestUtils.prototype = {
     cleanWorkspace: function (done) {
         this.rebuildRepository();
         return this.gsRepository.deleteWorkspace().then(function () {
-            this.tearDownRepository();
-            if (done) {
-                done();
-            } else {
-                return new Q();
-            }
+            return this.gsRepository.deleteWorkspace(this.newWorkspace).then(function () {
+                this.tearDownRepository();
+                if (done) {
+                    done();
+                } else {
+                    return new Q();
+                }
+            }.bind(this));
         }.bind(this)).catch(done);
     },
 
