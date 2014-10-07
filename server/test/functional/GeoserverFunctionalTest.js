@@ -176,20 +176,22 @@ describe("Geoserver functional tests ", function () {
         describe("styles ", function () {
 
             var style = config.style;
-            var secondStyle = { name: style.name + "2" };
+            var secondStyle = { name: "secondTestStyle", filename: "secondTestStyle.sld" };
             var newWorkspaceStyle = { name: style.name, workspace: newWorkspace.name };
             var existingGlobalStyle = { name: "point" };
 
             var styleConfig = {
-                name: style.name,
-                sldBody: null
+                name: style.name
             };
-
+            var secondStyleConfig = {
+                name: secondStyle.name
+            };
             var newWorkspaceStyleConfig = _.clone(newWorkspaceStyle);
 
             before(function (done) {
                 testUtils.readStyleContent(function (sldFileContent) {
                     styleConfig.sldBody = sldFileContent;
+                    secondStyleConfig.sldBody = sldFileContent;
                     newWorkspaceStyleConfig.sldBody = sldFileContent;
                     done();
                 }, done);
@@ -267,21 +269,39 @@ describe("Geoserver functional tests ", function () {
                 }).catch(done);
             });
 
-            it("should fail if style already exists in workspace", function (done) {
-
-                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
-                    return gsRepository.createWorkspaceStyle(styleConfig).fail(function (err) {
-                        expect(err.message).to.match(/already exists in workspace/);
-                        done();
-                    });
-                }).catch(done);
-            });
-
             it("should create a workspace style in a default workspace", function (done) {
 
                 return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
                     return gsRepository.getWorkspaceStyle(style).then(function (styleObject) {
                         expect(styleObject.name).to.be.equal(style.name);
+                        done();
+                    });
+                }).catch(done);
+            });
+
+            it("should only upload new SLD file on style create if style already exists in workspace", function (done) {
+
+                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+
+                    var styleWithDifferentSLDFileConfig = {
+                        name: style.name,
+                        sldBody: styleConfig.sldBody
+                    };
+
+                    return gsRepository.createWorkspaceStyle(styleWithDifferentSLDFileConfig).then(function () {
+                        return gsRepository.getWorkspaceStyle(styleConfig).then(function (styleObject) {
+                            expect(styleObject.name).to.be.equal(style.name);
+                            done();
+                        });
+                    });
+                }).catch(done);
+            });
+
+            it("should delete a workspace style from a default workspace", function (done) {
+
+                return gsRepository.deleteWorkspaceStyle(style).then(function () {
+                    return gsRepository.getWorkspaceStyles().then(function (workspaceStyles) {
+                        expect(workspaceStyles.length).to.be.equal(0);
                         done();
                     });
                 }).catch(done);
@@ -297,7 +317,7 @@ describe("Geoserver functional tests ", function () {
                 }).catch(done);
             });
 
-            it("should delete a workspace style in a non-default workspace", function (done) {
+            it("should delete a workspace style from a non-default workspace", function (done) {
 
                 return createStyleInNonDefaultWorkspace().then(function () {
                     return gsRepository.deleteWorkspaceStyle(newWorkspaceStyle).then(function () {
@@ -312,12 +332,6 @@ describe("Geoserver functional tests ", function () {
             it("should get all workspace styles", function (done) {
 
                 return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
-
-                    var secondStyleConfig = {
-                        name: secondStyle.name,
-                        sldBody: styleConfig.sldBody
-                    };
-
                     return gsRepository.createWorkspaceStyle(secondStyleConfig).then(function () {
                         return gsRepository.getWorkspaceStyles().then(function (workspaceStyles) {
                             expect(workspaceStyles.length).to.be.equal(2);

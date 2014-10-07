@@ -40,7 +40,6 @@ module.exports = function GeoserverLayer() {
 
     this.createGlobalStyle = function (config) {
         this.defineGlobalStyle(config);
-
         return this.globalStyleExists(config).then(function (exists) {
             if (exists) {
                 return this.uploadGlobalStyleContent(config);
@@ -99,7 +98,13 @@ module.exports = function GeoserverLayer() {
 
     this.createWorkspaceStyle = function (config) {
         this.defineWorkspaceStyle(config);
-        return this.createStyle(config);
+        return this.workspaceStyleExists(config).then(function (exists) {
+            if (exists) {
+                return this.uploadWorkspaceStyleContent(config);
+            } else {
+                return this.createStyle(config);
+            }
+        }.bind(this));
     };
 
     this.createWorkspaceStyleConfiguration = function (config) {
@@ -116,7 +121,6 @@ module.exports = function GeoserverLayer() {
         if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
-
         return this.workspaceStyleExists(config).then(function (exists) {
             if (exists) {
                 return this.deleteGeoserverObject(this.types.WORKSPACESTYLE, config);
@@ -127,7 +131,6 @@ module.exports = function GeoserverLayer() {
 
 
     this.getLayerDefaultStyle = function (config) {
-
         if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
@@ -137,7 +140,6 @@ module.exports = function GeoserverLayer() {
     };
 
     this.getLayerStyles = function (config) {
-
         if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
@@ -152,11 +154,9 @@ module.exports = function GeoserverLayer() {
         if (!styleName) {
             styleName = this.DEFAULT_STYLE;
         }
-
         if (nameDoesntExist(config)) {
             return Q.reject(new Error("style name required"));
         }
-
         var updateLayerConfig = {
             layer: {
                 defaultStyle: {
@@ -165,7 +165,6 @@ module.exports = function GeoserverLayer() {
             },
             name: config.name
         };
-
         return this.updateLayer(updateLayerConfig);
     };
 
@@ -174,7 +173,6 @@ module.exports = function GeoserverLayer() {
         if (nameDoesntExist(config) && !styleName) {
             return rejectRequest("layer and style name required");
         }
-
         var updateLayerConfig = {
             layer: {
                 defaultStyle: {
@@ -184,7 +182,6 @@ module.exports = function GeoserverLayer() {
             },
             name: config.name
         };
-
         return this.updateLayer(updateLayerConfig);
     };
 
@@ -259,7 +256,6 @@ module.exports = function GeoserverLayer() {
         }
 
         var restUrl = this.resolver.get(config.styleType, styleConfig);
-
         var deferred = Q.defer();
 
         function response(err, resp, body) {
