@@ -5,7 +5,6 @@ var _ = require("underscore");
 
 var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
 var TestUtils = require("../../TestUtils.js");
-var GeoserverMockServer = require("../../test-server.js");
 var config = require("../../config");
 
 describe("Geoserver LegendGraphic tests", function () {
@@ -52,14 +51,6 @@ describe("Geoserver LegendGraphic tests", function () {
             expect(function () {
                 gsRepository.legend.getRuleUrl(ruleWithoutStyle);
             }).to.throw("rule and style name required");
-        });
-
-        it("getRuleUrl should return valid getLegendGraphic for rule url ", function () {
-
-            var legendUrl = gsRepository.legend.getRuleUrl(rule);
-            var expectedUrl = gsRepository.legend.baseURL + parametersWithStyle.join("&");
-
-            expect(legendUrl).to.be.equal(expectedUrl);
         });
 
         it("getRuleUrl should return valid getLegendGraphic for rule url ", function () {
