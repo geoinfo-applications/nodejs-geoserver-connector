@@ -16,8 +16,6 @@ describe("Geoserver LegendGraphic tests", function () {
     var gsRepository = testUtils.gsRepository;
     var legend = gsRepository.legend;
 
-    var geoserverMockServer;
-
     // var layer = config.layer;
     var style = config.style;
     var rule = config.rule;
@@ -35,21 +33,8 @@ describe("Geoserver LegendGraphic tests", function () {
     var ruleWithoutStyle = _.omit(_.clone(rule), "style");
     var parametersWithStyle = parameters.concat(["STYLE=" + style.name]);
 
-    before(function (done) {
-        geoserverMockServer = new GeoserverMockServer();
-        geoserverMockServer.addDefaultRequestHandlers();
-        geoserverMockServer.listen(done);
-    });
-
-    after(function () {
-        geoserverMockServer.tearDown();
-    });
-
-    beforeEach(function (done) {
+    beforeEach(function () {
         gsRepository = new GeoserverRepository(config.unit_test);
-        gsRepository.initializeWorkspace().then(function () {
-            done();
-        });
     });
 
     afterEach(function () {
@@ -67,6 +52,14 @@ describe("Geoserver LegendGraphic tests", function () {
             expect(function () {
                 gsRepository.legend.getRuleUrl(ruleWithoutStyle);
             }).to.throw("rule and style name required");
+        });
+
+        it("getRuleUrl should return valid getLegendGraphic for rule url ", function () {
+
+            var legendUrl = gsRepository.legend.getRuleUrl(rule);
+            var expectedUrl = gsRepository.legend.baseURL + parametersWithStyle.join("&");
+
+            expect(legendUrl).to.be.equal(expectedUrl);
         });
 
         it("getRuleUrl should return valid getLegendGraphic for rule url ", function () {
