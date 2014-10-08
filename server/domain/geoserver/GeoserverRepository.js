@@ -12,6 +12,8 @@ var GeoserverWorkspace = require("./GeoserverWorkspace.js");
 var GeoserverFeatureType = require("./GeoserverFeatureType.js");
 var GeoserverLayer = require("./GeoserverLayer.js");
 var GeoserverStyle = require("./GeoserverStyle.js");
+var GeoserverLegend = require("./GeoserverLegend.js");
+
 
 function GeoserverRepository(config) {
 
@@ -32,8 +34,11 @@ function GeoserverRepository(config) {
     }
     this.db.dbtype = "postgis";
 
-    this.baseURL = util.format("http://%s:%d/" + this.geoserver.context + "rest",
+    this.baseURL = util.format("http://%s:%d/" + this.geoserver.context,
         this.geoserver.host, this.geoserver.port);
+
+    this.restURL = this.baseURL + "rest";
+    this.wmsURL = this.baseURL + "wms?";
 
     this.timeout = this.geoserver.timeout || 5000;
 
@@ -44,9 +49,13 @@ function GeoserverRepository(config) {
     });
 
     this.resolver = new GeoserverResolver({
-        baseURL: this.baseURL,
+        restURL: this.restURL,
         workspace: this.geoserver.workspace,
         datastore: this.geoserver.datastore
+    });
+
+    this.legend = new GeoserverLegend({
+        wmsURL: this.wmsURL
     });
 
     this.geoserverDetails = null;
@@ -105,7 +114,7 @@ GeoserverRepository.prototype = {
         }
 
         this.dispatcher.get({
-            url: this.baseURL + this.resolver.restAPI.about,
+            url: this.restURL + this.resolver.restAPI.about,
             callback: response
         });
 

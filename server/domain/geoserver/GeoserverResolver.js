@@ -7,7 +7,7 @@ function GeoserverResolver(geoserverRepositoryConfig) {
 
     this.geoserverConfig = _.extend({}, geoserverRepositoryConfig);
 
-    this.baseURL = this.geoserverConfig.baseURL;
+    this.baseURL = this.geoserverConfig.restURL;
     this.datastore = this.geoserverConfig.datastore;
     this.workspace = this.geoserverConfig.workspace;
 

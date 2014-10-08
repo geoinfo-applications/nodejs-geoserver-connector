@@ -16,8 +16,6 @@ function GeoserverDispatcher(geoserverRepositoryConfig) {
 
 GeoserverDispatcher.prototype = {
 
-
-
     get: function (config) {
 
         var geoserverRestCall = config.url;

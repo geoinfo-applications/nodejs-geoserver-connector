@@ -43,7 +43,7 @@ describe("Geoserver Resolver unit tests ", function () {
 
     function createGeoserverResolver() {
         resolver = new GeoserverResolver({
-            baseURL: geoserverRepository.baseURL,
+            baseURL: geoserverRepository.restURL,
             workspace: geoserverRepository.geoserver.workspace,
             datastore: geoserverRepository.geoserver.datastore
         });
