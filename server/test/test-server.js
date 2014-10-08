@@ -26,7 +26,9 @@ function GeoserverMockServer() {
     } else {
         this.gsOptions.context = "";
     }
-    this.baseURL = "/" + this.gsOptions.context + "rest";
+    this.baseURL = "/" + this.gsOptions.context;
+    this.restURL = this.baseURL + "rest";
+    this.wmsURL = this.baseURL + "wms";
 
     this.geoserverRestGetAPI = {
         getLayerStyles: "/layers/:layer/styles",
@@ -63,6 +65,10 @@ function GeoserverMockServer() {
 
         uploadGlobalStyle: "/styles/:style",
         uploadWorkspaceStyle: "/workspaces/:ws/styles/:style"
+    };
+
+    this.geoserverWmsAPI = {
+        getLegendGraphic: "/wms?REQUEST=GetLegendGraphic*"
     };
 
     this.files = {
@@ -178,7 +184,6 @@ function GeoserverMockServer() {
         this.handlers[key] = this.handlers[key].bind(this);
     }, this);
 
-
 }
 
 
@@ -200,54 +205,50 @@ GeoserverMockServer.prototype = {
         }
     },
 
+    getRestUrl: function (restCall) {
+        return this.restURL + restCall;
+    },
+
     addDefaultRequestHandlers: function () {
 
-        function checkJSONHeaders(req, res) {
-            if (isContentTypeHeaderJSON(req) && isAcceptHeaderJSON(req)) {
-                res.status(200).json(true);
-            } else {
-                res.status(404).json("Content-type/Accept headers must be json");
-            }
-        }
-
         _.forEach(this.geoserverRestGetAPI, function (geoserverAPICall) {
-            this.gsMockServer.get(this.baseURL + geoserverAPICall, function (req, res) {
+            this.gsMockServer.get(this.getRestUrl(geoserverAPICall), function (req, res) {
                 checkJSONHeaders(req, res);
             });
         }.bind(this));
 
         _.forEach(this.geoserverRestPostAPI, function (geoserverAPICall) {
-            this.gsMockServer.post(this.baseURL + geoserverAPICall, function (req, res) {
+            this.gsMockServer.post(this.getRestUrl(geoserverAPICall), function (req, res) {
                 res.status(201).json(true);
             });
         }.bind(this));
 
         _.forEach(this.geoserverRestPutAPI, function (geoserverAPICall) {
-            this.gsMockServer.put(this.baseURL + geoserverAPICall, function (req, res) {
+            this.gsMockServer.put(this.getRestUrl(geoserverAPICall), function (req, res) {
                 res.status(200).json(true);
             });
         }.bind(this));
 
         _.forEach(this.geoserverRestDeleteAPI, function (geoserverAPICall) {
-            this.gsMockServer.delete(this.baseURL + geoserverAPICall, function (req, res) {
+            this.gsMockServer.delete(this.getRestUrl(geoserverAPICall), function (req, res) {
                 checkJSONHeaders(req, res);
             });
         }.bind(this));
 
-        this.gsMockServer.route(this.baseURL + this.geoserverRestAPI.getLayer)
+        this.gsMockServer.route(this.getRestUrl(this.geoserverRestAPI.getLayer))
             .get(this.handlers.getLayer)
             .put(this.handlers.putLayer);
 
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyle, this.handlers.getStyle);
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyle, this.handlers.getStyle);
+        this.gsMockServer.get(this.getRestUrl(this.geoserverRestAPI.getGlobalStyle), this.handlers.getStyle);
+        this.gsMockServer.get(this.getRestUrl(this.geoserverRestAPI.getWorkspaceStyle), this.handlers.getStyle);
 
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getGlobalStyles, this.handlers.getStyles);
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getWorkspaceStyles, this.handlers.getStyles);
+        this.gsMockServer.get(this.getRestUrl(this.geoserverRestAPI.getGlobalStyles), this.handlers.getStyles);
+        this.gsMockServer.get(this.getRestUrl(this.geoserverRestAPI.getWorkspaceStyles), this.handlers.getStyles);
 
-        this.gsMockServer.put(this.baseURL + this.geoserverRestAPI.uploadGlobalStyle, this.handlers.putStyle);
-        this.gsMockServer.put(this.baseURL + this.geoserverRestAPI.uploadWorkspaceStyle, this.handlers.putStyle);
+        this.gsMockServer.put(this.getRestUrl(this.geoserverRestAPI.uploadGlobalStyle), this.handlers.putStyle);
+        this.gsMockServer.put(this.getRestUrl(this.geoserverRestAPI.uploadWorkspaceStyle), this.handlers.putStyle);
 
-        this.gsMockServer.get(this.baseURL + this.geoserverRestAPI.getInstanceDetails, function (req, res) {
+        this.gsMockServer.get(this.getRestUrl(this.geoserverRestAPI.getInstanceDetails), function (req, res) {
             res.json({
                 about: {
                     resource: [
@@ -256,14 +257,27 @@ GeoserverMockServer.prototype = {
                 }
             });
         });
+
+        this.gsMockServer.get(this.wmsURL + this.geoserverWmsAPI.getLegendGraphic, function (req, res) {
+            checkJSONHeaders(req, res);
+        });
+
     },
 
     addTimeoutRequestHandler: function () {
-        this.gsMockServer.get(this.baseURL + "/*", function () {
+        this.gsMockServer.get(this.restURL + "/*", function () {
             // timeout
         });
     }
 };
+
+function checkJSONHeaders(req, res) {
+    if (isContentTypeHeaderJSON(req) && isAcceptHeaderJSON(req)) {
+        res.status(200).json(true);
+    } else {
+        res.status(404).json("Content-type/Accept headers must be json");
+    }
+}
 
 function isContentTypeHeaderJSON(req) {
     return req.get("Content-Type") === "application/json";

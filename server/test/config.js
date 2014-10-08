@@ -56,4 +56,9 @@ config.style = {
     filename: "teststyle.sld"
 };
 
+config.rule = {
+    name: "testRule",
+    style: config.style.name
+};
+
 module.exports = config;
