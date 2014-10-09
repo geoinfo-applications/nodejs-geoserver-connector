@@ -38,7 +38,6 @@ function GeoserverRepository(config) {
         this.geoserver.host, this.geoserver.port);
 
     this.restURL = this.baseURL + "rest";
-    this.wmsURL = this.baseURL + "wms?";
 
     this.timeout = this.geoserver.timeout || 5000;
 
@@ -55,7 +54,7 @@ function GeoserverRepository(config) {
     });
 
     this.legend = new GeoserverLegend({
-        wmsURL: this.wmsURL
+        baseURL: this.baseURL
     });
 
     this.geoserverDetails = null;

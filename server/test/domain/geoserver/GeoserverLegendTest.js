@@ -25,7 +25,7 @@ describe("Geoserver LegendGraphic tests", function () {
         "FORMAT=" + legend.defaultImageFormat,
         "WIDTH=" + legend.defaultWidth,
         "HEIGHT=" + legend.defaultHeight,
-        "LAYER=" + legend.WORKSPACE + ":" + legend.DEFAULT_LAYER,
+        "LAYER=" + legend.DEFAULT_LAYER,
         "RULE=" + rule.name
     ];
 
@@ -43,20 +43,26 @@ describe("Geoserver LegendGraphic tests", function () {
     describe("rules ", function () {
 
         it("formatParameters should return valid parameters array for a rule", function () {
-            var urlParameters = gsRepository.legend.formatParameters(rule);
+            var urlParameters = legend.formatParameters(rule);
             expect(urlParameters).to.be.eql(parametersWithStyle);
+        });
+
+        it("getBaseURL should return correct workspace url ", function () {
+            var expectedURL = gsRepository.baseURL + legend.DEFAULT_WORKSPACE + "/wms?"
+            var baseURL = legend.getBaseURL();
+            expect(baseURL).to.be.eql(expectedURL);
         });
 
         it("getRuleUrl should fail if rule or style name is missing ", function () {
             expect(function () {
-                gsRepository.legend.getRuleUrl(ruleWithoutStyle);
+                legend.getRuleUrl(ruleWithoutStyle);
             }).to.throw("rule and style name required");
         });
 
         it("getRuleUrl should return valid getLegendGraphic for rule url ", function () {
 
-            var legendUrl = gsRepository.legend.getRuleUrl(rule);
-            var expectedUrl = gsRepository.legend.baseURL + parametersWithStyle.join("&");
+            var legendUrl = legend.getRuleUrl(rule);
+            var expectedUrl = legend.getBaseURL(rule) + parametersWithStyle.join("&");
 
             expect(legendUrl).to.be.equal(expectedUrl);
         });
