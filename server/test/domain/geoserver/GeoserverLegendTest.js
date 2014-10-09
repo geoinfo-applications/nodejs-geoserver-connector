@@ -48,7 +48,7 @@ describe("Geoserver LegendGraphic tests", function () {
         });
 
         it("getBaseURL should return correct workspace url ", function () {
-            var expectedURL = gsRepository.baseURL + legend.DEFAULT_WORKSPACE + "/wms?"
+            var expectedURL = gsRepository.baseURL + legend.DEFAULT_WORKSPACE + "/wms?";
             var baseURL = legend.getBaseURL();
             expect(baseURL).to.be.eql(expectedURL);
         });

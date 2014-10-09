@@ -25,9 +25,9 @@ GeoserverLegend.prototype = {
         return this.getBaseURL(config) + this.formatParameters(config).join("&");
     },
 
-    getBaseURL : function (config) {
+    getBaseURL: function (config) {
         var workspace = config && config.workspace || this.DEFAULT_WORKSPACE;
-        return this.baseURL + workspace + "/wms?"
+        return this.baseURL + workspace + "/wms?";
     },
 
     formatParameters: function (config) {
