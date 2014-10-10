@@ -143,6 +143,22 @@ describe("Geoserver functional tests ", function () {
                 }).catch(done);
             });
 
+            it("should create non-default datastore in non-default workspace", function (done) {
+
+                gsRepository.createWorkspace(newWorkspace).then(function () {
+
+                    var datastoreConfig = _.extend({}, newDatastore, { workspace: newWorkspace.name });
+
+                    return gsRepository.createDatastore(datastoreConfig).then(function () {
+                        return gsRepository.getDatastore(datastoreConfig).then(function (datastore) {
+                            expect(datastore.name).to.be.equal(datastoreConfig.name);
+                            expect(datastore.workspace.name).to.be.equal(datastoreConfig.workspace);
+                            done();
+                        });
+                    });
+                }).catch(done);
+            });
+
         });
 
         describe("feature type ", function () {

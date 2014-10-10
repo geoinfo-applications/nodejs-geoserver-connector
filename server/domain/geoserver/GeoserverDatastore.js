@@ -1,5 +1,7 @@
 "use strict";
 
+
+// TODO clean up a bit
 module.exports = function GeoserverDatastore() {
 
     this.createDatastore = function (config) {
@@ -21,7 +23,8 @@ module.exports = function GeoserverDatastore() {
                     workspace: { name: wsName },
                     connectionParameters: dbParams
                 },
-                name: storeName
+                name: storeName,
+                workspace: wsName
             };
 
             return this.createGeoserverObject(this.types.DATASTORE, datastoreConfig);
@@ -31,6 +34,16 @@ module.exports = function GeoserverDatastore() {
 
     this.datastoreExists = function (config) {
         return this.geoserverObjectExists(this.types.DATASTORE, config);
+    };
+
+    this.getDatastore = function (config) {
+        var storeName = config && config.name || this.geoserver.datastore;
+        var wsName = config && config.workspace || this.geoserver.workspace;
+
+        var datastoreConfig = { name: storeName, workspace: wsName };
+        return this.getGeoserverObject(this.types.DATASTORE, datastoreConfig).then(function (datastoreObject) {
+            return datastoreObject.dataStore;
+        });
     };
 
     this.deleteDatastore = function (config) {
