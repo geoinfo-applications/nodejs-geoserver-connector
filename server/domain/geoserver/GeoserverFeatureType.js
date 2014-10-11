@@ -17,7 +17,9 @@ module.exports = function GeoserverFeatureType() {
     }
 
     this.getFeatureType = function (config) {
-        return this.getGeoserverObject(this.types.FEATURETYPE, config);
+        return this.getGeoserverObject(this.types.FEATURETYPE, config).then(function (featureTypeObject) {
+            return featureTypeObject.featureType;
+        })
     };
 
     this.createFeatureType = function (config) {
@@ -90,9 +92,9 @@ module.exports = function GeoserverFeatureType() {
             return deferred.promise;
         }.bind(this);
 
-        function updateFeatureTypeConfig(config) {
+        function updateFeatureTypeConfig(featureType) {
             var newConfig = {};
-            newConfig.featureType = _.extend({}, config.featureType);
+            newConfig.featureType = _.extend({}, featureType);
             newConfig.featureType.name = newFeatureTypeName;
             newConfig.featureType.nativeName = newFeatureTypeName;
             return renameFeatureType(newConfig);
