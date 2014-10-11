@@ -7,7 +7,7 @@ var TestUtils = require("../../TestUtils.js");
 var GeoserverMockServer = require("../../test-server.js");
 var config = require("../../config");
 
-describe("Geoserver unit tests", function () {
+describe("Geoserver repository unit tests", function () {
 
     this.timeout(500);
 

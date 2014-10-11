@@ -2,17 +2,19 @@
 
 var Q = require("q");
 
-function nameDoesntExist(config) {
-    if (!config || !config.name) {
-        return true;
-    }
-}
-
-function rejectRequest(errorMessage) {
-    return Q.reject(new Error(errorMessage));
-}
 
 module.exports = function GeoserverLayer() {
+
+    function nameDoesntExist(config) {
+        if (!config || !config.name) {
+            return true;
+        }
+        return false;
+    }
+
+    function rejectRequest(errorMessage) {
+        return Q.reject(new Error(errorMessage));
+    }
 
     this.getGlobalStyle = function (config) {
         if (nameDoesntExist(config)) {

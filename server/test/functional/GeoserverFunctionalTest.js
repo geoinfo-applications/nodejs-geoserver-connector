@@ -167,10 +167,18 @@ describe("Geoserver functional tests ", function () {
 
                 return gsRepository.featureTypeExists(layer).then(function (exists) {
                     if (exists) {
-                        done(new Error("Layer should not exist in store!"));
+                        done(new Error("feature type should not exist in store!"));
                     } else {
                         done();
                     }
+                }).catch(done);
+            });
+
+            it("should fail if name is not supplied", function (done) {
+
+                return gsRepository.createFeatureType({}).fail(function (err) {
+                    expect(err.message).to.match(/name required/);
+                    done();
                 }).catch(done);
             });
 
