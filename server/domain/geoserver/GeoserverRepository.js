@@ -54,7 +54,8 @@ function GeoserverRepository(config) {
     });
 
     this.legend = new GeoserverLegend({
-        baseURL: this.baseURL
+        baseURL: this.baseURL,
+        workspace: this.geoserver.workspace
     });
 
     this.geoserverDetails = null;

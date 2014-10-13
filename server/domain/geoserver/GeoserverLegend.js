@@ -5,8 +5,7 @@ var _ = require("underscore");
 function GeoserverLegend(geoserverConfig) {
 
     this.baseURL = geoserverConfig.baseURL;
-    this.DEFAULT_WORKSPACE = "visualizers";
-    this.DEFAULT_LAYER = "DEFAULT_LEGEND_LAYER";
+    this.defaultWorkspace = geoserverConfig.workspace;
 
     this.defaultWidth = 200;
     this.defaultHeight = 100;
@@ -19,22 +18,17 @@ GeoserverLegend.prototype = {
 
     getRuleUrl: function (config) {
         if (this.requiredRuleParametersDontExist(config)) {
-            return this.rejectRequest("rule and style name required");
+            return this.rejectRequest("rule, style and layer name required");
         }
-
         return this.getBaseURL(config) + this.formatParameters(config).join("&");
     },
 
     getBaseURL: function (config) {
-        var workspace = config && config.workspace || this.DEFAULT_WORKSPACE;
+        var workspace = config && config.workspace || this.defaultWorkspace;
         return this.baseURL + workspace + "/wms?";
     },
 
     formatParameters: function (config) {
-
-        var ruleName = config.name;
-        var styleName = config.style;
-        var layer = config.layer || this.DEFAULT_LAYER;
 
         var paramaters = [
             "REQUEST=GetLegendGraphic",
@@ -42,8 +36,11 @@ GeoserverLegend.prototype = {
             "FORMAT=" + (config.format || this.defaultImageFormat),
             "WIDTH=" + (config.width || this.defaultWidth),
             "HEIGHT=" + (config.height || this.defaultHeight),
-            "LAYER=" + layer
+            "LAYER=" + config.layer
         ];
+
+        var ruleName = config.name;
+        var styleName = config.style;
 
         if (ruleName) {
             paramaters.push("RULE=" + ruleName);
@@ -55,7 +52,7 @@ GeoserverLegend.prototype = {
     },
 
     requiredRuleParametersDontExist: function (config) {
-        if (!config || !config.name || !config.style) {
+        if (!config || !config.name || !config.style || !config.layer) {
             return true;
         }
     },
