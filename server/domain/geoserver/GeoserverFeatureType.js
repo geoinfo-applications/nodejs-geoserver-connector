@@ -19,7 +19,7 @@ module.exports = function GeoserverFeatureType() {
     this.getFeatureType = function (config) {
         return this.getGeoserverObject(this.types.FEATURETYPE, config).then(function (featureTypeObject) {
             return featureTypeObject.featureType;
-        })
+        });
     };
 
     this.createFeatureType = function (config) {
@@ -100,12 +100,7 @@ module.exports = function GeoserverFeatureType() {
             return renameFeatureType(newConfig);
         }
 
-        return this.getFeatureType(featureTypeConfig)
-            .then(updateFeatureTypeConfig)
-            .catch(function (err) {
-                console.log(err);
-                return Q.reject(err);
-            });
+        return this.getFeatureType(featureTypeConfig).then(updateFeatureTypeConfig);
     };
 
     this.recalculateFeatureTypeBBox = function (config) {
