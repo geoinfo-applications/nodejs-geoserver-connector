@@ -93,6 +93,7 @@ module.exports = function (grunt) {
                 src: [ "./server/test/**" ],
                 options: {
                     reporter: "mocha-multi",
+                    reportFormats: [ "lcov", "clover" ],
                     //  excludes: ["**/integration/"],
                     recursive: true,
                     print: "summary",
