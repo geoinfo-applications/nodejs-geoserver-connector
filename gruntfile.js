@@ -132,7 +132,7 @@ module.exports = function (grunt) {
             }
         },
 
-        clean: ["./mocha.json"],
+        clean: ["./mocha.json", "./coverage/server/clover.xml"],
 
         jscs: {
             src: jsFiles,
