@@ -49,10 +49,9 @@ describe("Geoserver repository unit tests", function () {
                 done(new Error("repository shouldn't be initialized "));
             }).catch(function (err) {
                 expect(gsRepository.isEnabled).to.be.equal(false);
-                expect(err.message).to.be.equal("ETIMEDOUT");
+                expect(err.message).to.match(/ETIMEDOUT/);
                 done();
             });
-
         });
     });
 
@@ -92,7 +91,6 @@ describe("Geoserver repository unit tests", function () {
                     expect(gsRepository.isEnabled).to.be.equal(true);
                     done();
                 }).catch(done);
-
             });
 
             it("should correctly initialize new Geoserver instance ", function (done) {
@@ -102,7 +100,6 @@ describe("Geoserver repository unit tests", function () {
                     expect(gsInstance.geoserverDetails["@name"]).to.be.equal("GeoServer");
                     done();
                 }).catch(done);
-
             });
         });
 

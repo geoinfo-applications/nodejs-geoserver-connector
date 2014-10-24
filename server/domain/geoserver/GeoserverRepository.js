@@ -83,7 +83,7 @@ GeoserverRepository.prototype = {
 
             if (responseHasError()) {
                 logError(err, body);
-                return deferred.reject(err);
+                return deferred.reject(new Error(err));
             } else {
                 updateGeoserverStatus(body);
                 logInstanceInitialization();
@@ -139,7 +139,7 @@ GeoserverRepository.prototype = {
             }.bind(this))
             .catch(function (err) {
                 console.log(err);
-                return Q.reject(err);
+                return Q.reject(new Error(err));
             });
     },
 
@@ -161,7 +161,7 @@ GeoserverRepository.prototype = {
         function response(err, resp, body) {
 
             if (err) {
-                return deferred.reject(err);
+                return deferred.reject(new Error(err));
             }
             if (resp.statusCode !== 200) {
                 // warn.log("Geoserver object doesn't exist >", body);
@@ -192,7 +192,7 @@ GeoserverRepository.prototype = {
         function response(err, resp, body) {
 
             if (err) {
-                return deferred.reject(err);
+                return deferred.reject(new Error(err));
             }
             if (resp.statusCode !== 200) {
                 // warn.log("Geoserver object doesn't exist >", body);
@@ -214,7 +214,7 @@ GeoserverRepository.prototype = {
         function response(err, resp, body) {
 
             if (err) {
-                return deferred.reject(err);
+                return deferred.reject(new Error(err));
             }
             if (resp.statusCode !== 201) {
                 console.error("Error creating Geoserver object", type, body);
@@ -255,7 +255,7 @@ GeoserverRepository.prototype = {
         function response(err, resp, body) {
 
             if (err) {
-                return deferred.reject(err);
+                return deferred.reject(new Error(err));
             }
             if (resp.statusCode !== 200) {
                 console.log("Error deleting Geoserver object >", type, body);

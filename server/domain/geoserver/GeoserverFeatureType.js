@@ -75,11 +75,11 @@ module.exports = function GeoserverFeatureType() {
 
             function response(err, resp, body) {
                 if (err) {
-                    return deferred.reject(err);
+                    return deferred.reject(new Error(err));
                 }
                 if (resp.statusCode !== 200) {
                     console.error("Error rename Geoserver featureType >", body);
-                    return deferred.reject(false);
+                    return deferred.reject(new Error(body));
                 }
                 deferred.resolve(true);
             }

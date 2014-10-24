@@ -186,7 +186,6 @@ function GeoserverMockServer() {
 
 }
 
-
 GeoserverMockServer.prototype = {
 
     listen: function (done) {
