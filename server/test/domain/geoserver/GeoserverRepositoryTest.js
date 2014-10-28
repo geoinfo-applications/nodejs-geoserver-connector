@@ -95,9 +95,9 @@ describe("Geoserver repository unit tests", function () {
 
             it("should correctly initialize new Geoserver instance ", function (done) {
 
-                gsRepository.initializeWorkspace().then(function (gsInstance) {
-                    expect(gsInstance.isEnabled).to.be.equal(true);
-                    expect(gsInstance.geoserverDetails["@name"]).to.be.equal("GeoServer");
+                gsRepository.initializeWorkspace().then(function () {
+                    expect(gsRepository.isEnabled).to.be.equal(true);
+                    expect(gsRepository.geoserverDetails["@name"]).to.be.equal("GeoServer");
                     done();
                 }).catch(done);
             });

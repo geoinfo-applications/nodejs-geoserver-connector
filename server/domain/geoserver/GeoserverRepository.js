@@ -132,9 +132,6 @@ GeoserverRepository.prototype = {
         return this.isGeoserverRunning()
             .then(createDefaultWorkspace)
             .then(createDefaultDatastore)
-            .then(function () {
-                return this;
-            }.bind(this))
             .catch(function (err) {
                 console.log(err);
                 return Q.reject(new Error(err));

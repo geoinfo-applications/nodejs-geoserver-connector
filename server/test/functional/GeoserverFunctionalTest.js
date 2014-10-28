@@ -30,9 +30,9 @@ describe("Geoserver functional tests ", function () {
 
         it("should correctly fetch Geoserver details upon initialization", function (done) {
 
-            gsRepository.initializeWorkspace().then(function (gsInstance) {
-                expect(gsInstance.isEnabled).to.be.equal(true);
-                expect(gsInstance.geoserverDetails["@name"]).to.be.equal("GeoServer");
+            gsRepository.initializeWorkspace().then(function () {
+                expect(gsRepository.isEnabled).to.be.equal(true);
+                expect(gsRepository.geoserverDetails["@name"]).to.be.equal("GeoServer");
                 done();
             }).catch(done);
         });
