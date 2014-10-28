@@ -152,12 +152,8 @@ module.exports = function GeoserverLayer() {
     };
 
     this.setLayerDefaultStyle = function (config, styleName) {
-
-        if (!styleName) {
-            styleName = this.DEFAULT_STYLE;
-        }
-        if (nameDoesntExist(config)) {
-            return Q.reject(new Error("style name required"));
+        if (!styleName || nameDoesntExist(config)) {
+            return Q.reject(new Error("layer and style name required"));
         }
         var updateLayerConfig = {
             layer: {

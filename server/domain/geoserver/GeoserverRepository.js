@@ -69,8 +69,6 @@ function GeoserverRepository(config) {
         STYLE: "Style",
         WORKSPACESTYLE: "WorkspaceStyle"
     };
-
-    this.DEFAULT_STYLE = "DEFAULT_STYLE";
 }
 
 GeoserverRepository.prototype = {
