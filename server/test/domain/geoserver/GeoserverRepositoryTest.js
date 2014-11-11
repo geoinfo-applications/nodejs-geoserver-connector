@@ -101,6 +101,13 @@ describe("Geoserver repository unit tests", function () {
                     done();
                 }).catch(done);
             });
+
+            it("should reload catalog ", function (done) {
+
+                gsRepository.reloadCatalog().then(function () {
+                    done();
+                }).catch(done);
+            });
         });
 
         describe("testing Geoserver CRUD methods", function () {

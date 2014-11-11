@@ -14,6 +14,7 @@ function GeoserverResolver(geoserverRepositoryConfig) {
     this.restAPI = {
 
         about: "/about/version",
+        reloadCatalog: "/reload",
 
         getWorkspaces: "/workspaces",
         getWorkspace: "/workspaces/%s",

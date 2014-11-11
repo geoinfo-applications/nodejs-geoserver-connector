@@ -62,6 +62,7 @@ function GeoserverMockServer() {
         getWorkspaceStyle: "/workspaces/:ws/styles/:style",
         getWorkspaceStyles: "/workspaces/:ws/styles",
         getInstanceDetails: "/about/version",
+        reloadCatalog: "/reload",
 
         uploadGlobalStyle: "/styles/:style",
         uploadWorkspaceStyle: "/workspaces/:ws/styles/:style"
@@ -255,6 +256,10 @@ GeoserverMockServer.prototype = {
                     ]
                 }
             });
+        });
+
+        this.gsMockServer.post(this.getRestUrl(this.geoserverRestAPI.reloadCatalog), function (req, res) {
+            res.json(true);
         });
 
         this.gsMockServer.get(this.wmsURL + this.geoserverWmsAPI.getLegendGraphic, function (req, res) {

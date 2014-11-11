@@ -119,6 +119,35 @@ GeoserverRepository.prototype = {
         return deferred.promise;
     },
 
+    reloadCatalog: function () {
+        var deferred = Q.defer();
+        var self = this;
+
+        function response(err, resp, body) {
+            if (responseHasError()) {
+                logError(err, body);
+                return deferred.reject(new Error(err));
+            } else {
+                return deferred.resolve();
+            }
+            function responseHasError() {
+                return !!err || (resp && resp.statusCode !== 200);
+            }
+        }
+
+        function logError(error, requestBody) {
+            var errorMsg = (error && error.message) || requestBody;
+            console.error("Error reloading Geoserver catalog > " + self.baseURL, errorMsg);
+        }
+
+        this.dispatcher.post({
+            url: this.restURL + this.resolver.restAPI.reloadCatalog,
+            callback: response
+        });
+
+        return deferred.promise;
+    },
+
     initializeWorkspace: function () {
 
         var createDefaultWorkspace = function () {

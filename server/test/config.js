@@ -31,7 +31,7 @@ var config = {
             flat: dbConfig
         },
         geoserver: {
-            host: "localhost",
+            host: "192.168.110.5",
             port: 9090,
             context: "geoserver",
             timeout: 10 * 1000,
