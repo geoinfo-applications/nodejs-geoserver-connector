@@ -127,7 +127,13 @@ module.exports = function (grunt) {
         },
 
         env: {
-            dev: {
+            test: {
+                NODE_ENV: "test",
+                multi: "spec=- mocha-bamboo-reporter=-",
+                TESTSERVER_HOST: "192.168.110.5"
+            },
+            build: {
+                NODE_ENV: "test",
                 multi: "spec=- mocha-bamboo-reporter=-"
             }
         },
@@ -150,10 +156,10 @@ module.exports = function (grunt) {
     require("load-grunt-tasks")(grunt);
 
     grunt.registerTask("code-check", [ "jshint", "jscs", "todo" ]);
-    grunt.registerTask("istanbul", [ "env:dev", "mocha_istanbul" ]);
-    grunt.registerTask("coverage", [ "code-check", "env:dev", "mocha_istanbul", "plato" ]);
-    grunt.registerTask("mocha", [ "code-check", "mochaTest" ]);
-    grunt.registerTask("test", [ "code-check", "env:dev", "mocha_istanbul" ]);
-    grunt.registerTask("update", [ "npm-install", "clean", "todo", "david:check" ]);
+    grunt.registerTask("coverage", [ "code-check", "env:test", "mocha_istanbul", "plato" ]);
+    grunt.registerTask("mocha", [ "code-check", "env:test", "mochaTest" ]);
+    grunt.registerTask("test", [ "code-check", "env:test", "mocha_istanbul" ]);
+    grunt.registerTask("update", [ "npm-install", "clean", "david" ]);
+    grunt.registerTask("build", ["env:build", "update", "plato", "code-check", "mocha_istanbul"]);
 
 };
