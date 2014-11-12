@@ -121,31 +121,47 @@ GeoserverRepository.prototype = {
 
     reloadCatalog: function () {
         var deferred = Q.defer();
+
+        this.dispatcher.post({
+            url: this.restURL + this.resolver.restAPI.reloadCatalog,
+            callback: this.createResponseListener(deferred)
+        });
+
+        return deferred.promise;
+    },
+
+    resetCache: function () {
+        var deferred = Q.defer();
+
+        this.dispatcher.post({
+            url: this.restURL + this.resolver.restAPI.resetCache,
+            callback: this.createResponseListener(deferred)
+        });
+
+        return deferred.promise;
+    },
+
+    createResponseListener: function (deferred) {
         var self = this;
 
-        function response(err, resp, body) {
+        return function responseListener(err, resp, body) {
             if (responseHasError()) {
                 logError(err, body);
                 return deferred.reject(new Error(err));
             } else {
                 return deferred.resolve();
             }
+
             function responseHasError() {
                 return !!err || (resp && resp.statusCode !== 200);
             }
-        }
+
+        };
 
         function logError(error, requestBody) {
             var errorMsg = (error && error.message) || requestBody;
             console.error("Error reloading Geoserver catalog > " + self.baseURL, errorMsg);
         }
-
-        this.dispatcher.post({
-            url: this.restURL + this.resolver.restAPI.reloadCatalog,
-            callback: response
-        });
-
-        return deferred.promise;
     },
 
     initializeWorkspace: function () {

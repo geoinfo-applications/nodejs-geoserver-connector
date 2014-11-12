@@ -63,6 +63,7 @@ function GeoserverMockServer() {
         getWorkspaceStyles: "/workspaces/:ws/styles",
         getInstanceDetails: "/about/version",
         reloadCatalog: "/reload",
+        resetCache: "/reset",
 
         uploadGlobalStyle: "/styles/:style",
         uploadWorkspaceStyle: "/workspaces/:ws/styles/:style"
@@ -259,6 +260,10 @@ GeoserverMockServer.prototype = {
         });
 
         this.gsMockServer.post(this.getRestUrl(this.geoserverRestAPI.reloadCatalog), function (req, res) {
+            res.json(true);
+        });
+
+        this.gsMockServer.post(this.getRestUrl(this.geoserverRestAPI.resetCache), function (req, res) {
             res.json(true);
         });
 

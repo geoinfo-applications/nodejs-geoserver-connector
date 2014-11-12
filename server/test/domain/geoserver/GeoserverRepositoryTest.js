@@ -85,7 +85,7 @@ describe("Geoserver repository unit tests", function () {
                 done();
             });
 
-            it("should correctly fetch Geoserver details ", function (done) {
+            it("should correctly fetch Geoserver details", function (done) {
 
                 gsRepository.isGeoserverRunning().then(function () {
                     expect(gsRepository.isEnabled).to.be.equal(true);
@@ -93,7 +93,7 @@ describe("Geoserver repository unit tests", function () {
                 }).catch(done);
             });
 
-            it("should correctly initialize new Geoserver instance ", function (done) {
+            it("should correctly initialize new Geoserver instance", function (done) {
 
                 gsRepository.initializeWorkspace().then(function () {
                     expect(gsRepository.isEnabled).to.be.equal(true);
@@ -102,9 +102,16 @@ describe("Geoserver repository unit tests", function () {
                 }).catch(done);
             });
 
-            it("should reload catalog ", function (done) {
+            it("should reload catalog", function (done) {
 
                 gsRepository.reloadCatalog().then(function () {
+                    done();
+                }).catch(done);
+            });
+
+            it("should reset cache", function (done) {
+
+                gsRepository.resetCache().then(function () {
                     done();
                 }).catch(done);
             });

@@ -15,6 +15,7 @@ function GeoserverResolver(geoserverRepositoryConfig) {
 
         about: "/about/version",
         reloadCatalog: "/reload",
+        resetCache: "/reset",
 
         getWorkspaces: "/workspaces",
         getWorkspace: "/workspaces/%s",
