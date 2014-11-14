@@ -19,6 +19,7 @@ var config = {
             host: "localhost",
             port: 3003,
             context: "geoserver",
+            adminPath: "admin",
             timeout: 2000,
             user: "admin",
             pass: "geoserver",

@@ -102,8 +102,7 @@ describe("Geoserver Styles tests", function () {
 
         it("should create new global style configuration", function (done) {
 
-            gsRepository.createGlobalStyleConfiguration(style).then(function (result) {
-                expect(result).to.be.equal(true);
+            gsRepository.createGlobalStyleConfiguration(style).then(function () {
                 done();
             }).catch(done);
         });
@@ -161,8 +160,7 @@ describe("Geoserver Styles tests", function () {
         });
 
         it("should delete global style", function (done) {
-            gsRepository.deleteGlobalStyle(style).then(function (result) {
-                expect(result).to.be.equal(true);
+            gsRepository.deleteGlobalStyle(style).then(function () {
                 done();
             });
         });

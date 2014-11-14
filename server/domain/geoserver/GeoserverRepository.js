@@ -37,6 +37,10 @@ function GeoserverRepository(config) {
     this.baseURL = util.format("http://%s:%d/" + this.geoserver.context,
         this.geoserver.host, this.geoserver.port);
 
+    if (this.geoserver.adminPath) {
+        this.baseURL += this.geoserver.adminPath + "/";
+    }
+
     this.restURL = this.baseURL + "rest";
 
     this.timeout = this.geoserver.timeout || 5000;
@@ -124,7 +128,10 @@ GeoserverRepository.prototype = {
 
         this.dispatcher.post({
             url: this.restURL + this.resolver.restAPI.reloadCatalog,
-            callback: this.createResponseListener(deferred)
+            callback: this.createResponseListener({
+                deferred: deferred,
+                errorMessage: "Error reloading Geoserver catalog"
+            })
         });
 
         return deferred.promise;
@@ -135,14 +142,19 @@ GeoserverRepository.prototype = {
 
         this.dispatcher.post({
             url: this.restURL + this.resolver.restAPI.resetCache,
-            callback: this.createResponseListener(deferred)
+            callback: this.createResponseListener({
+                deferred: deferred,
+                errorMessage: "Error resetting Geoserver catalog"
+            })
         });
 
         return deferred.promise;
     },
 
-    createResponseListener: function (deferred) {
-        var self = this;
+    createResponseListener: function (config) {
+
+        var deferred = config.deferred;
+        var responseStatusCode = config.responseStatusCode || 200;
 
         return function responseListener(err, resp, body) {
             if (responseHasError()) {
@@ -153,15 +165,14 @@ GeoserverRepository.prototype = {
             }
 
             function responseHasError() {
-                return !!err || (resp && resp.statusCode !== 200);
+                return !!err || (resp && resp.statusCode !== responseStatusCode);
             }
 
+            function logError(error, requestBody) {
+                var errorMsg = (error && error.message) || requestBody;
+                console.error(config.errorMessage, errorMsg);
+            }
         };
-
-        function logError(error, requestBody) {
-            var errorMsg = (error && error.message) || requestBody;
-            console.error("Error reloading Geoserver catalog > " + self.baseURL, errorMsg);
-        }
     },
 
     initializeWorkspace: function () {
@@ -195,7 +206,6 @@ GeoserverRepository.prototype = {
     getGeoserverObject: function (type, config) {
 
         var deferred = Q.defer();
-
         var restUrl = this.resolver.get(type, config);
 
         function response(err, resp, body) {
@@ -219,27 +229,17 @@ GeoserverRepository.prototype = {
     updateGeoserverObject: function (type, config) {
 
         var deferred = Q.defer();
-
         var restUrl = this.resolver.get(type, config);
         var payload = JSON.stringify(config);
 
         this.dispatcher.put({
             url: restUrl,
             body: payload,
-            callback: response
+            callback: this.createResponseListener({
+                deferred: deferred,
+                errorMessage: "Error updating Geoserver object" + type
+            })
         });
-
-        function response(err, resp, body) {
-
-            if (err) {
-                return deferred.reject(new Error(err));
-            }
-            if (resp.statusCode !== 200) {
-                // warn.log("Geoserver object doesn't exist >", body);
-                return deferred.reject(new Error(body));
-            }
-            return deferred.resolve(true);
-        }
 
         return deferred.promise;
     },
@@ -251,23 +251,14 @@ GeoserverRepository.prototype = {
         var restUrl = this.resolver.create(type, config);
         var payload = JSON.stringify(config);
 
-        function response(err, resp, body) {
-
-            if (err) {
-                return deferred.reject(new Error(err));
-            }
-            if (resp.statusCode !== 201) {
-                console.error("Error creating Geoserver object", type, body);
-                return deferred.reject(new Error(body));
-            }
-            // console.info("Geoserver object created >", type, object.name);
-            return deferred.resolve(true);
-        }
-
         this.dispatcher.post({
             url: restUrl,
             body: payload,
-            callback: response
+            callback: this.createResponseListener({
+                deferred: deferred,
+                responseStatusCode: 201,
+                errorMessage: "Error creating Geoserver object:" + type
+            })
         });
 
         return deferred.promise;
@@ -276,38 +267,31 @@ GeoserverRepository.prototype = {
     deleteGeoserverObject: function (type, config, options) {
 
         var deferred = Q.defer();
-
         var restUrl = this.resolver.delete(type, config);
 
         if (type === this.types.STYLE) {
             var purge = options && options.purge || true;
             restUrl += "?purge=" + purge;
-
-        } else if ([
-            this.types.FEATURETYPE,
-            this.types.DATASTORE,
-            this.types.WORKSPACE
-        ].indexOf(type) > -1) {
+        } else if (isRecurseRequired(this.types)) {
             var recurse = options && options.recurse || true;
             restUrl += "?recurse=" + recurse;
         }
 
-        function response(err, resp, body) {
-
-            if (err) {
-                return deferred.reject(new Error(err));
-            }
-            if (resp.statusCode !== 200) {
-                console.log("Error deleting Geoserver object >", type, body);
-                return deferred.reject(new Error(body));
-            }
-            // console.info("Geoserver object deleted >", type, this.name);
-            return deferred.resolve(true);
+        function isRecurseRequired(types) {
+            var typesRequiringRecurse = [
+                types.FEATURETYPE,
+                types.DATASTORE,
+                types.WORKSPACE
+            ];
+            return typesRequiringRecurse.indexOf(type) > -1;
         }
 
         this.dispatcher.delete({
             url: restUrl,
-            callback: response.bind(config)
+            callback: this.createResponseListener({
+                deferred: deferred,
+                errorMessage: "Error deleting Geoserver object:" + type
+            })
         });
 
         return deferred.promise;

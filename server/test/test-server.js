@@ -19,14 +19,17 @@ function GeoserverMockServer() {
     this.mockServer = null;
 
     this.gsOptions = _.extend({}, options);
-    if (this.gsOptions.context) {
-        if (!/^.*\/$/.test(this.gsOptions.context)) {
-            this.gsOptions.context += "/";
-        }
+    if (this.gsOptions.context && !/^.*\/$/.test(this.gsOptions.context)) {
+        this.gsOptions.context += "/";
     } else {
         this.gsOptions.context = "";
     }
-    this.baseURL = "/" + this.gsOptions.context;
+    if (this.gsOptions.adminPath && !/^.*\/$/.test(this.gsOptions.adminPath)) {
+        this.gsOptions.adminPath += "/";
+    } else {
+        this.gsOptions.adminPath = "";
+    }
+    this.baseURL = "/" + this.gsOptions.context + this.gsOptions.adminPath;
     this.restURL = this.baseURL + "rest";
     this.wmsURL = this.baseURL + "wms";
 

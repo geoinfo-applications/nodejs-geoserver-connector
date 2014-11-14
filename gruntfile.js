@@ -4,10 +4,9 @@
 module.exports = function (grunt) {
 
     var jsFiles = [
-        "**/*.js",
-        "!node_modules/**",
-        "!reports/**",
-        "!coverage/**"
+        "server/**/*.js",
+        "server.js",
+        "gruntfile.js"
     ];
 
     // Project Configuration

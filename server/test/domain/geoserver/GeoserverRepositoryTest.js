@@ -16,7 +16,7 @@ describe("Geoserver repository unit tests", function () {
 
     var geoserverMockServer;
 
-    describe("testing offline Geoserver access ", function () {
+    describe("testing offline Geoserver handling ", function () {
 
         before(function (done) {
             geoserverMockServer = new GeoserverMockServer();
@@ -67,7 +67,7 @@ describe("Geoserver repository unit tests", function () {
         });
 
         beforeEach(function () {
-            testUtils.createRepository();
+            gsRepository = new GeoserverRepository(config.unit_test);
         });
 
         afterEach(function () {
@@ -78,12 +78,19 @@ describe("Geoserver repository unit tests", function () {
             geoserverMockServer.tearDown();
         });
 
-        describe("testing Geoserver access functionalites", function () {
+        describe("testing Geoserver config", function () {
 
-            beforeEach(function (done) {
-                gsRepository = new GeoserverRepository(config.unit_test);
-                done();
+            it("should correctly add admin path to baseUrl if supplied", function () {
+
+                var gsConfig = config.unit_test.geoserver;
+                var expectedAdminUrl = "http://" + gsConfig.host + ":" + gsConfig.port + "/" +
+                    gsConfig.context + "/" + gsConfig.adminPath + "/";
+
+                expect(gsRepository.baseURL).to.be.equal(expectedAdminUrl);
             });
+        });
+
+        describe("testing Geoserver access functionalites", function () {
 
             it("should correctly fetch Geoserver details", function (done) {
 

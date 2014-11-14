@@ -187,7 +187,7 @@ describe("Geoserver functional tests ", function () {
                 return gsRepository.createFeatureType(nonExistingLayer).fail(function (err) {
                     if (err.message === "Trying to create new feature type inside the store," +
                         " but no attributes were specified" ||
-                        err.message === ":null" /* database is not accessible */) {
+                        err.message === "null" /* database is not accessible */) {
                         done();
                     } else {
                         done(new Error(err));
