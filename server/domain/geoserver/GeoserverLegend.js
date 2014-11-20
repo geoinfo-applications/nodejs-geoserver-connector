@@ -36,7 +36,8 @@ GeoserverLegend.prototype = {
             "FORMAT=" + (config.format || this.defaultImageFormat),
             "WIDTH=" + (config.width || this.defaultWidth),
             "HEIGHT=" + (config.height || this.defaultHeight),
-            "LAYER=" + config.layer
+            "LAYER=" + config.layer,
+            "TRANSPARENT=true"
         ];
 
         var ruleName = config.name;

@@ -27,6 +27,7 @@ describe("Geoserver LegendGraphic tests", function () {
         "WIDTH=" + legend.defaultWidth,
         "HEIGHT=" + legend.defaultHeight,
         "LAYER=" + layer.name,
+        "TRANSPARENT=true",
         "RULE=" + rule.name
     ];
 
@@ -45,12 +46,15 @@ describe("Geoserver LegendGraphic tests", function () {
 
         it("formatParameters should return valid parameters array for a rule", function () {
             var urlParameters = legend.formatParameters(rule);
+
             expect(urlParameters).to.be.eql(parametersWithStyle);
         });
 
         it("getBaseURL should return correct workspace url ", function () {
             var expectedURL = gsRepository.baseURL + legend.defaultWorkspace + "/wms?";
+
             var baseURL = legend.getBaseURL();
+
             expect(baseURL).to.be.eql(expectedURL);
         });
 
