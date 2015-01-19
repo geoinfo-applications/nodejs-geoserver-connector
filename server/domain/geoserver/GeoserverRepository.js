@@ -73,7 +73,7 @@ function GeoserverRepository(config) {
         WORKSPACE: "Workspace",
         STYLE: "Style",
         WORKSPACESTYLE: "WorkspaceStyle",
-        FONTS: "Fonts"
+        FONT: "Fonts"
     };
 }
 

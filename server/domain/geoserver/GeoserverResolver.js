@@ -165,6 +165,10 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         getStyleParameters: function (config) {
             var styleName = config.name;
             return [ styleName ];
+        },
+
+        getFontsParameters: function () {
+            return [];
         }
     };
 

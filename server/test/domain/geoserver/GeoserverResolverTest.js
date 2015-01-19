@@ -38,7 +38,8 @@ describe("Geoserver Resolver unit tests ", function () {
         FeatureType: [ workspaceName, datastoreName, featureTypeName ],
         Layer: [ workspaceName, config.layer.name ],
         Style: [ config.style.name ],
-        WorkspaceStyle: [ workspaceName, config.style.name ]
+        WorkspaceStyle: [ workspaceName, config.style.name ],
+        Fonts: []
     };
 
     function createGeoserverResolver() {
@@ -137,7 +138,13 @@ describe("Geoserver Resolver unit tests ", function () {
             var config = geoserverTypesConfigs[type];
             var resolvedUrl = resolver.create(type, config);
 
-            var pathTemplate = resolver.restAPI["get" + type + "s"];
+            var pathTemplate;
+            if (type === geoserverTypes.FONT) {
+                pathTemplate = resolver.restAPI["get" + type];
+            } else {
+                pathTemplate = resolver.restAPI["get" + type + "s"];
+            }
+
             var urlParameters = getParameters[type];
 
             if (type === geoserverTypes.LAYER) {
