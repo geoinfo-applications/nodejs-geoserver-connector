@@ -12,7 +12,6 @@ var GeoserverWorkspace = require("./GeoserverWorkspace");
 var GeoserverFeatureType = require("./GeoserverFeatureType");
 var GeoserverLayer = require("./GeoserverLayer");
 var GeoserverStyle = require("./GeoserverStyle");
-var GeoserverFonts = require("./GeoserverFonts");
 var GeoserverLegend = require("./GeoserverLegend");
 
 
@@ -72,8 +71,7 @@ function GeoserverRepository(config) {
         DATASTORE: "Datastore",
         WORKSPACE: "Workspace",
         STYLE: "Style",
-        WORKSPACESTYLE: "WorkspaceStyle",
-        FONT: "Fonts"
+        WORKSPACESTYLE: "WorkspaceStyle"
     };
 }
 
@@ -153,21 +151,39 @@ GeoserverRepository.prototype = {
         return deferred.promise;
     },
 
+    getFonts: function () {
+        var deferred = Q.defer();
+
+        this.dispatcher.get({
+            url: this.restURL + this.resolver.restAPI.getFonts,
+            callback: function (error, response, body) {
+                if (error) {
+                    deferred.reject(new Error(error))
+                } else {
+                    deferred.resolve(JSON.parse(body).fonts);
+                }
+
+            }
+        });
+
+        return deferred.promise;
+    },
+
     createResponseListener: function (config) {
 
         var deferred = config.deferred;
         var responseStatusCode = config.responseStatusCode || 200;
 
-        return function responseListener(err, resp, body) {
+        return function responseListener(error, response, body) {
             if (responseHasError()) {
-                logError(err, body);
-                return deferred.reject(new Error(err));
+                logError(error, body);
+                return deferred.reject(new Error(error));
             } else {
                 return deferred.resolve();
             }
 
             function responseHasError() {
-                return !!err || (resp && resp.statusCode !== responseStatusCode);
+                return !!error || (response && response.statusCode !== responseStatusCode);
             }
 
             function logError(error, requestBody) {
@@ -306,6 +322,5 @@ GeoserverDatastore.call(GeoserverRepository.prototype);
 GeoserverFeatureType.call(GeoserverRepository.prototype);
 GeoserverLayer.call(GeoserverRepository.prototype);
 GeoserverStyle.call(GeoserverRepository.prototype);
-GeoserverFonts.call(GeoserverRepository.prototype);
 
 module.exports = GeoserverRepository;

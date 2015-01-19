@@ -123,13 +123,6 @@ function GeoserverResolver(geoserverRepositoryConfig) {
             }
 
             return this.formatReturnUrl(restUrl, parameters);
-        },
-
-        resolveFonts: function () {
-            var restUrl = this.restAPI.getFonts;
-            var parameters = [];
-
-            return this.formatReturnUrl(restUrl, parameters);
         }
     };
 
@@ -165,10 +158,6 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         getStyleParameters: function (config) {
             var styleName = config.name;
             return [ styleName ];
-        },
-
-        getFontsParameters: function () {
-            return [];
         }
     };
 
