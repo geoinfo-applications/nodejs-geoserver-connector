@@ -158,7 +158,7 @@ GeoserverRepository.prototype = {
             url: this.restURL + this.resolver.restAPI.getFonts,
             callback: function (error, response, body) {
                 if (error) {
-                    deferred.reject(new Error(error))
+                    deferred.reject(new Error(error));
                 } else {
                     deferred.resolve(JSON.parse(body).fonts);
                 }
