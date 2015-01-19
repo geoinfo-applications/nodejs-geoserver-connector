@@ -6,10 +6,8 @@ var _ = require("underscore");
 module.exports = function GeoserverFeatureType() {
 
     function nameDoesntExist(config) {
-        if (!config || !config.name) {
-            return true;
-        }
-        return false;
+        return !(config && config.name);
+
     }
 
     function rejectRequest(errorMessage) {

@@ -36,7 +36,9 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         getStyle: "/styles/%s",
 
         getWorkspaceStyles: "/workspaces/%s/styles",
-        getWorkspaceStyle: "/workspaces/%s/styles/%s"
+        getWorkspaceStyle: "/workspaces/%s/styles/%s",
+
+        getFonts: "/fonts.json"
     };
 
     this.getResolvers = {
@@ -119,6 +121,13 @@ function GeoserverResolver(geoserverRepositoryConfig) {
                 restUrl = this.restAPI.getStyles;
                 parameters.pop();
             }
+
+            return this.formatReturnUrl(restUrl, parameters);
+        },
+
+        resolveFonts: function () {
+            var restUrl = this.restAPI.getFonts;
+            var parameters = [];
 
             return this.formatReturnUrl(restUrl, parameters);
         }

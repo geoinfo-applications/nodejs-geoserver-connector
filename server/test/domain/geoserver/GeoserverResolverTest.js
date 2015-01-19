@@ -96,7 +96,6 @@ describe("Geoserver Resolver unit tests ", function () {
         });
     });
 
-
     it("should corectly resolve get methods ", function () {
 
         _.each(geoserverTypes, function (type) {

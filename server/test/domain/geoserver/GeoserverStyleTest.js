@@ -326,24 +326,6 @@ describe("Geoserver Styles tests", function () {
             }).catch(done);
         });
 
-//         it("should add style to layer ", function (done) {
-//         gsRepository.setLayerDefaultStyle().then(function () {
-//         done();
-//         }).catch(done);
-//         });
-//
-//         it("should remove style from layer ", function (done) {
-//         gsRepository.setLayerDefaultStyle().then(function () {
-//         done();
-//         }).catch(done);
-//         });
-//
-//         it("should remove and delete layer style ", function (done) {
-//         gsRepository.setLayerDefaultStyle().then(function () {
-//         done();
-//         }).catch(done);
-//         });
-
     });
 
 });

@@ -4,15 +4,16 @@ var Q = require("q");
 var _ = require("underscore");
 var util = require("util");
 
-var GeoserverDispatcher = require("./GeoserverDispatcher.js");
-var GeoserverResolver = require("./GeoserverResolver.js");
+var GeoserverDispatcher = require("./GeoserverDispatcher");
+var GeoserverResolver = require("./GeoserverResolver");
 
-var GeoserverDatastore = require("./GeoserverDatastore.js");
-var GeoserverWorkspace = require("./GeoserverWorkspace.js");
-var GeoserverFeatureType = require("./GeoserverFeatureType.js");
-var GeoserverLayer = require("./GeoserverLayer.js");
-var GeoserverStyle = require("./GeoserverStyle.js");
-var GeoserverLegend = require("./GeoserverLegend.js");
+var GeoserverDatastore = require("./GeoserverDatastore");
+var GeoserverWorkspace = require("./GeoserverWorkspace");
+var GeoserverFeatureType = require("./GeoserverFeatureType");
+var GeoserverLayer = require("./GeoserverLayer");
+var GeoserverStyle = require("./GeoserverStyle");
+var GeoserverFonts = require("./GeoserverFonts");
+var GeoserverLegend = require("./GeoserverLegend");
 
 
 function GeoserverRepository(config) {
@@ -71,7 +72,8 @@ function GeoserverRepository(config) {
         DATASTORE: "Datastore",
         WORKSPACE: "Workspace",
         STYLE: "Style",
-        WORKSPACESTYLE: "WorkspaceStyle"
+        WORKSPACESTYLE: "WorkspaceStyle",
+        FONTS: "Fonts"
     };
 }
 
@@ -304,5 +306,6 @@ GeoserverDatastore.call(GeoserverRepository.prototype);
 GeoserverFeatureType.call(GeoserverRepository.prototype);
 GeoserverLayer.call(GeoserverRepository.prototype);
 GeoserverStyle.call(GeoserverRepository.prototype);
+GeoserverFonts.call(GeoserverRepository.prototype);
 
 module.exports = GeoserverRepository;

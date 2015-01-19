@@ -6,10 +6,8 @@ var Q = require("q");
 module.exports = function GeoserverLayer() {
 
     function nameDoesntExist(config) {
-        if (!config || !config.name) {
-            return true;
-        }
-        return false;
+        return !!(!config || !config.name);
+
     }
 
     function rejectRequest(errorMessage) {
@@ -183,18 +181,6 @@ module.exports = function GeoserverLayer() {
         return this.updateLayer(updateLayerConfig);
     };
 
-//    this.addLayerStyle = function (config) {
-//        throw new Error();
-//    };
-//
-//    this.removeLayerStyle = function (config) {
-//        throw new Error();
-//    };
-//
-//    this.deleteLayerStyle = function (config) {
-//        throw new Error();
-//    };
-
     this.defineGlobalStyle = function (config) {
         if (config) {
             config.styleType = this.types.STYLE;
@@ -219,16 +205,17 @@ module.exports = function GeoserverLayer() {
     };
 
     this.createStyleConfiguration = function (config) {
-
         if (nameDoesntExist(config)) {
             return rejectRequest("layer name required");
         }
+
         var styleConfig = {
             style: {
                 name: config.name,
                 filename: config.name + ".sld"
             }
         };
+
         if (config.workspace) {
             styleConfig.workspace = config.workspace;
         }
@@ -263,12 +250,14 @@ module.exports = function GeoserverLayer() {
             // console.info("SLD file uploaded>", body);
             return deferred.resolve(true);
         }
+
         this.dispatcher.put({
             url: restUrl,
             body: sldBody,
             callback: response,
             contentType: "application/vnd.ogc.sld+xml"
         });
+
         return deferred.promise;
     };
 
