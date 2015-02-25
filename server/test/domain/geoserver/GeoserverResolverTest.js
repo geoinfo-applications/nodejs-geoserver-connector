@@ -21,11 +21,14 @@ describe("Geoserver Resolver unit tests ", function () {
 
     var workspaceName = functionalTestConfig.geoserver.workspace;
     var datastoreName = functionalTestConfig.geoserver.datastore;
+    var coverageName = "AR_2014";
     var featureTypeName = "testFeatureType";
 
     var geoserverTypesConfigs = {
         Workspace: { name: workspaceName },
         Datastore: { name: datastoreName },
+        CoverageStore: { name: coverageName },
+        Coverage: { name: coverageName, store: coverageName },
         FeatureType: { name: featureTypeName },
         Layer: config.layer,
         Style: config.style,
@@ -33,12 +36,14 @@ describe("Geoserver Resolver unit tests ", function () {
     };
 
     var getParameters = {
-        Workspace: [ workspaceName ],
-        Datastore: [ workspaceName, datastoreName ],
-        FeatureType: [ workspaceName, datastoreName, featureTypeName ],
-        Layer: [ workspaceName, config.layer.name ],
-        Style: [ config.style.name ],
-        WorkspaceStyle: [ workspaceName, config.style.name ]
+        Workspace: [workspaceName],
+        Datastore: [workspaceName, datastoreName],
+        CoverageStore: [workspaceName, coverageName],
+        Coverage: [workspaceName, coverageName, coverageName],
+        FeatureType: [workspaceName, datastoreName, featureTypeName],
+        Layer: [workspaceName, config.layer.name],
+        Style: [config.style.name],
+        WorkspaceStyle: [workspaceName, config.style.name]
     };
 
     function createGeoserverResolver() {
@@ -142,7 +147,7 @@ describe("Geoserver Resolver unit tests ", function () {
 
             if (type === geoserverTypes.LAYER) {
                 urlParameters = [];
-            } else {
+            } else if ([geoserverTypes.COVERAGESTORE, geoserverTypes.COVERAGE].indexOf(type) < 0) {
                 urlParameters.pop();
             }
             var fullParameters = [pathTemplate].concat(urlParameters);

@@ -48,13 +48,11 @@ GeoserverDispatcher.prototype = {
     },
 
     post: function (config) {
-        this.get(
-            _.extend({ method: "POST" }, config));
+        this.get(_.extend({ method: "POST" }, config));
     },
 
     put: function (config) {
-        this.get(
-            _.extend({ method: "PUT" }, config));
+        this.get(_.extend({ method: "PUT" }, config));
     },
 
     delete: function (config) {

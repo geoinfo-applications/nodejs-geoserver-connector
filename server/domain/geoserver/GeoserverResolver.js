@@ -23,6 +23,12 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         getDatastores: "/workspaces/%s/datastores",
         getDatastore: "/workspaces/%s/datastores/%s",
 
+        getCoverages: "/workspaces/%s/coveragestores/%s/coverages/%s",
+        getCoverage: "/workspaces/%s/coveragestores/%s/coverages/%s",
+
+        getCoverageStores: "/workspaces/%s/coveragestores/%s",
+        getCoverageStore: "/workspaces/%s/coveragestores/%s",
+
         getFeatureTypes: "/workspaces/%s/datastores/%s/featuretypes",
         getFeatureType: "/workspaces/%s/datastores/%s/featuretypes/%s",
 
@@ -60,7 +66,7 @@ function GeoserverResolver(geoserverRepositoryConfig) {
             var restUrl = this.restAPI.getFeatureType;
             var parameters = this.getParameters.getFeatureTypeParameters(config);
 
-            if (this.methodIsCreateOrConfigNotExist(method, config)) {
+            if (this.methodIsCreateOrConfigDoesntExist(method, config)) {
                 restUrl = this.restAPI.getFeatureTypes;
                 parameters.pop();
             }
@@ -76,6 +82,28 @@ function GeoserverResolver(geoserverRepositoryConfig) {
             if (method === "create") {
                 restUrl = this.restAPI.getDatastores;
                 parameters.pop();
+            }
+
+            return this.formatReturnUrl(restUrl, parameters);
+        },
+
+        resolveCoverage: function (config, method) {
+            var restUrl = this.restAPI.getCoverage;
+            var parameters = this.getParameters.getCoverageParameters(config);
+
+            if (method === "create") {
+                restUrl = this.restAPI.getCoverages;
+            }
+
+            return this.formatReturnUrl(restUrl, parameters);
+        },
+
+        resolveCoverageStore: function (config, method) {
+            var restUrl = this.restAPI.getCoverageStore;
+            var parameters = this.getParameters.getCoverageStoreParameters(config);
+
+            if (method === "create") {
+                restUrl = this.restAPI.getCoverageStores;
             }
 
             return this.formatReturnUrl(restUrl, parameters);
@@ -100,7 +128,7 @@ function GeoserverResolver(geoserverRepositoryConfig) {
             var restUrl = this.restAPI.getWorkspaceStyle;
             var parameters = this.getParameters.getWorkspaceStyleParameters(config);
 
-            if (this.methodIsCreateOrConfigNotExist(method, config)) {
+            if (this.methodIsCreateOrConfigDoesntExist(method, config)) {
                 restUrl = this.restAPI.getWorkspaceStyles;
                 parameters.pop();
             }
@@ -117,7 +145,7 @@ function GeoserverResolver(geoserverRepositoryConfig) {
                 parameters = this.getParameters.getStyleParameters(config);
             }
 
-            if (this.methodIsCreateOrConfigNotExist(method, config)) {
+            if (this.methodIsCreateOrConfigDoesntExist(method, config)) {
                 restUrl = this.restAPI.getStyles;
                 parameters.pop();
             }
@@ -142,6 +170,19 @@ function GeoserverResolver(geoserverRepositoryConfig) {
             var datastoreName = config && config.name || this.datastore;
             var workspaceName = this.resolveWorkspaceName(config);
             return [ workspaceName, datastoreName ];
+        },
+
+        getCoverageParameters: function (config) {
+            var coverageName = config && config.name;
+            var coverageStoreName = config && config.store;
+            var workspaceName = this.resolveWorkspaceName(config);
+            return [ workspaceName, coverageStoreName, coverageName ];
+        },
+
+        getCoverageStoreParameters: function (config) {
+            var coverageStoreName = config.name;
+            var workspaceName = this.resolveWorkspaceName(config);
+            return [ workspaceName, coverageStoreName ];
         },
 
         getWorkspaceParameters: function (config) {
@@ -177,7 +218,7 @@ GeoserverResolver.prototype = {
         return config && config.workspace || this.workspace;
     },
 
-    methodIsCreateOrConfigNotExist: function (method, config) {
+    methodIsCreateOrConfigDoesntExist: function (method, config) {
         return method === "create" || !config;
     },
 

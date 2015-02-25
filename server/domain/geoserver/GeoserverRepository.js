@@ -8,6 +8,7 @@ var GeoserverDispatcher = require("./GeoserverDispatcher");
 var GeoserverResolver = require("./GeoserverResolver");
 
 var GeoserverDatastore = require("./GeoserverDatastore");
+var GeoserverCoverageStore = require("./GeoserverCoverageStore");
 var GeoserverWorkspace = require("./GeoserverWorkspace");
 var GeoserverFeatureType = require("./GeoserverFeatureType");
 var GeoserverLayer = require("./GeoserverLayer");
@@ -69,6 +70,8 @@ function GeoserverRepository(config) {
         LAYER: "Layer",
         FEATURETYPE: "FeatureType",
         DATASTORE: "Datastore",
+        COVERAGESTORE: "CoverageStore",
+        COVERAGE: "Coverage",
         WORKSPACE: "Workspace",
         STYLE: "Style",
         WORKSPACESTYLE: "WorkspaceStyle"
@@ -320,6 +323,7 @@ GeoserverRepository.prototype = {
 GeoserverWorkspace.call(GeoserverRepository.prototype);
 GeoserverDatastore.call(GeoserverRepository.prototype);
 GeoserverFeatureType.call(GeoserverRepository.prototype);
+GeoserverCoverageStore.call(GeoserverRepository.prototype);
 GeoserverLayer.call(GeoserverRepository.prototype);
 GeoserverStyle.call(GeoserverRepository.prototype);
 

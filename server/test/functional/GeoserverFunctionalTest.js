@@ -197,6 +197,43 @@ describe("Geoserver functional tests ", function () {
 
         });
 
+        describe("coverage stores ", function () {
+
+            var coverageStoreConfig;
+            var coverageBasePath = "file:///var/lib/tomcat7/webapps/geoserver/data/coverages/";
+
+            beforeEach(function () {
+                coverageStoreConfig = {
+                    name: "AR_2014",
+                    coverageDirectory: coverageBasePath + "mosaic_sample"
+                };
+            });
+
+            it("should create coverage mosaic store and automatically configure coverage layer ", function (done) {
+                coverageStoreConfig.coverageStoreType = "imagemosaic";
+
+                // HINT by default geoserver creates layer named "mosaic"
+                gsRepository.createCoverageStore(coverageStoreConfig).then(function () {
+                    return gsRepository.layerExists({ name: "mosaic" }).then(function (pyramidLayerExists) {
+                        expect(pyramidLayerExists).to.be.eql(true);
+                        done();
+                    });
+                }).catch(done);
+            });
+
+            it("should create coverage pyramid store and automatically configure coverage layer ", function (done) {
+                coverageStoreConfig.coverageDirectory = coverageBasePath + "pyramid_sample";
+
+                // HINT by default geoserver creates layer named as pyramid directory
+                gsRepository.createCoverageStore(coverageStoreConfig).then(function () {
+                    return gsRepository.layerExists({ name: "pyramid_sample" }).then(function (pyramidLayerExists) {
+                        expect(pyramidLayerExists).to.be.eql(true);
+                        done();
+                    });
+                }).catch(done);
+            });
+        });
+
         describe("styles ", function () {
 
             var style = config.style;
