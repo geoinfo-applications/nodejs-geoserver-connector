@@ -46,6 +46,7 @@
         "mocha": "^1.21.4",
         "mocha-bamboo-reporter": "*",
         "mocha-multi": "*",
+        "sinon-chai": "^2.6.0",
         "xml2js": "^0.4.4"
     }
 }
