@@ -9,6 +9,7 @@ var GeoserverResolver = require("./GeoserverResolver");
 
 var GeoserverDatastore = require("./GeoserverDatastore");
 var GeoserverCoverageStore = require("./GeoserverCoverageStore");
+var GeoserverCoverage = require("./GeoserverCoverage");
 var GeoserverWorkspace = require("./GeoserverWorkspace");
 var GeoserverFeatureType = require("./GeoserverFeatureType");
 var GeoserverLayer = require("./GeoserverLayer");
@@ -302,6 +303,7 @@ GeoserverRepository.prototype = {
             var typesRequiringRecurse = [
                 types.FEATURETYPE,
                 types.DATASTORE,
+                types.COVERAGESTORE,
                 types.WORKSPACE
             ];
             return typesRequiringRecurse.indexOf(type) > -1;
@@ -323,6 +325,7 @@ GeoserverRepository.prototype = {
 GeoserverWorkspace.call(GeoserverRepository.prototype);
 GeoserverDatastore.call(GeoserverRepository.prototype);
 GeoserverFeatureType.call(GeoserverRepository.prototype);
+GeoserverCoverage.call(GeoserverRepository.prototype);
 GeoserverCoverageStore.call(GeoserverRepository.prototype);
 GeoserverLayer.call(GeoserverRepository.prototype);
 GeoserverStyle.call(GeoserverRepository.prototype);

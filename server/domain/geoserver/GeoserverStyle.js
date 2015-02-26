@@ -239,6 +239,7 @@ module.exports = function GeoserverLayer() {
         var restUrl = this.resolver.get(config.styleType, styleConfig);
         var deferred = Q.defer();
 
+        // TODO reuse createResponseListener
         function response(err, resp, body) {
             if (err) {
                 return deferred.reject(new Error(err));

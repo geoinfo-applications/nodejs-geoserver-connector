@@ -197,7 +197,7 @@ describe("Geoserver functional tests ", function () {
 
         });
 
-        describe("coverage stores ", function () {
+        describe("coverages ", function () {
 
             var coverageStoreConfig;
             var coverageBasePath = "file:///var/lib/tomcat7/webapps/geoserver/data/coverages/";
@@ -205,17 +205,18 @@ describe("Geoserver functional tests ", function () {
             beforeEach(function () {
                 coverageStoreConfig = {
                     name: "AR_2014",
-                    coverageDirectory: coverageBasePath + "mosaic_sample"
+                    coverageDirectory: coverageBasePath + "pyramid_sample"
                 };
             });
 
             it("should create coverage mosaic store and automatically configure coverage layer ", function (done) {
                 coverageStoreConfig.coverageStoreType = "imagemosaic";
+                coverageStoreConfig.coverageDirectory = coverageBasePath + "mosaic_sample";
 
                 // HINT by default geoserver creates layer named "mosaic"
                 gsRepository.createCoverageStore(coverageStoreConfig).then(function () {
-                    return gsRepository.layerExists({ name: "mosaic" }).then(function (pyramidLayerExists) {
-                        expect(pyramidLayerExists).to.be.eql(true);
+                    return gsRepository.layerExists({ name: "mosaic" }).then(function (mosaicLayerExists) {
+                        expect(mosaicLayerExists).to.be.eql(true);
                         done();
                     });
                 }).catch(done);
@@ -229,6 +230,47 @@ describe("Geoserver functional tests ", function () {
                     return gsRepository.layerExists({ name: "pyramid_sample" }).then(function (pyramidLayerExists) {
                         expect(pyramidLayerExists).to.be.eql(true);
                         done();
+                    });
+                }).catch(done);
+            });
+
+            it("should create coverage store w/ layer, then update layer parameters ", function (done) {
+                coverageStoreConfig.coverageStoreType = "imagemosaic";
+                coverageStoreConfig.coverageDirectory = coverageBasePath + "mosaic_sample";
+
+                gsRepository.createCoverageStore(coverageStoreConfig).then(function () {
+                    var newConfig = {
+                        name: "mosaic",
+                        store: coverageStoreConfig.name,
+                        updatedConfig: {
+                            coverage: {
+                                name: "new_name",
+                                title: "new_name",
+                                enabled: true,
+                                parameters: {
+                                    entry: [
+                                        { string: ["AllowMultithreading", false] },
+                                        { string: ["MergeBehavior", "FLAT"] },
+                                        { string: ["FootprintBehavior", "None"] },
+                                        { string: ["Filter", ""] },
+                                        { string: ["MaxAllowedTiles", -1] },
+                                        { string: ["SORTING", ""] },
+                                        { string: ["InputTransparentColor", ""] },
+                                        { string: ["OutputTransparentColor", "#FF00FF"] },
+                                        { string: ["SUGGESTED_TILE_SIZE", "512,512"] },
+                                        { string: ["Accurate resolution computation", false] },
+                                        { string: ["USE_JAI_IMAGEREAD", false] },
+                                        { string: ["BackgroundValues", ""] }
+                                    ]
+                                }
+                            }
+                        }
+                    };
+                    return gsRepository.updateCoverage(newConfig).then(function () {
+                        return gsRepository.layerExists({ name: "new_name" }).then(function (mosaicLayerExists) {
+                            expect(mosaicLayerExists).to.be.eql(true);
+                            done();
+                        });
                     });
                 }).catch(done);
             });
