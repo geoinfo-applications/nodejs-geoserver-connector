@@ -8,7 +8,7 @@ var config = require("../config");
 
 describe("Geoserver functional tests ", function () {
 
-    this.timeout(60 * 1000);
+    this.timeout(5000);
 
     var testUtils = new TestUtils(config.functional_test);
     var gsRepository = testUtils.gsRepository;
