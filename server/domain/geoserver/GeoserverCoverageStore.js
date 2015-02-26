@@ -2,7 +2,7 @@
 var Q = require("q");
 
 
-module.exports = function GeoserverDCoveragestore() {
+module.exports = function GeoserverCoverageStore() {
 
     this.coverageStoreExists = function (config) {
         return this.geoserverObjectExists(this.types.COVERAGESTORE, config);
@@ -32,7 +32,9 @@ module.exports = function GeoserverDCoveragestore() {
     this.issueCoverageStoreCreateRequest = function (config) {
 
         var coverageStoretype = config.coverageStoreType || "imagepyramid";
-        var payload = config.coverageDirectory;
+        if (!config || !config.coverageDirectory) {
+            return Q.reject("coverageDirectory parameter required");
+        }
 
         var restUrl = this.resolver.create(this.types.COVERAGESTORE, config);
         restUrl += "/external." + coverageStoretype;
@@ -40,9 +42,9 @@ module.exports = function GeoserverDCoveragestore() {
         var deferred = Q.defer();
         this.dispatcher.put({
             url: restUrl,
-            body: payload,
+            body: config.coverageDirectory,
+            contentType: "text/plain",
             callback: this.createResponseListener({
-                contentType: "text/plain",
                 deferred: deferred,
                 responseStatusCode: 201,
                 errorMessage: "Error creating Geoserver object:" + this.types.COVERAGESTORE

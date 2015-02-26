@@ -23,7 +23,7 @@ describe("Geoserver Coverage Test ", function () {
         geoserverMockServer.restore();
     });
 
-    var storeConfig = { name: "AR_2014" };
+    var storeConfig = { name: "AR_2014", workspace: "geoportal" };
 
     beforeEach(function () {
         geoserverRepository = new GeoserverRepository(config.unit_test);
@@ -79,7 +79,7 @@ describe("Geoserver Coverage Test ", function () {
         }).catch(done);
     });
 
-    describe("testing non standard geoserver create method ", function () {
+    describe("testing coverage store create method ", function () {
 
         var type, config, url;
 
@@ -104,7 +104,7 @@ describe("Geoserver Coverage Test ", function () {
         });
 
         it("should add additional external.pyramid parameter to url request ", function (done) {
-            geoserverRepository.issueCoverageStoreCreateRequest(type, config);
+            geoserverRepository.issueCoverageStoreCreateRequest(config);
 
             var dispatcherArgs = geoserverRepository.dispatcher.put.firstCall.args[0];
 
