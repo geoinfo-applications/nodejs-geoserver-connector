@@ -24,20 +24,19 @@ module.exports = function GeoserverCoverageStore() {
                 return Q.reject("Coverage Store already exists");
             }
 
-            // TODO pyramid/mosaic configs
             return this.issueCoverageStoreCreateRequest(config);
         }.bind(this));
     };
 
     this.issueCoverageStoreCreateRequest = function (config) {
 
-        var coverageStoretype = config.coverageStoreType || "imagepyramid";
+        var coverageStoreType = config.coverageStoreType || "imagepyramid";
         if (!config || !config.coverageDirectory) {
             return Q.reject("coverageDirectory parameter required");
         }
 
         var restUrl = this.resolver.create(this.types.COVERAGESTORE, config);
-        restUrl += "/external." + coverageStoretype;
+        restUrl += "/external." + coverageStoreType;
 
         var deferred = Q.defer();
         this.dispatcher.put({
