@@ -89,7 +89,7 @@ GeoserverRepository.prototype = {
 
             if (responseHasError()) {
                 logError(err, body);
-                return deferred.reject(new Error(err));
+                return deferred.reject(err);
             } else {
                 updateGeoserverStatus(body);
                 logInstanceInitialization();
@@ -162,7 +162,7 @@ GeoserverRepository.prototype = {
             url: this.restURL + this.resolver.restAPI.getFonts,
             callback: function (error, response, body) {
                 if (error) {
-                    deferred.reject(new Error(error));
+                    deferred.reject(error);
                 } else {
                     deferred.resolve(JSON.parse(body).fonts);
                 }
@@ -181,7 +181,7 @@ GeoserverRepository.prototype = {
         return function responseListener(error, response, body) {
             if (responseHasError()) {
                 logError(error, body);
-                return deferred.reject(new Error(error));
+                return deferred.reject(error);
             } else {
                 return deferred.resolve();
             }
@@ -236,7 +236,6 @@ GeoserverRepository.prototype = {
                 return deferred.reject(new Error(err));
             }
             if (resp.statusCode !== 200) {
-                // warn.log("Geoserver object doesn't exist >", body);
                 return deferred.reject(new Error(body));
             }
             var receivedObject = JSON.parse(body);
