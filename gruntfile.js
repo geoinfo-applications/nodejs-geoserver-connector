@@ -9,7 +9,6 @@ module.exports = function (grunt) {
         "gruntfile.js"
     ];
 
-    // Project Configuration
     grunt.initConfig({
         jshint: {
             jsFiles: jsFiles,
@@ -89,7 +88,7 @@ module.exports = function (grunt) {
 
         mocha_istanbul: {
             unit_tests: {
-                src: [ "./server/test/**" ],
+                src: [ "./server/test/**/*.js" ],
                 options: {
                     reporter: "mocha-multi",
                     reportFormats: [ "lcov", "clover" ],
@@ -103,26 +102,7 @@ module.exports = function (grunt) {
         },
 
         todo: {
-            options: {
-                marks: [
-                    {
-                        name: "FIX",
-                        pattern: /FIXME/,
-                        color: "red"
-                    },
-                    {
-                        name: "TODO",
-                        pattern: /TODO/,
-                        color: "red"
-                    },
-                    {
-                        name: "NOTE",
-                        pattern: /NOTE/,
-                        color: "blue"
-                    }
-                ]
-            },
-            src: [ "server/**/*.js" ]
+            src: jsFiles
         },
 
         env: {
