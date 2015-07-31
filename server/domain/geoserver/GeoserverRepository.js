@@ -36,8 +36,8 @@ function GeoserverRepository(config) {
     }
     this.db.dbtype = "postgis";
 
-    this.baseURL = util.format("http://%s:%d/" + this.geoserver.context,
-        this.geoserver.host, this.geoserver.port);
+    this.baseURL = util.format("http://%s:%d/%s",
+        this.geoserver.host, this.geoserver.port, this.geoserver.context);
 
     if (this.geoserver.adminPath) {
         this.baseURL += this.geoserver.adminPath + "/";
@@ -85,43 +85,33 @@ GeoserverRepository.prototype = {
         var deferred = Q.defer();
         var self = this;
 
-        function response(err, resp, body) {
-
-            if (responseHasError()) {
-                logError(err, body);
-                return deferred.reject(err);
-            } else {
-                updateGeoserverStatus(body);
-                logInstanceInitialization();
-                return deferred.resolve();
-            }
-
-            function responseHasError() {
-                return !!err || (resp && resp.statusCode !== 200);
-            }
-
-        }
-
-        function logError(error, requestBody) {
-            var errorMsg = (error && error.message) || requestBody;
-            console.error("Error accessing Geoserver instance > " + self.baseURL, errorMsg);
-        }
-
-        function updateGeoserverStatus(requestBody) {
-            self.isEnabled = true;
-            var responseDetails = JSON.parse(requestBody);
-            self.geoserverDetails = responseDetails.about.resource[0];
-        }
-
-        function logInstanceInitialization() {
-            if (process.env.NODE_ENV === "production") {
-                console.info("Geoserver instance initialized @ " + self.baseURL);
-            }
-        }
-
         this.dispatcher.get({
             url: this.restURL + this.resolver.restAPI.about,
-            callback: response
+            callback: function (error, response, body) {
+                if (responseHasError()) {
+                    logError(error, body);
+                    return deferred.reject(error);
+                } else {
+                    updateGeoserverStatus(body);
+                    return deferred.resolve();
+                }
+
+                function responseHasError() {
+                    return !!error || (response && response.statusCode !== 200);
+                }
+
+                function logError() {
+                    var errorMsg = (error && error.message) || body;
+                    console.error("Error accessing Geoserver instance > " + self.baseURL, errorMsg);
+                }
+
+                function updateGeoserverStatus() {
+                    self.isEnabled = true;
+                    var responseDetails = JSON.parse(body);
+                    self.geoserverDetails = responseDetails.about.resource[0];
+                    console.info("Geoserver instance initialized @ " + self.baseURL);
+                }
+            }
         });
 
         return deferred.promise;
@@ -290,22 +280,11 @@ GeoserverRepository.prototype = {
         var deferred = Q.defer();
         var restUrl = this.resolver.delete(type, config);
 
-        if (type === this.types.STYLE) {
-            var purge = options && options.purge || true;
-            restUrl += "?purge=" + purge;
-        } else if (isRecurseRequired(this.types)) {
-            var recurse = options && options.recurse || true;
-            restUrl += "?recurse=" + recurse;
+        if (options && options.purge) {
+            restUrl += "?purge=" + options.purge;
         }
-
-        function isRecurseRequired(types) {
-            var typesRequiringRecurse = [
-                types.FEATURETYPE,
-                types.DATASTORE,
-                types.COVERAGESTORE,
-                types.WORKSPACE
-            ];
-            return typesRequiringRecurse.indexOf(type) > -1;
+        if (options && options.recurse) {
+            restUrl += "?recurse=" + options.recurse;
         }
 
         this.dispatcher.delete({

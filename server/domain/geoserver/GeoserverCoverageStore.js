@@ -59,7 +59,10 @@ module.exports = function GeoserverCoverageStore() {
 
         return this.coverageStoreExists({ name: coverageStoreName, workspace: workspaceName }).then(function (exists) {
             if (exists) {
-                return this.deleteGeoserverObject(this.types.COVERAGESTORE, config);
+                return this.deleteGeoserverObject(this.types.COVERAGESTORE, config, {
+                    recurse: true,
+                    purge: "metadata"
+                });
             }
             return true;
         }.bind(this));

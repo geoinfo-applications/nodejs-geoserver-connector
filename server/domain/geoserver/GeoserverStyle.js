@@ -65,7 +65,7 @@ module.exports = function GeoserverLayer() {
         }
         return this.globalStyleExists(config).then(function (exists) {
             if (exists) {
-                return this.deleteGeoserverObject(this.types.STYLE, config);
+                return this.deleteGeoserverObject(this.types.STYLE, config, { purge: true });
             }
             return true;
         }.bind(this));

@@ -47,7 +47,7 @@ module.exports = function GeoserverFeatureType() {
         var featureTypeName = config && config.name;
         return this.featureTypeExists(config).then(function (exists) {
             if (exists) {
-                return this.deleteGeoserverObject(this.types.FEATURETYPE, config);
+                return this.deleteGeoserverObject(this.types.FEATURETYPE, config, { recurse: true });
             }
             return new Error("featureTypeName does not exist" + featureTypeName);
         }.bind(this));
