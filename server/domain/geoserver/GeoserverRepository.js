@@ -278,13 +278,13 @@ GeoserverRepository.prototype = {
     deleteGeoserverObject: function (type, config, options) {
 
         var deferred = Q.defer();
-        var restUrl = this.resolver.delete(type, config);
+        var restUrl = this.resolver.delete(type, config) + "?";
 
         if (options && options.purge) {
-            restUrl += "?purge=" + options.purge;
+            restUrl += "&purge=" + options.purge;
         }
         if (options && options.recurse) {
-            restUrl += "?recurse=" + options.recurse;
+            restUrl += "&recurse=" + options.recurse;
         }
 
         this.dispatcher.delete({
