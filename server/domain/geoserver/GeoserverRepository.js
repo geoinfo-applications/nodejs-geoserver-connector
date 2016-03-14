@@ -8,6 +8,8 @@ var GeoserverDispatcher = require("./GeoserverDispatcher");
 var GeoserverResolver = require("./GeoserverResolver");
 
 var GeoserverDatastore = require("./GeoserverDatastore");
+var GeoserverWmsStore = require("./GeoserverWmsStore");
+var GeoserverWmsLayer = require("./GeoserverWmsLayer");
 var GeoserverCoverageStore = require("./GeoserverCoverageStore");
 var GeoserverCoverage = require("./GeoserverCoverage");
 var GeoserverWorkspace = require("./GeoserverWorkspace");
@@ -72,10 +74,13 @@ function GeoserverRepository(config) {
         FEATURETYPE: "FeatureType",
         DATASTORE: "Datastore",
         COVERAGESTORE: "CoverageStore",
+        WMSSTORE: "WmsStore",
+        WMSLAYER: "WmsLayer",
         COVERAGE: "Coverage",
         WORKSPACE: "Workspace",
         STYLE: "Style",
-        WORKSPACESTYLE: "WorkspaceStyle"
+        WORKSPACESTYLE: "WorkspaceStyle",
+        LAYERGROUP: "LayerGroup"
     };
 }
 
@@ -201,7 +206,6 @@ GeoserverRepository.prototype = {
             .then(createDefaultWorkspace)
             .then(createDefaultDatastore)
             .catch(function (err) {
-                console.log(err);
                 return Q.reject(new Error(err));
             });
     },
@@ -307,5 +311,7 @@ GeoserverCoverage.call(GeoserverRepository.prototype);
 GeoserverCoverageStore.call(GeoserverRepository.prototype);
 GeoserverLayer.call(GeoserverRepository.prototype);
 GeoserverStyle.call(GeoserverRepository.prototype);
+GeoserverWmsStore.call(GeoserverRepository.prototype);
+GeoserverWmsLayer.call(GeoserverRepository.prototype);
 
 module.exports = GeoserverRepository;

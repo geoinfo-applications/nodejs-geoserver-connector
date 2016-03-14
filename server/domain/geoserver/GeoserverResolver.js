@@ -23,6 +23,15 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         getDatastores: "/workspaces/%s/datastores",
         getDatastore: "/workspaces/%s/datastores/%s",
 
+        getWmsStores: "/workspaces/%s/wmsstores/",
+        getWmsStore: "/workspaces/%s/wmsstores/%s",
+
+        getWmsLayers: "/workspaces/%s/wmsstores/%s/wmslayers",
+        getWmsLayer: "/workspaces/%s/wmsstores/%s/wmslayers/%s",
+
+        getLayerGroups: "/layergroups",
+        getLayerGroup: "/layergroups/%s/",
+
         getCoverages: "/workspaces/%s/coveragestores/%s/coverages/%s",
         getCoverage: "/workspaces/%s/coveragestores/%s/coverages/%s",
 
@@ -109,6 +118,25 @@ function GeoserverResolver(geoserverRepositoryConfig) {
             return this.formatReturnUrl(restUrl, parameters);
         },
 
+        resolveWmsStore: function (config, method) {
+            var restUrl = method === "create" ? this.restAPI.getWmsStores : this.restAPI.getWmsStore;
+            var parameters = this.getParameters.getWmsStoreParameters(config, method);
+
+            return this.formatReturnUrl(restUrl, parameters);
+        },
+
+        resolveWmsLayer: function (config, method) {
+            var restUrl = method === "create" ? this.restAPI.getWmsLayers : this.restAPI.getWmsLayer;
+            var parameters = this.getParameters.getWmsLayerParameters(config, method);
+            return this.formatReturnUrl(restUrl, parameters);
+        },
+
+        resolveLayerGroup: function (config, method) {
+            var restUrl = method === "create" ? this.restAPI.getLayerGroups: this.restAPI.getLayerGroup;
+            var parameters = this.getParameters.getLayerGroupParameters(config, method);
+            return this.formatReturnUrl(restUrl, parameters);
+        },
+
         resolveWorkspace: function (config, method) {
 
             var restUrl = this.restAPI.getWorkspace;
@@ -185,6 +213,24 @@ function GeoserverResolver(geoserverRepositoryConfig) {
             return [ workspaceName, coverageStoreName ];
         },
 
+        getWmsStoreParameters: function (config, method) {
+            var wmsStoreName = method === "create" ? void 0 : encodeURIComponent(config.name);
+            var workspaceName = encodeURIComponent(this.resolveWorkspaceName(config));
+            return _.compact([ workspaceName, wmsStoreName ]);
+        },
+
+        getWmsLayerParameters: function (config, method) {
+            var wmsLayerName = method === "create" ? void 0 : config.layerName;
+            var wmsStoreName = config.externalWmsService.name;
+            var workspaceName = this.resolveWorkspaceName(config);
+            return _.compact([ workspaceName, wmsStoreName, wmsLayerName ]);
+        },
+
+        getLayerGroupParameters: function (config, method) {
+            var layerGroupName = method === "create" ? void 0 : config.name;
+            return _.compact([ layerGroupName ]);
+        },
+
         getWorkspaceParameters: function (config) {
             var workspaceName = config && config.name || this.workspace;
             return [ workspaceName ];
@@ -223,7 +269,6 @@ GeoserverResolver.prototype = {
     },
 
     formatReturnUrl: function (restApiCall, restParameters) {
-
         var parameters = restParameters.slice(0);
         var fullRestUrl = this.baseURL + restApiCall;
 
@@ -241,9 +286,8 @@ GeoserverResolver.prototype = {
 
     get: function (type, config, method) {
 
-        if (!method) {
-            method = "get";
-        }
+        method = method ? method : "get";
+
         return this.getResolvers["resolve" + type](config, method);
     }
 };
