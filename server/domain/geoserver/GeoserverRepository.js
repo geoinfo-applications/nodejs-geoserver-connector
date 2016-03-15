@@ -15,6 +15,7 @@ var GeoserverCoverage = require("./GeoserverCoverage");
 var GeoserverWorkspace = require("./GeoserverWorkspace");
 var GeoserverFeatureType = require("./GeoserverFeatureType");
 var GeoserverLayer = require("./GeoserverLayer");
+var GeoserverLayerGroup = require("./GeoserverLayerGroup");
 var GeoserverStyle = require("./GeoserverStyle");
 var GeoserverLegend = require("./GeoserverLegend");
 
@@ -310,6 +311,7 @@ GeoserverFeatureType.call(GeoserverRepository.prototype);
 GeoserverCoverage.call(GeoserverRepository.prototype);
 GeoserverCoverageStore.call(GeoserverRepository.prototype);
 GeoserverLayer.call(GeoserverRepository.prototype);
+GeoserverLayerGroup.call(GeoserverRepository.prototype);
 GeoserverStyle.call(GeoserverRepository.prototype);
 GeoserverWmsStore.call(GeoserverRepository.prototype);
 GeoserverWmsLayer.call(GeoserverRepository.prototype);
