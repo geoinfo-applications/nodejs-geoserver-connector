@@ -48,6 +48,21 @@ module.exports = function GeoserverWmsStore() {
         return deferred.promise;
     };
 
+    this.deleteWmsStore = function (externalWmsService) {
+        var deferred = Q.defer();
+        var restUrl = this.resolver.delete(this.types.WMSSTORE, externalWmsService);
+
+        this.dispatcher.delete({
+            url: restUrl,
+            callback: this.createResponseListener({
+                deferred: deferred,
+                errorMessage: "Error deleting Geoserver object:" + this.types.WMSSTORE
+            })
+        });
+
+        return deferred.promise;
+    };
+
     this.updateWmsStore = function (config) {
         var deferred = Q.defer();
         var restUrl = this.resolver.get(this.types.WMSSTORE, config);
@@ -60,21 +75,6 @@ module.exports = function GeoserverWmsStore() {
                 deferred: deferred,
                 responseStatusCode: 200,
                 errorMessage: "Error updating Geoserver object" + this.types.WMSSTORE
-            })
-        });
-
-        return deferred.promise;
-    };
-
-    this.deleteWmsStore = function (externalWmsService) {
-        var deferred = Q.defer();
-        var restUrl = this.resolver.delete(this.types.WMSSTORE, externalWmsService);
-
-        this.dispatcher.delete({
-            url: restUrl,
-            callback: this.createResponseListener({
-                deferred: deferred,
-                errorMessage: "Error deleting Geoserver object:" + this.types.WMSSTORE
             })
         });
 
