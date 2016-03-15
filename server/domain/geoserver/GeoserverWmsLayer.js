@@ -15,8 +15,17 @@ module.exports = function GeoserverWmsLayer() {
     };
 
 
-    this.wmsLayerExists = function (config) {
-        return this.geoserverObjectExists(this.types.WMSLAYER, config);
+    this.wmsLayerExists = function (layerSearchingParameters, wmsLayerSearchingParameters) {
+        return Q.all([
+            this.geoserverObjectExists(this.types.LAYER, layerSearchingParameters),
+            this.geoserverObjectExists(this.types.WMSLAYER, wmsLayerSearchingParameters)
+        ]).spread(function (layerExists, wmsLayerExists) {
+            return Q.when(wmsLayerExists && layerExists);
+        });
+    };
+
+    this.layerGroupExists = function (config) {
+        return this.geoserverObjectExists(this.types.LAYERGROUP, config);
     };
 
     this.getWmsLayers = function (config) {
@@ -48,11 +57,8 @@ module.exports = function GeoserverWmsLayer() {
     };
 
     this.makeSureLayerExists = function (searchingParameters, config) {
-        return Q.all([
-            this.geoserverObjectExists(this.types.LAYER, searchingParameters),
-            this.geoserverObjectExists(this.types.WMSLAYER, config)
-        ]).spread(function (layerExists, wmsLayerExists) {
-            return Q.when(!(wmsLayerExists || layerExists) && this.issueWmsLayerCreateRequest(config)).then(function () {
+        return this.wmsLayerExists(searchingParameters, config).then(function (exists) {
+            return Q.when(!exists && this.issueWmsLayerCreateRequest(config)).then(function () {
                 return config.layerName;
             });
         }.bind(this));
@@ -91,6 +97,7 @@ module.exports = function GeoserverWmsLayer() {
     };
 
     this.issueLayerGroupCreateRequest = function (allLayerNames, config) {
+
         var deferred = Q.defer();
 
         var restUrl = this.resolver.create(this.types.LAYERGROUP, config);
@@ -114,12 +121,17 @@ module.exports = function GeoserverWmsLayer() {
             return { enabled: true, name: layerName };
         });
 
+        var styles = new Array(allLayerNames.length).fill("");
+
         return {
             layerGroup: {
                 name: config.name,
                 title: config.label,
                 layers: {
                     layer: layers
+                },
+                styles: {
+                    style: styles
                 }
             },
             srs: config.srs ? config.srs : "EPSG:2056",
@@ -128,31 +140,69 @@ module.exports = function GeoserverWmsLayer() {
     };
 
 
-    this.updateWmsLayer = function (config) {
-        return this.wmsLayerExists(config).then(function (exists) {
+    this.updateWmsLayer = function (externalWmsLayer, existingExternalWmsLayer) {
+        return this.layerGroupExists(externalWmsLayer).then(function (exists) {
             if (!exists) {
                 return Q.reject("WmsLayer doesn't exist");
             }
 
-            return this.issueWmslLayerUpdateRequest(config);
+            var layerNativeNames = externalWmsLayer.layerNames.split(",");
+            var existingLayerNativeNames = existingExternalWmsLayer.layerNames.split(",");
+
+            var layersToDelete = _.compact(_.difference(existingLayerNativeNames, layerNativeNames));
+
+            return Q.all(_.map(layerNativeNames, function (nativeName) {
+                var layerConfig = _.clone(externalWmsLayer);
+
+                layerConfig.layerName = (externalWmsLayer.externalWmsService.name + "_" + nativeName).replace(/[^A-Za-z0-9_-]/g, "_");
+                layerConfig.nativeName = nativeName;
+
+                var layerSearchingParameters = this.resolveLayerConfig(layerConfig);
+
+                return  this.makeSureLayerExists(layerSearchingParameters, layerConfig);
+            }.bind(this))).then(function (allLayersNames) {
+                return this.issueLayerGroupUpdateRequest(allLayersNames, externalWmsLayer);
+            }.bind(this)).then(function () {
+                if (layersToDelete.length) {
+                    return Q.all(_.map(layersToDelete, function (nativeName) {
+                        var layerConfig = _.clone(externalWmsLayer);
+
+                        layerConfig.layerName = (externalWmsLayer.externalWmsService.name + "_" + nativeName).replace(/[^A-Za-z0-9_-]/g, "_");
+                        layerConfig.nativeName = nativeName;
+
+                        var layerDeletingParameters = this.resolveLayerConfig(layerConfig);
+
+                        return this.wmsLayerExists(layerDeletingParameters, layerConfig).then(function (exists) {
+                            if (exists) {
+                                return this.deleteWmsLayerFromLayerList(layerDeletingParameters).then(function () {
+                                    return this.deleteWmsLayerFromWmsStore(layerConfig);
+                                }.bind(this)).catch(function () {
+                                    return Q.when();
+                                });
+                            }
+                            return;
+                        }.bind(this));
+                    }.bind(this)));
+                }
+                return;
+            }.bind(this));
         }.bind(this));
     };
 
-    this.issueWmslLayerUpdateRequest = function (config) {
-
-        if (!config || !config.updatedConfig) {
-            return Q.reject("updatedConfig parameter required");
-        }
-        var restUrl = this.resolver.get(this.types.COVERAGE, config);
+    this.issueLayerGroupUpdateRequest = function (allLayerNames, config) {
 
         var deferred = Q.defer();
+
+        var restUrl = this.resolver.get(this.types.LAYERGROUP, config);
+        var requestObject = JSON.stringify(this.layerGroupRequestObject(allLayerNames, config));
+
         this.dispatcher.put({
             url: restUrl,
-            body: JSON.stringify(config.updatedConfig),
+            body: requestObject,
             callback: this.createResponseListener({
                 deferred: deferred,
-                responseStatusCode: 201,
-                errorMessage: "Error Updating Geoserver object:" + this.types.WMSLAYER
+                responseStatusCode: 200,
+                errorMessage: "Error updating Geoserver object:" + this.types.LAYERGROUP
             })
         });
 
@@ -160,22 +210,30 @@ module.exports = function GeoserverWmsLayer() {
     };
 
     this.deleteWmsLayer = function (config) {
-        var layers = config.layerNames.split(",");
+        var layerNames = config.layerNames.split(",");
 
         return this.deleteLayerGroup(config).then(function () {
-            return Q.all(_.map(layers, function (layer) {
-                config.layerName = (config.externalWmsService.name + "_" + layer).replace(/[^A-Za-z0-9_-]/g, "_");
+            return Q.all(_.map(layerNames, function (nativeName) {
+                var layerConfig = _.clone(config);
 
-                var layerDeletingParameters = this.resolveLayerConfig(config);
 
-                return this.deleteWmsLayerFromLayerList(layerDeletingParameters).then(function () {
-                    return this.deleteWmsLayerFromWmsStore(config);
+                layerConfig.layerName = (config.externalWmsService.name + "_" + nativeName)
+                    .replace(/[^A-Za-z0-9_-]/g, "_");
+                layerConfig.nativeName = nativeName;
+
+                var layerDeletingParameters = this.resolveLayerConfig(layerConfig);
+
+                return this.wmsLayerExists(layerDeletingParameters, layerConfig).then(function (exists) {
+                    if (exists) {
+                        return this.deleteWmsLayerFromLayerList(layerDeletingParameters).then(function () {
+                            return this.deleteWmsLayerFromWmsStore(layerConfig);
+                        }.bind(this));
+                    }
+                    return;
                 }.bind(this));
             }.bind(this)));
         }.bind(this));
-
     };
-
 
     this.deleteLayerGroup = function (config) {
         var deferred = Q.defer();

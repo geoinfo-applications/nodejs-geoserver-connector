@@ -132,7 +132,7 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         },
 
         resolveLayerGroup: function (config, method) {
-            var restUrl = method === "create" ? this.restAPI.getLayerGroups: this.restAPI.getLayerGroup;
+            var restUrl = method === "create" ? this.restAPI.getLayerGroups : this.restAPI.getLayerGroup;
             var parameters = this.getParameters.getLayerGroupParameters(config, method);
             return this.formatReturnUrl(restUrl, parameters);
         },
