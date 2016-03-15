@@ -112,10 +112,10 @@ module.exports = function GeoserverWmsLayer() {
     };
 
     this.deleteWmsLayer = function (config) {
-        return this.deleteLayerGroup(config).then(function () {
+        return this.deleteGeoserverObject(this.types.LAYERGROUP, config).then(function () {
             return this.getWmsLayerRequestParameters(config).then(function (requestParameters) {
                 return Q.all(_.map(requestParameters, function (requestParameter) {
-                    return this.deleteWmsLayerEverywhere(requestParameter.layerRequestParameters, requestParameter.wmsLayerRequestParameters);
+                    return this.deleteWmsLayerEverywhere(requestParameter.layerRequestParameters, requestParameter.wmsLayerRequestParameters)
                 }.bind(this)));
             }.bind(this));
         }.bind(this));
@@ -123,44 +123,14 @@ module.exports = function GeoserverWmsLayer() {
 
     this.deleteWmsLayerEverywhere = function (layerRequestParameters, wmsLayerRequestParameters) {
           return this.wmsLayerExists(layerRequestParameters, wmsLayerRequestParameters).then(function (exists) {
-              console.log("DELETEEEEEEE");
               if (exists) {
-                  return this.deleteWmsLayerFromLayerList(layerRequestParameters).then(function () {
-                      return this.deleteWmsLayerFromWmsStore(wmsLayerRequestParameters);
-                  }.bind(this));
+                  return this.deleteGeoserverObject(this.types.LAYER, layerRequestParameters).then(function () {
+                      return this.deleteGeoserverObject(this.types.WMSLAYER, wmsLayerRequestParameters);
+                  }.bind(this)).catch(function () {
+                      return Q.when();
+                  });
               }
           }.bind(this));
-    };
-
-    this.deleteWmsLayerFromLayerList = function (deletingParameters) {
-        console.log("DELETING PARAMETERS", deletingParameters);
-        var deferred = Q.defer();
-        var restUrl = this.resolver.delete(this.types.LAYER, deletingParameters);
-
-        this.dispatcher.delete({
-            url: restUrl,
-            callback: this.createResponseListener({
-                deferred: deferred,
-                errorMessage: "Error deleting Geoserver object:" + this.types.LAYER
-            })
-        });
-
-        return deferred.promise;
-    };
-
-    this.deleteWmsLayerFromWmsStore = function (deletingParameters) {
-        var deferred = Q.defer();
-        var restUrl = this.resolver.delete(this.types.WMSLAYER, deletingParameters);
-
-        this.dispatcher.delete({
-            url: restUrl,
-            callback: this.createResponseListener({
-                deferred: deferred,
-                errorMessage: "Error deleting Geoserver object:" + this.types.WMSLAYER
-            })
-        });
-
-        return deferred.promise;
     };
 
     this.updateWmsLayer = function (externalWmsLayer, existingExternalWmsLayer) {

@@ -62,21 +62,6 @@ module.exports = function GeoserverLayerGroup() {
         };
     };
 
-    this.deleteLayerGroup = function (config) {
-        var deferred = Q.defer();
-        var restUrl = this.resolver.delete(this.types.LAYERGROUP, config);
-
-        this.dispatcher.delete({
-            url: restUrl,
-            callback: this.createResponseListener({
-                deferred: deferred,
-                errorMessage: "Error deleting Geoserver object" + this.types.LAYERGROUP
-            })
-        });
-
-        return deferred.promise;
-    };
-
     this.updateLayerGroup = function (config, allLayerNames) {
 
         var deferred = Q.defer();
