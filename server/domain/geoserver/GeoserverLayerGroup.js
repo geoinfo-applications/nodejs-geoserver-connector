@@ -11,6 +11,10 @@ module.exports = function GeoserverLayerGroup() {
         return this.geoserverObjectExists(this.types.LAYERGROUP, config);
     };
 
+    this.getLayerGroup = function (config) {
+        return this.getGeoserverObject(this.types.LAYERGROUP, config);
+    };
+
     this.createLayerGroup = function (config, allLayerNames) {
         return this.wmsStoreExists(config).then(function (exists) {
             if (exists) {
@@ -63,7 +67,6 @@ module.exports = function GeoserverLayerGroup() {
     };
 
     this.updateLayerGroup = function (config, allLayerNames) {
-
         var deferred = Q.defer();
 
         var restUrl = this.resolver.get(this.types.LAYERGROUP, config);
