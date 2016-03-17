@@ -1,4 +1,5 @@
 {
+    "esnext": true,
     "requireCurlyBraces": [
         "if", "else", "for", "while", "do", "try", "catch"
     ],
@@ -46,5 +47,13 @@
     "requireOperatorBeforeLineBreak": true,
     "disallowMultipleLineStrings": true,
     "requireSpaceAfterLineComment": true,
-    "safeContextKeyword": [ "self" ]
+    "safeContextKeyword": [ "self" ],
+
+    "requireParenthesesAroundArrowParam": true,
+    "disallowSpaceBeforeSemicolon": true,
+    "disallowSpaceBeforeComma": true,
+    "disallowNestedTernaries": true,
+    "requireSpaceAfterComma": true,
+    "disallowTabs": true,
+    "requirePaddingNewLinesAfterUseStrict": true
 }

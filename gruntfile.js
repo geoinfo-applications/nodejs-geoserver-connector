@@ -57,14 +57,14 @@ module.exports = function (grunt) {
                     reporter: "spec",
                     slow: 100
                 },
-                src: [ "server/test/functional/*.js" ]
+                src: ["server/test/functional/*.js"]
             },
             load_tests: {
                 options: {
                     reporter: "spec",
                     slow: 100
                 },
-                src: [ "server/test/load-testing/*.js" ]
+                src: ["server/test/load-testing/*.js"]
             }
         },
 
@@ -76,27 +76,27 @@ module.exports = function (grunt) {
                 options: {
                     opts: "server/test/unit_tests.opts"
                 },
-                src: [ "server/test/domain/**/*.js"]
+                src: ["server/test/domain/**/*.js"]
             },
             functional: {
                 options: {
                     opts: "server/test/functional_tests.opts"
                 },
-                src: [ "server/test/functional/**/*.js"]
+                src: ["server/test/functional/**/*.js"]
             }
         },
 
         mocha_istanbul: {
             unit_tests: {
-                src: [ "./server/test/**/*.js" ],
+                src: ["./server/test/**/*.js"],
                 options: {
                     reporter: "mocha-multi",
-                    reportFormats: [ "lcov", "clover" ],
+                    reportFormats: ["lcov", "clover"],
                     //  excludes: ["**/integration/"],
                     recursive: true,
                     print: "summary",
                     coverageFolder: "./coverage/server",
-                    require: [ "./server/test/test-server.js" ]
+                    require: ["./server/test/test-server.js"]
                 }
             }
         },
@@ -134,11 +134,11 @@ module.exports = function (grunt) {
 
     require("load-grunt-tasks")(grunt);
 
-    grunt.registerTask("code-check", [ "jshint", "jscs", "todo" ]);
-    grunt.registerTask("coverage", [ "code-check", "env:test", "mocha_istanbul", "plato" ]);
-    grunt.registerTask("mocha", [ "code-check", "env:test", "mochaTest" ]);
-    grunt.registerTask("test", [ "code-check", "env:test", "mocha_istanbul" ]);
-    grunt.registerTask("update", [ "npm-install", "clean", "david" ]);
+    grunt.registerTask("code-check", ["jshint", "jscs", "todo"]);
+    grunt.registerTask("coverage", ["code-check", "env:test", "mocha_istanbul", "plato"]);
+    grunt.registerTask("mocha", ["code-check", "env:test", "mochaTest"]);
+    grunt.registerTask("test", ["code-check", "env:test", "mocha_istanbul"]);
+    grunt.registerTask("update", ["npm-install", "clean", "david"]);
     grunt.registerTask("build", ["env:build", "update", "plato", "code-check", "mocha_istanbul"]);
 
 };

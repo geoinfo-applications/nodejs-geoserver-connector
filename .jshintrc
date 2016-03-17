@@ -3,18 +3,21 @@
     "predef"        : [ "angular", "describe", "it", "before", "after", "beforeEach", "afterEach" ],
     "browser"       : true,       // Defines globals exposed by modern browsers
     "node"          : true,       // Defines globals available when running inside of the Node runtime environment
-    "maxlen"        : 120,        // The maximum length of a line.
+    "maxlen"        : 150,        // The maximum length of a line.
     "maxdepth"      : 3,          // This option lets you control how nested do you want your blocks to be
     "maxstatements" : 35,         // The max number of statements allowed per function
     "maxparams"     : 10,         // The max number of formal parameters allowed per function
 
-    // Development.s
+    // Developments
     "debug"         : false,      // Allow debugger statements e.g. browser breakpoints.
     "devel"         : true,       // Allow developments statements e.g. `console.log();`.
 
-    // ECMAScript 5.
+    // ECMAScript 5
     "strict"        : true,       // Require `use strict` pragma  in every file.
     "globalstrict"  : true,       // Allow global "use strict" (also enables 'strict').
+
+    // ECMAScript 6
+    "esnext"        : true,       // Enable ES6 / Harmony features
 
     // The Good Parts.
     "asi"           : false,      // Tolerate Automatic Semicolon Insertion (no semicolons).
