@@ -9,7 +9,7 @@ module.exports = function GeoserverWmsStore() {
         return this.geoserverObjectExists(this.types.WMSSTORE, config);
     };
 
-    this.getWmsStores = function (config) {
+    this.getWmsStore = function (config) {
         var wmsStoreName = config && config.name;
         var workspaceName = config && config.workspace || this.geoserver.workspace;
 
@@ -49,18 +49,7 @@ module.exports = function GeoserverWmsStore() {
     };
 
     this.deleteWmsStore = function (externalWmsService) {
-        var deferred = Q.defer();
-        var restUrl = this.resolver.delete(this.types.WMSSTORE, externalWmsService);
-
-        this.dispatcher.delete({
-            url: restUrl,
-            callback: this.createResponseListener({
-                deferred: deferred,
-                errorMessage: "Error deleting Geoserver object:" + this.types.WMSSTORE
-            })
-        });
-
-        return deferred.promise;
+        return this.deleteGeoserverObject(this.types.WMSSTORE, externalWmsService);
     };
 
     this.updateWmsStore = function (config) {
@@ -89,7 +78,6 @@ module.exports = function GeoserverWmsStore() {
                 type: "WMS",
                 enabled: true,
                 workspace: { name: config.workspace ? config.workspace : this.geoserver.workspace },
-                _default: false,
                 capabilitiesURL: config.url,
                 user: config.username,
                 password: config.password,

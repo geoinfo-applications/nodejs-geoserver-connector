@@ -30,7 +30,7 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         getWmsLayer: "/workspaces/%s/wmsstores/%s/wmslayers/%s",
 
         getLayerGroups: "/layergroups",
-        getLayerGroup: "/layergroups/%s/",
+        getLayerGroup: "/layergroups/%s",
 
         getCoverages: "/workspaces/%s/coveragestores/%s/coverages/%s",
         getCoverage: "/workspaces/%s/coveragestores/%s/coverages/%s",

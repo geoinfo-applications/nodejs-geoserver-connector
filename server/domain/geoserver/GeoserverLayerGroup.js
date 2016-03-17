@@ -16,9 +16,9 @@ module.exports = function GeoserverLayerGroup() {
     };
 
     this.createLayerGroup = function (config, allLayerNames) {
-        return this.wmsStoreExists(config).then(function (exists) {
+        return this.layerGroupExists(config).then(function (exists) {
             if (exists) {
-                return Q.reject("Wms Store already exists");
+                return Q.reject("Layer Group already exists");
             }
             return this.issueLayerGroupCreateRequest(config, allLayerNames);
         }.bind(this));
@@ -28,7 +28,7 @@ module.exports = function GeoserverLayerGroup() {
         var deferred = Q.defer();
 
         var restUrl = this.resolver.create(this.types.LAYERGROUP, config);
-        var requestObject = JSON.stringify(this.layerGroupRequestObject(allLayerNames, config));
+        var requestObject = JSON.stringify(this.layerGroupRequestObject(config, allLayerNames));
 
         this.dispatcher.post({
             url: restUrl,
@@ -43,7 +43,7 @@ module.exports = function GeoserverLayerGroup() {
         return deferred.promise;
     };
 
-    this.layerGroupRequestObject = function (allLayerNames, config) {
+    this.layerGroupRequestObject = function (config, allLayerNames) {
         var layers = _.map(allLayerNames, function (layerName) {
             return { enabled: true, name: layerName };
         });
@@ -70,7 +70,7 @@ module.exports = function GeoserverLayerGroup() {
         var deferred = Q.defer();
 
         var restUrl = this.resolver.get(this.types.LAYERGROUP, config);
-        var requestObject = JSON.stringify(this.layerGroupRequestObject(allLayerNames, config));
+        var requestObject = JSON.stringify(this.layerGroupRequestObject(config, allLayerNames));
 
         this.dispatcher.put({
             url: restUrl,
