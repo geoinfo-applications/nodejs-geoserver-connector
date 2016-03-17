@@ -184,12 +184,13 @@ describe("Geoserver functional tests ", function () {
 
             it("should fail if feature type does not exist in flat DB", function (done) {
 
-                return gsRepository.createFeatureType(nonExistingLayer).fail(function (err) {
-                    if (err === "Trying to create new feature type inside the store," +
-                        " but no attributes were specified" || !err /* database is not accessible err = null */) {
+                return gsRepository.createFeatureType(nonExistingLayer).fail(function (error) {
+                    console.log(error);
+                    if (error === "Trying to create new feature type inside the store," +
+                        " but no attributes were specified" || !error /* database is not accessible error = null */) {
                         done();
                     } else {
-                        done(new Error(err));
+                        done(new Error(error));
                     }
                 }).catch(done);
             });
