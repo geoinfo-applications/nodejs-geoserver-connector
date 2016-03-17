@@ -177,7 +177,7 @@ GeoserverRepository.prototype = {
         return function responseListener(error, response, body) {
             if (responseHasError()) {
                 logError(error, body);
-                return deferred.reject(error);
+                return deferred.reject(getErrorMessage());
             } else {
                 return deferred.resolve();
             }
@@ -186,9 +186,14 @@ GeoserverRepository.prototype = {
                 return !!error || (response && response.statusCode !== responseStatusCode);
             }
 
-            function logError(error, requestBody) {
-                var errorMsg = (error && error.message) || requestBody;
-                console.error(config.errorMessage, errorMsg);
+            function logError() {
+                console.error(config.errorMessage, getErrorMessage());
+            }
+
+            function getErrorMessage() {
+                var errorMessage = (error && error.message);
+                var bodyMessage = body === ":null" ? null : body;
+                return errorMessage || bodyMessage;
             }
         };
     },
