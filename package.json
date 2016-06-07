@@ -1,6 +1,6 @@
 {
     "name": "geoservermanager",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "description": "Geoserver Manager",
     "main": "module.js",
     "repository": {
@@ -12,7 +12,10 @@
     },
     "author": "Geoinfo AG",
     "license": "ISC",
-    "private": "true",
+    "private": false,
+    "publishConfig":{
+        "registry":"http://npm.geoinfo.ch"
+    },
     "engines": {
       "node": "^4.0.0",
       "npm": ">2.7.0"
