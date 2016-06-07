@@ -128,6 +128,15 @@ module.exports = function (grunt) {
 
         david: {
             check: {}
+        },
+
+        release: {
+            options: {
+                npm: true,
+                tagName: "release-<%= version %>",
+                commitMessage: "[grunt release plugin] release <%= version %>",
+                tagMessage: "[grunt release plugin] version <%= version %>"
+            }
         }
 
     });
