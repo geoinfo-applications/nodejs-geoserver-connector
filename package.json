@@ -5,7 +5,7 @@
   "main": "module.js",
   "repository": {
     "type": "git",
-    "url": "http://geo9x006.geoinfo.ch:8080/scm/ngp/geoservermanager.git"
+    "url": "http://git.geoinfo.ch/scm/ngp/geoservermanager.git"
   },
   "scripts": {
     "test": "grunt test"
