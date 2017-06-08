@@ -7,7 +7,6 @@ module.exports = function GeoserverFeatureType() {
 
     function nameDoesntExist(config) {
         return !(config && config.name);
-
     }
 
     function rejectRequest(errorMessage) {

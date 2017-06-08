@@ -1,5 +1,4 @@
 {
-    "esnext": true,
     "requireCurlyBraces": [
         "if", "else", "for", "while", "do", "try", "catch"
     ],
@@ -16,19 +15,16 @@
         "beforeOpeningRoundBrace": true
     },
     "requireBlocksOnNewline": 1,
-    "disallowEmptyBlocks": true,
+    "disallowEmptyBlocks": { "allExcept": ["comments"] },
     "disallowSpacesInsideParentheses": true,
     "requireSpacesInsideObjectBrackets": "all",
     "disallowQuotedKeysInObjects": true,
-    "disallowDanglingUnderscores": true,
     "disallowSpaceAfterObjectKeys": true,
     "requireSpaceBeforeObjectValues": true,
     "requireCommaBeforeLineBreak": true,
     "disallowSpaceAfterPrefixUnaryOperators": true,
     "disallowSpaceBeforePostfixUnaryOperators": true,
-    "disallowSpaceBeforeBinaryOperators": [
-        ","
-    ],
+    "disallowSpaceBeforeBinaryOperators": [","],
     "requireSpaceBeforeBinaryOperators": true,
     "requireSpaceAfterBinaryOperators": true,
     "requireCamelCaseOrUpperCaseIdentifiers": "ignoreProperties",
@@ -48,7 +44,6 @@
     "disallowMultipleLineStrings": true,
     "requireSpaceAfterLineComment": true,
     "safeContextKeyword": [ "self" ],
-
     "requireParenthesesAroundArrowParam": true,
     "disallowSpaceBeforeSemicolon": true,
     "disallowSpaceBeforeComma": true,

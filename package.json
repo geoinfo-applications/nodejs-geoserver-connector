@@ -1,5 +1,5 @@
 {
-  "name": "geoservermanager",
+  "name": "@ngp/geoservermanager",
   "version": "1.0.1",
   "description": "Geoserver Manager",
   "main": "module.js",
