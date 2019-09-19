@@ -25,11 +25,16 @@ GeoserverDispatcher.prototype = {
             throw new Error("URL and Callback required");
         }
 
+        var headers = addRequestHeaders.call(null, this.defaultContentType);
+        if (config.headers) {
+            _.extend(headers, config.headers);
+        }
+
         request({
             uri: geoserverRestCall,
             method: config.method || "GET",
             body: config.body || undefined,
-            headers: addRequestHeaders.call(null, this.defaultContentType),
+            headers: headers,
             timeout: this.timeout,
             auth: {
                 user: this.user,

@@ -274,6 +274,7 @@ GeoserverRepository.prototype = {
 
         this.dispatcher.post({
             url: restUrl,
+            headers: { Accept: undefined },
             body: payload,
             callback: this.createResponseListener({
                 deferred: deferred,
