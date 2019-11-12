@@ -1,0 +1,6 @@
+--slow 10
+--bail
+--colors
+--reporter spec
+--recursive
+

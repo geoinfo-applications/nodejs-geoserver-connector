@@ -1,0 +1,5 @@
+--slow 75
+--bail
+--colors
+--reporter spec
+--recursive
