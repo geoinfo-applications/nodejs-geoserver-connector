@@ -1,7 +1,7 @@
 {
-  "name": "@ngp/geoservermanager",
+  "name": "@geoinfo/nodejs-geoserver-connector",
   "version": "1.0.3",
-  "description": "Geoserver Manager",
+  "description": "NodeJS bindings for Geoserver Rest API",
   "main": "module.js",
   "repository": {
     "type": "git",
