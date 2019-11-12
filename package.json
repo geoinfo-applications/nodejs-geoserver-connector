@@ -10,8 +10,8 @@
   "scripts": {
     "test": "grunt test"
   },
-  "author": "Geoinfo AG",
-  "license": "ISC",
+  "author": "GEOINFO Applications AG",
+  "license": "MIT",
   "private": false,
   "publishConfig": {
     "registry": "http://npm.geoinfo.ch"
