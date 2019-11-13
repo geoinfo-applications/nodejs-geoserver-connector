@@ -165,7 +165,7 @@ describe("Geoserver functional tests ", function () {
 
             it("should return false if feature type does not exist in default store", function (done) {
 
-                return gsRepository.featureTypeExists(layer).then(function (exists) {
+                gsRepository.featureTypeExists(layer).then(function (exists) {
                     if (exists) {
                         done(new Error("feature type should not exist in store!"));
                     } else {
@@ -347,7 +347,7 @@ describe("Geoserver functional tests ", function () {
 
             it("should create a global style", function (done) {
 
-                return gsRepository.createGlobalStyle(styleConfig).then(function () {
+                gsRepository.createGlobalStyle(styleConfig).then(function () {
                     return gsRepository.getGlobalStyle(style).then(function (layerObject) {
                         expect(layerObject.name).to.be.equal(style.name);
                         done();
@@ -366,7 +366,7 @@ describe("Geoserver functional tests ", function () {
 
             it("should fail creating workspace style if style is not supplied", function (done) {
 
-                return gsRepository.createWorkspaceStyle().fail(function (err) {
+                gsRepository.createWorkspaceStyle().fail(function (err) {
                     expect(err.message).to.match(/layer name required/);
                     done();
                 }).catch(done);
@@ -374,7 +374,7 @@ describe("Geoserver functional tests ", function () {
 
             it("should create a workspace style in a default workspace", function (done) {
 
-                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+                gsRepository.createWorkspaceStyle(styleConfig).then(function () {
                     return gsRepository.getWorkspaceStyle(style).then(function (styleObject) {
                         expect(styleObject.name).to.be.equal(style.name);
                         done();
@@ -384,7 +384,7 @@ describe("Geoserver functional tests ", function () {
 
             it("should only upload new SLD file on style create if style already exists in workspace", function (done) {
 
-                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+                gsRepository.createWorkspaceStyle(styleConfig).then(function () {
 
                     var styleWithDifferentSLDFileConfig = {
                         name: style.name,
@@ -402,7 +402,7 @@ describe("Geoserver functional tests ", function () {
 
             it("should delete a workspace style from a default workspace", function (done) {
 
-                return gsRepository.deleteWorkspaceStyle(style).then(function () {
+                gsRepository.deleteWorkspaceStyle(style).then(function () {
                     return gsRepository.getWorkspaceStyles().then(function (workspaceStyles) {
                         expect(workspaceStyles.length).to.be.equal(0);
                         done();
@@ -412,7 +412,7 @@ describe("Geoserver functional tests ", function () {
 
             it("should create a workspace style in a non-default workspace", function (done) {
 
-                return createStyleInNonDefaultWorkspace().then(function () {
+                createStyleInNonDefaultWorkspace().then(function () {
                     return gsRepository.getWorkspaceStyle(newWorkspaceStyle).then(function (styleObject) {
                         expect(styleObject.name).to.be.equal(newWorkspaceStyle.name);
                         done();
@@ -422,7 +422,7 @@ describe("Geoserver functional tests ", function () {
 
             it("should delete a workspace style from a non-default workspace", function (done) {
 
-                return createStyleInNonDefaultWorkspace().then(function () {
+                createStyleInNonDefaultWorkspace().then(function () {
                     return gsRepository.deleteWorkspaceStyle(newWorkspaceStyle).then(function () {
                         return gsRepository.getWorkspaceStyles().then(function (workspaceStyles) {
                             expect(workspaceStyles.length).to.be.equal(0);
@@ -434,7 +434,7 @@ describe("Geoserver functional tests ", function () {
 
             it("should get all workspace styles", function (done) {
 
-                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+                gsRepository.createWorkspaceStyle(styleConfig).then(function () {
                     return gsRepository.createWorkspaceStyle(secondStyleConfig).then(function () {
                         return gsRepository.getWorkspaceStyles().then(function (workspaceStyles) {
                             expect(workspaceStyles.length).to.be.equal(2);
@@ -448,7 +448,7 @@ describe("Geoserver functional tests ", function () {
 
             it("should delete a workspace style", function (done) {
 
-                return gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+                gsRepository.createWorkspaceStyle(styleConfig).then(function () {
                     return gsRepository.deleteWorkspaceStyle(style).then(function () {
                         return gsRepository.getWorkspaceStyles().then(function (workspaceStlyes) {
                             expect(workspaceStlyes).to.be.instanceof(Array);

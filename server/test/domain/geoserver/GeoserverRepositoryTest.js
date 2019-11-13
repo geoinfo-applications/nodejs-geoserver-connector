@@ -184,7 +184,7 @@ describe("Geoserver repository unit tests", function () {
             });
 
             it("should recalculate feature type BBOX ", function (done) {
-                return gsRepository.recalculateFeatureTypeBBox(layer).then(function () {
+                gsRepository.recalculateFeatureTypeBBox(layer).then(function () {
                     done();
                 }).catch(done);
             });
