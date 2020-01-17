@@ -1,11 +1,11 @@
 {
   "name": "@geoinfo/nodejs-geoserver-connector",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "NodeJS bindings for Geoserver Rest API",
   "main": "module.js",
   "repository": {
     "type": "git",
-    "url": "http://git.geoinfo.ch/scm/ngp/geoservermanager.git"
+    "url": "git+https://github.com/geoinfo-applications/nodejs-geoserver-connector.git"
   },
   "scripts": {
     "test": "grunt test"
@@ -13,12 +13,9 @@
   "author": "GEOINFO Applications AG",
   "license": "MIT",
   "private": false,
-  "publishConfig": {
-    "registry": "http://npm.geoinfo.ch"
-  },
   "engines": {
-    "node": "^4.0.0",
-    "npm": ">2.7.0"
+    "node": "^10.0.0",
+    "npm": ">6.13.4"
   },
   "engineStrict": true,
   "dependencies": {
