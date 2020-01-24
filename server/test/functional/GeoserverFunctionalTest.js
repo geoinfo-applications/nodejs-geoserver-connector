@@ -1,466 +1,393 @@
 "use strict";
 
-var _ = require("underscore");
-var expect = require("chai").expect;
+const _ = require("underscore");
+const expect = require("chai").expect;
 
-var TestUtils = require("../TestUtils.js");
-var config = require("../config");
+const TestUtils = require("../TestUtils.js");
+const config = require("../config");
 
-describe("Geoserver functional tests ", function () {
+describe("Geoserver functional tests ", () => {
 
-    this.timeout(5000);
+    const testUtils = new TestUtils(config.functional_test);
+    const gsRepository = testUtils.gsRepository;
 
-    var testUtils = new TestUtils(config.functional_test);
-    var gsRepository = testUtils.gsRepository;
+    describe("testing access ", () => {
 
-    describe("testing access ", function () {
-
-        beforeEach(function (done) {
-            testUtils.cleanWorkspace(done);
+        beforeEach(async () => {
+            await testUtils.cleanWorkspace();
         });
 
-        afterEach(function (done) {
-            testUtils.cleanWorkspace(done);
+        afterEach(async () => {
+            await testUtils.cleanWorkspace();
         });
 
-        it("GS repository should be disabled if Geoserver instance is not initialized", function (done) {
+        it("GS repository should be disabled if Geoserver instance is not initialized", () => {
             expect(gsRepository.isEnabled).to.be.equal(false);
-            done();
         });
 
-        it("should correctly fetch Geoserver details upon initialization", function (done) {
+        it("should correctly fetch Geoserver details upon initialization", async () => {
 
-            gsRepository.initializeWorkspace().then(function () {
-                expect(gsRepository.isEnabled).to.be.equal(true);
-                expect(gsRepository.geoserverDetails["@name"]).to.be.equal("GeoServer");
-                done();
-            }).catch(done);
+            await gsRepository.initializeWorkspace();
+
+            expect(gsRepository.isEnabled).to.be.equal(true);
+            expect(gsRepository.geoserverDetails["@name"]).to.be.equal("GeoServer");
         });
 
     });
 
-    describe("objects manipulation test ", function () {
+    describe("objects manipulation test ", () => {
 
-        var layer = config.layer;
+        const layer = config.layer;
 
-        var newWorkspace = testUtils.newWorkspace;
-        var newDatastore = testUtils.newDatastore;
-        var nonExistingLayer = config.nonExistingLayer;
+        const newWorkspace = testUtils.newWorkspace;
+        const newDatastore = testUtils.newDatastore;
+        const nonExistingLayer = config.nonExistingLayer;
 
-        beforeEach(function (done) {
-            testUtils.initializeWorkspace(done);
+        beforeEach(async () => {
+            await testUtils.cleanWorkspace();
+            await testUtils.initializeWorkspace()
         });
 
-        afterEach(function (done) {
-            testUtils.cleanWorkspaces(done);
+        afterEach(async () => {
+            await testUtils.cleanWorkspace();
         });
 
-        describe("workspaces ", function () {
+        describe("workspaces ", () => {
 
-            it("should return false if non-default workspace does not exist ", function (done) {
+            it("should return false if non-default workspace does not exist ", async () => {
 
-                gsRepository.workspaceExists(newWorkspace).then(function (exists) {
-                    if (exists) {
-                        done(new Error("Workspace should not exist in GS workspaces!"));
-                    } else {
-                        done();
-                    }
-                }).catch(done);
+                const exists = await gsRepository.workspaceExists(newWorkspace);
+
+                expect(!!exists).to.not.be.eql(true, "Workspace should not exist in GS workspaces!");
             });
 
-            it("should return true if default workspace exists ", function (done) {
+            it("should return true if default workspace exists ", async () => {
 
-                gsRepository.workspaceExists().then(function (exists) {
-                    if (exists) {
-                        done();
-                    } else {
-                        done(new Error("Workspace should exist in GS workspaces!"));
-                    }
-                }).catch(done);
+                const exists = await gsRepository.workspaceExists();
+
+                expect(!!exists).to.be.eql(true, "Workspace should exist in GS workspaces!");
             });
 
-            it("should return true if workspace already exists", function (done) {
+            it("should return true if workspace already exists", async () => {
 
-                gsRepository.createWorkspace().then(function (result) {
-                    expect(result).to.be.equal(true);
-                    done();
-                }).catch(done);
+                const result = await gsRepository.createWorkspace();
+
+                expect(!!result).to.be.equal(true);
             });
 
-            it("should delete default GS workspace", function (done) {
+            it("should delete default GS workspace", async () => {
 
-                gsRepository.deleteWorkspace().then(function () {
-                    done();
-                }).catch(done);
+                await gsRepository.deleteWorkspace();
+
             });
 
-            it("should create non-default GS workspace", function (done) {
+            it("should create non-default GS workspace", async () => {
+                await gsRepository.createWorkspace(newWorkspace);
 
-                gsRepository.createWorkspace(newWorkspace).then(function () {
-                    return gsRepository.deleteWorkspace(newWorkspace).then(function () {
-                        done();
-                    });
-                }).catch(done);
+                await gsRepository.deleteWorkspace(newWorkspace);
+
             });
 
         });
 
-        describe("datastores ", function () {
+        describe("datastores ", () => {
 
-            it("should return true if default GS datastore exists in default workspace", function (done) {
+            it("should return true if default GS datastore exists in default workspace", async () => {
 
-                gsRepository.datastoreExists().then(function (exists) {
-                    if (exists) {
-                        done();
-                    } else {
-                        done(new Error("Datastore should exist in GS workspace!"));
-                    }
-                }).catch(done);
+                const exists = await gsRepository.datastoreExists();
+
+                expect(!!exists).to.be.eql(true, "Datastore should exist in GS workspace!");
             });
 
-            it("should delete default GS datastore  in default workspace", function (done) {
+            it("should delete default GS datastore  in default workspace", async () => {
 
-                gsRepository.deleteDatastore().then(function () {
-                    done();
-                }).catch(done);
+                await gsRepository.deleteDatastore();
             });
 
-            it("should return false if non-default GS datastore does not exist in default workspace", function (done) {
+            it("should return false if non-default GS datastore does not exist in default workspace", async () => {
 
-                gsRepository.datastoreExists(newDatastore).then(function (exists) {
-                    if (exists) {
-                        done(new Error("Datastore should not exist in GS workspace!"));
-                    } else {
-                        done();
-                    }
-                }).catch(done);
+                const exists = await gsRepository.datastoreExists(newDatastore);
+
+                expect(!!exists).to.not.be.eql(true, "Datastore should not exist in GS workspace!");
             });
 
-            it("should create non-default GS datastore", function (done) {
+            it("should create non-default GS datastore", async () => {
 
-                gsRepository.createDatastore(newDatastore).then(function () {
-                    done();
-                }).catch(done);
+                await gsRepository.createDatastore(newDatastore);
             });
 
-            it("should create non-default datastore in non-default workspace", function (done) {
+            it("should create non-default datastore in non-default workspace", async () => {
+                await gsRepository.createWorkspace(newWorkspace);
+                const datastoreConfig = _.extend({}, newDatastore, { workspace: newWorkspace.name });
 
-                gsRepository.createWorkspace(newWorkspace).then(function () {
 
-                    var datastoreConfig = _.extend({}, newDatastore, { workspace: newWorkspace.name });
+                await gsRepository.createDatastore(datastoreConfig);
 
-                    return gsRepository.createDatastore(datastoreConfig).then(function () {
-                        return gsRepository.getDatastore(datastoreConfig).then(function (datastore) {
-                            expect(datastore.name).to.be.equal(datastoreConfig.name);
-                            expect(datastore.workspace.name).to.be.equal(datastoreConfig.workspace);
-                            done();
-                        });
-                    });
-                }).catch(done);
+                const datastore = await gsRepository.getDatastore(datastoreConfig);
+                expect(datastore.name).to.be.equal(datastoreConfig.name);
+                expect(datastore.workspace.name).to.be.equal(datastoreConfig.workspace);
             });
 
         });
 
-        describe("feature type ", function () {
+        describe("feature type ", () => {
 
-            it("should return false if feature type does not exist in default store", function (done) {
+            it("should return false if feature type does not exist in default store", async () => {
 
-                gsRepository.featureTypeExists(layer).then(function (exists) {
-                    if (exists) {
-                        done(new Error("feature type should not exist in store!"));
-                    } else {
-                        done();
-                    }
-                }).catch(done);
+                const exists = await gsRepository.featureTypeExists(layer);
+
+                expect(!!exists).to.be.eql(false, "feature type should not exist in store!");
             });
 
-            it("should fail if name is not supplied", function (done) {
+            it("should fail if name is not supplied", async () => {
 
-                return gsRepository.createFeatureType({}).fail(function (err) {
-                    expect(err.message).to.match(/name required/);
-                    done();
-                }).catch(done);
+                try {
+                    await gsRepository.createFeatureType({});
+                } catch (error) {
+                    expect(error.message).to.match(/name required/);
+                    return;
+                }
+
+                throw new Error("should fail");
             });
 
-            it("should fail if feature type does not exist in flat DB", function (done) {
+            it("should fail if feature type does not exist in flat DB", async () => {
+                try {
+                    await gsRepository.createFeatureType(nonExistingLayer);
+                } catch (error) {
+                    expect(error).to.be.eql("Trying to create new feature type inside the store,");
+                    return;
+                }
 
-                return gsRepository.createFeatureType(nonExistingLayer).fail(function (error) {
-                    console.log(error);
-                    if (error === "Trying to create new feature type inside the store," +
-                        " but no attributes were specified" || !error /* database is not accessible error = null */) {
-                        done();
-                    } else {
-                        done(new Error(error));
-                    }
-                }).catch(done);
+                throw new Error("Should fail");
             });
 
         });
 
-        describe("coverages ", function () {
+        describe("coverages ", () => {
 
-            var coverageStoreConfig;
-            var coverageBasePath = "file:///var/lib/tomcat7/webapps/geoserver/data/coverages/";
+            let coverageStoreConfig;
+            const coverageBasePath = "file:///var/lib/tomcat7/webapps/geoserver/data/coverages/";
 
-            beforeEach(function () {
+            beforeEach(() => {
                 coverageStoreConfig = {
                     name: "AR_2014",
                     coverageDirectory: coverageBasePath + "pyramid_sample"
                 };
             });
 
-            it("should create coverage mosaic store and automatically configure coverage layer ", function (done) {
+            it("should create coverage mosaic store and automatically configure coverage layer ", async () => {
                 coverageStoreConfig.coverageStoreType = "imagemosaic";
                 coverageStoreConfig.coverageDirectory = coverageBasePath + "mosaic_sample";
 
                 // HINT by default geoserver creates layer named "mosaic"
-                gsRepository.createCoverageStore(coverageStoreConfig).then(function () {
-                    return gsRepository.layerExists({ name: "mosaic" }).then(function (mosaicLayerExists) {
-                        expect(mosaicLayerExists).to.be.eql(true);
-                        done();
-                    });
-                }).catch(done);
+                await gsRepository.createCoverageStore(coverageStoreConfig);
+
+                const mosaicLayerExists = await gsRepository.layerExists({ name: "mosaic" });
+                expect(mosaicLayerExists).to.be.eql(true);
             });
 
-            it("should create coverage pyramid store and automatically configure coverage layer ", function (done) {
+            it("should create coverage pyramid store and automatically configure coverage layer ", async () => {
                 coverageStoreConfig.coverageDirectory = coverageBasePath + "pyramid_sample";
 
                 // HINT by default geoserver creates layer named as pyramid directory
-                gsRepository.createCoverageStore(coverageStoreConfig).then(function () {
-                    return gsRepository.layerExists({ name: "pyramid_sample" }).then(function (pyramidLayerExists) {
-                        expect(pyramidLayerExists).to.be.eql(true);
-                        done();
-                    });
-                }).catch(done);
+                await gsRepository.createCoverageStore(coverageStoreConfig);
+
+                const pyramidLayerExists = await gsRepository.layerExists({ name: "pyramid_sample" });
+                expect(pyramidLayerExists).to.be.eql(true);
             });
 
-            it("should create coverage store w/ layer, then update layer parameters ", function (done) {
+            it("should create coverage store w/ layer, then update layer parameters ", async () => {
                 coverageStoreConfig.coverageStoreType = "imagemosaic";
                 coverageStoreConfig.coverageDirectory = coverageBasePath + "mosaic_sample";
-
-                gsRepository.createCoverageStore(coverageStoreConfig).then(function () {
-                    var newConfig = {
-                        name: "mosaic",
-                        store: coverageStoreConfig.name,
-                        updatedConfig: {
-                            coverage: {
-                                name: "new_name",
-                                title: "new_name",
-                                enabled: true,
-                                parameters: {
-                                    entry: [
-                                        { string: ["AllowMultithreading", false] },
-                                        { string: ["MergeBehavior", "FLAT"] },
-                                        { string: ["FootprintBehavior", "None"] },
-                                        { string: ["Filter", ""] },
-                                        { string: ["MaxAllowedTiles", -1] },
-                                        { string: ["SORTING", ""] },
-                                        { string: ["InputTransparentColor", ""] },
-                                        { string: ["OutputTransparentColor", "#FF00FF"] },
-                                        { string: ["SUGGESTED_TILE_SIZE", "512,512"] },
-                                        { string: ["Accurate resolution computation", false] },
-                                        { string: ["USE_JAI_IMAGEREAD", false] },
-                                        { string: ["BackgroundValues", ""] }
-                                    ]
-                                }
+                await gsRepository.createCoverageStore(coverageStoreConfig);
+                const newConfig = {
+                    name: "mosaic",
+                    store: coverageStoreConfig.name,
+                    updatedConfig: {
+                        coverage: {
+                            name: "new_name",
+                            title: "new_name",
+                            enabled: true,
+                            parameters: {
+                                entry: [
+                                    { string: ["AllowMultithreading", false] },
+                                    { string: ["MergeBehavior", "FLAT"] },
+                                    { string: ["FootprintBehavior", "None"] },
+                                    { string: ["Filter", ""] },
+                                    { string: ["MaxAllowedTiles", -1] },
+                                    { string: ["SORTING", ""] },
+                                    { string: ["InputTransparentColor", ""] },
+                                    { string: ["OutputTransparentColor", "#FF00FF"] },
+                                    { string: ["SUGGESTED_TILE_SIZE", "512,512"] },
+                                    { string: ["Accurate resolution computation", false] },
+                                    { string: ["USE_JAI_IMAGEREAD", false] },
+                                    { string: ["BackgroundValues", ""] }
+                                ]
                             }
                         }
-                    };
-                    return gsRepository.updateCoverage(newConfig).then(function () {
-                        return gsRepository.layerExists({ name: "new_name" }).then(function (mosaicLayerExists) {
-                            expect(mosaicLayerExists).to.be.eql(true);
-                            done();
-                        });
-                    });
-                }).catch(done);
+                    }
+                };
+                await gsRepository.updateCoverage(newConfig);
+
+                const mosaicLayerExists = await gsRepository.layerExists({ name: "new_name" });
+                expect(mosaicLayerExists).to.be.eql(true);
             });
         });
 
-        describe("styles ", function () {
+        describe("styles ", () => {
 
-            var style = config.style;
-            var secondStyle = { name: "secondTestStyle", filename: "secondTestStyle.sld" };
-            var newWorkspaceStyle = { name: style.name, workspace: newWorkspace.name };
-            var existingGlobalStyle = { name: "point" };
+            const style = config.style;
+            const secondStyle = { name: "secondTestStyle", filename: "secondTestStyle.sld" };
+            const newWorkspaceStyle = { name: style.name, workspace: newWorkspace.name };
+            const existingGlobalStyle = { name: "point" };
 
-            var styleConfig = {
+            const styleConfig = {
                 name: style.name
             };
-            var secondStyleConfig = {
+            const secondStyleConfig = {
                 name: secondStyle.name
             };
-            var newWorkspaceStyleConfig = _.clone(newWorkspaceStyle);
+            const newWorkspaceStyleConfig = _.clone(newWorkspaceStyle);
 
-            before(function (done) {
-                testUtils.readStyleContent(function (sldFileContent) {
+            before(async () => {
+                await testUtils.readStyleContent((sldFileContent) => {
                     styleConfig.sldBody = sldFileContent;
                     secondStyleConfig.sldBody = sldFileContent;
                     newWorkspaceStyleConfig.sldBody = sldFileContent;
-                    done();
-                }, done);
-            });
-
-            beforeEach(function (done) {
-                initializeStyleWorkspace(done);
-            });
-
-            afterEach(function (done) {
-                return cleanStyleWorkspace(done);
-            });
-
-            function initializeStyleWorkspace(done) {
-                return cleanStyleWorkspace().then(function () {
-                    testUtils.initializeWorkspace(done);
                 });
+            });
+
+            beforeEach(initializeStyleWorkspace);
+            afterEach(cleanStyleWorkspace);
+
+            async function initializeStyleWorkspace() {
+                await cleanStyleWorkspace();
+                await testUtils.initializeWorkspace();
             }
 
-            function cleanStyleWorkspace(done) {
-                return gsRepository.deleteGlobalStyle(style).then(function () {
-                    return gsRepository.deleteWorkspaceStyle(style).then(function () {
-                        return gsRepository.deleteWorkspaceStyle(secondStyle).then(function () {
-                            testUtils.cleanWorkspace(done);
-                        });
-                    });
-                });
+            async function cleanStyleWorkspace() {
+                await gsRepository.deleteGlobalStyle(style);
+                await gsRepository.deleteWorkspaceStyle(style);
+                await gsRepository.deleteWorkspaceStyle(secondStyle);
+                await testUtils.cleanWorkspace();
             }
 
-            function createStyleInNonDefaultWorkspace() {
-                return gsRepository.createWorkspace(newWorkspace).then(function () {
-                    return gsRepository.createWorkspaceStyle(newWorkspaceStyleConfig);
-                });
+            async function createStyleInNonDefaultWorkspace() {
+                await gsRepository.createWorkspace(newWorkspace);
+                return gsRepository.createWorkspaceStyle(newWorkspaceStyleConfig);
             }
 
-            it("should return global styles", function (done) {
+            it("should return global styles", async () => {
 
-                gsRepository.getGlobalStyles().then(function (styles) {
-                    expect(styles).to.be.instanceof(Array);
-                    done();
-                }).catch(done);
+                const styles = await gsRepository.getGlobalStyles();
+
+                expect(styles).to.be.instanceof(Array);
             });
 
-            it("should get a global style ", function (done) {
-                gsRepository.getGlobalStyle(existingGlobalStyle).then(function (styleObject) {
-                    expect(styleObject.name).to.be.equal(existingGlobalStyle.name);
-                    done();
-                }).catch(done);
+            it("should get a global style ", async () => {
+
+                const styleObject = await gsRepository.getGlobalStyle(existingGlobalStyle);
+
+                expect(styleObject.name).to.be.equal(existingGlobalStyle.name);
             });
 
-            it("should create a global style", function (done) {
+            it("should create a global style", async () => {
 
-                gsRepository.createGlobalStyle(styleConfig).then(function () {
-                    return gsRepository.getGlobalStyle(style).then(function (layerObject) {
-                        expect(layerObject.name).to.be.equal(style.name);
-                        done();
-                    });
-                }).catch(done);
+                await gsRepository.createGlobalStyle(styleConfig);
+
+                const layerObject = await gsRepository.getGlobalStyle(style);
+                expect(layerObject.name).to.be.equal(style.name);
             });
 
-            it("should not return any styles for new workspace", function (done) {
+            it("should not return any styles for new workspace", async () => {
 
-                gsRepository.getWorkspaceStyles().then(function (styles) {
-                    expect(styles).to.be.instanceof(Array);
-                    expect(styles.length).to.be.equal(0);
-                    done();
-                }).catch(done);
+                const styles = await gsRepository.getWorkspaceStyles();
+
+                expect(styles).to.be.instanceof(Array);
+                expect(styles.length).to.be.equal(0);
             });
 
-            it("should fail creating workspace style if style is not supplied", function (done) {
+            it("should fail creating workspace style if style is not supplied", async () => {
 
-                gsRepository.createWorkspaceStyle().fail(function (err) {
-                    expect(err.message).to.match(/layer name required/);
-                    done();
-                }).catch(done);
+                try {
+                    await gsRepository.createWorkspaceStyle();
+                } catch (error) {
+                    expect(error.message).to.match(/layer name required/);
+                    return;
+                }
+
+                throw new Error("should fail");
             });
 
-            it("should create a workspace style in a default workspace", function (done) {
+            it("should create a workspace style in a default workspace", async () => {
 
-                gsRepository.createWorkspaceStyle(styleConfig).then(function () {
-                    return gsRepository.getWorkspaceStyle(style).then(function (styleObject) {
-                        expect(styleObject.name).to.be.equal(style.name);
-                        done();
-                    });
-                }).catch(done);
+                await gsRepository.createWorkspaceStyle(styleConfig);
+
+                const styleObject = await gsRepository.getWorkspaceStyle(style);
+                expect(styleObject.name).to.be.equal(style.name);
             });
 
-            it("should only upload new SLD file on style create if style already exists in workspace", function (done) {
+            it("should only upload new SLD file on style create if style already exists in workspace", async () => {
+                await gsRepository.createWorkspaceStyle(styleConfig);
+                const styleWithDifferentSLDFileConfig = {
+                    name: style.name,
+                    sldBody: styleConfig.sldBody
+                };
 
-                gsRepository.createWorkspaceStyle(styleConfig).then(function () {
+                await gsRepository.createWorkspaceStyle(styleWithDifferentSLDFileConfig);
 
-                    var styleWithDifferentSLDFileConfig = {
-                        name: style.name,
-                        sldBody: styleConfig.sldBody
-                    };
-
-                    return gsRepository.createWorkspaceStyle(styleWithDifferentSLDFileConfig).then(function () {
-                        return gsRepository.getWorkspaceStyle(styleConfig).then(function (styleObject) {
-                            expect(styleObject.name).to.be.equal(style.name);
-                            done();
-                        });
-                    });
-                }).catch(done);
+                const styleObject = await gsRepository.getWorkspaceStyle(styleConfig);
+                expect(styleObject.name).to.be.equal(style.name);
             });
 
-            it("should delete a workspace style from a default workspace", function (done) {
+            it("should delete a workspace style from a default workspace", async () => {
 
-                gsRepository.deleteWorkspaceStyle(style).then(function () {
-                    return gsRepository.getWorkspaceStyles().then(function (workspaceStyles) {
-                        expect(workspaceStyles.length).to.be.equal(0);
-                        done();
-                    });
-                }).catch(done);
+                await gsRepository.deleteWorkspaceStyle(style);
+
+                const workspaceStyles = await gsRepository.getWorkspaceStyles();
+                expect(workspaceStyles.length).to.be.equal(0);
             });
 
-            it("should create a workspace style in a non-default workspace", function (done) {
+            it("should create a workspace style in a non-default workspace", async () => {
 
-                createStyleInNonDefaultWorkspace().then(function () {
-                    return gsRepository.getWorkspaceStyle(newWorkspaceStyle).then(function (styleObject) {
-                        expect(styleObject.name).to.be.equal(newWorkspaceStyle.name);
-                        done();
-                    });
-                }).catch(done);
+                await createStyleInNonDefaultWorkspace();
+
+                const styleObject = await gsRepository.getWorkspaceStyle(newWorkspaceStyle);
+                expect(styleObject.name).to.be.equal(newWorkspaceStyle.name);
             });
 
-            it("should delete a workspace style from a non-default workspace", function (done) {
+            it("should delete a workspace style from a non-default workspace", async () => {
+                await createStyleInNonDefaultWorkspace();
 
-                createStyleInNonDefaultWorkspace().then(function () {
-                    return gsRepository.deleteWorkspaceStyle(newWorkspaceStyle).then(function () {
-                        return gsRepository.getWorkspaceStyles().then(function (workspaceStyles) {
-                            expect(workspaceStyles.length).to.be.equal(0);
-                            done();
-                        });
-                    });
-                }).catch(done);
+                await gsRepository.deleteWorkspaceStyle(newWorkspaceStyle);
+
+                const workspaceStyles = await gsRepository.getWorkspaceStyles();
+                expect(workspaceStyles.length).to.be.equal(0);
             });
 
-            it("should get all workspace styles", function (done) {
+            it("should get all workspace styles", async () => {
+                await gsRepository.createWorkspaceStyle(styleConfig);
 
-                gsRepository.createWorkspaceStyle(styleConfig).then(function () {
-                    return gsRepository.createWorkspaceStyle(secondStyleConfig).then(function () {
-                        return gsRepository.getWorkspaceStyles().then(function (workspaceStyles) {
-                            expect(workspaceStyles.length).to.be.equal(2);
-                            expect(workspaceStyles[0].name).to.be.equal(style.name);
-                            expect(workspaceStyles[1].name).to.be.equal(secondStyle.name);
-                            done();
-                        });
-                    });
-                }).catch(done);
+                await gsRepository.createWorkspaceStyle(secondStyleConfig);
+
+                const workspaceStyles = await gsRepository.getWorkspaceStyles();
+                expect(workspaceStyles.length).to.be.equal(2);
+                expect(workspaceStyles[0].name).to.be.equal(style.name);
+                expect(workspaceStyles[1].name).to.be.equal(secondStyle.name);
             });
 
-            it("should delete a workspace style", function (done) {
+            it("should delete a workspace style", async () => {
+                await gsRepository.createWorkspaceStyle(styleConfig);
 
-                gsRepository.createWorkspaceStyle(styleConfig).then(function () {
-                    return gsRepository.deleteWorkspaceStyle(style).then(function () {
-                        return gsRepository.getWorkspaceStyles().then(function (workspaceStlyes) {
-                            expect(workspaceStlyes).to.be.instanceof(Array);
-                            expect(workspaceStlyes.length).to.be.equal(0);
-                            done();
-                        });
-                    });
-                }).catch(done);
+                await gsRepository.deleteWorkspaceStyle(style);
+
+                const workspaceStlyes = await gsRepository.getWorkspaceStyles();
+                expect(workspaceStlyes).to.be.instanceof(Array);
+                expect(workspaceStlyes.length).to.be.equal(0);
             });
-
         });
 
     });
-});
+}).timeout(5000);
 
