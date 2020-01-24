@@ -229,7 +229,7 @@ describe("Geoserver Wms Layer Test ", function () {
         it("should create new layer and return its name", function (done) {
             geoserverRepository.wmsLayerExists.returns(new Q.when(false));
 
-            geoserverRepository.makeSureLayerExists({}, wmsLayerConfig).then(function (result) {
+            geoserverRepository.makeSureWmsLayerExists({}, wmsLayerConfig).then(function (result) {
                 expect(geoserverRepository.issueWmsLayerCreateRequest).callCount(1);
                 expect(result).to.be.eql("ch.blw.alpprodukte");
                 done();
@@ -239,7 +239,7 @@ describe("Geoserver Wms Layer Test ", function () {
         it("should not create new layer and return its name", function (done) {
             geoserverRepository.wmsLayerExists.returns(new Q.when(true));
 
-            geoserverRepository.makeSureLayerExists({}, wmsLayerConfig).then(function (result) {
+            geoserverRepository.makeSureWmsLayerExists({}, wmsLayerConfig).then(function (result) {
                 expect(geoserverRepository.issueWmsLayerCreateRequest).callCount(0);
                 expect(result).to.be.eql("ch.blw.alpprodukte");
                 done();
@@ -250,7 +250,7 @@ describe("Geoserver Wms Layer Test ", function () {
     describe("create not existing layers", function () {
         beforeEach(function () {
             geoserverRepository.getWmsLayerRequestParameters = sinon.stub();
-            geoserverRepository.makeSureLayerExists = sinon.stub();
+            geoserverRepository.makeSureWmsLayerExists = sinon.stub();
 
             wmsLayerConfig.layerName = "ch.blw.alpprodukte";
         });
@@ -258,15 +258,15 @@ describe("Geoserver Wms Layer Test ", function () {
         it("should check two layers if exists", function (done) {
             geoserverRepository.getWmsLayerRequestParameters.returns(Q.when(["layer1", "layer2"]));
 
-            geoserverRepository.createNotExistingLayers(wmsLayerConfig).then(function () {
-                expect(geoserverRepository.makeSureLayerExists).callCount(2);
+            geoserverRepository.createNotExistingWmsLayers(wmsLayerConfig).then(function () {
+                expect(geoserverRepository.makeSureWmsLayerExists).callCount(2);
                 done();
             }).catch(done);
         });
     });
 
     it("should create wms layer", function (done) {
-        geoserverRepository.createNotExistingLayers = sinon.stub().returns(new Q(["layer1", "layer2"]));
+        geoserverRepository.createNotExistingWmsLayers = sinon.stub().returns(new Q(["layer1", "layer2"]));
         geoserverRepository.createLayerGroup = sinon.stub();
 
         geoserverRepository.createWmsLayer(wmsLayerConfig).then(function () {
@@ -342,7 +342,7 @@ describe("Geoserver Wms Layer Test ", function () {
         it("should delete layers", function (done) {
             var layersToDelete = [ "layer1", "layer2" ];
 
-            geoserverRepository.deleteAllUnnecessaryGeoserverLayers(wmsLayerConfig, layersToDelete).then(function () {
+            geoserverRepository.deleteAllUnnecessaryGeoserverWmsLayers(wmsLayerConfig, layersToDelete).then(function () {
                 expect(geoserverRepository.getWmsLayerRequestParameters).callCount(1);
                 expect(geoserverRepository.deleteWmsLayerEverywhere).callCount(2);
                 expect(geoserverRepository.deleteWmsLayerEverywhere).to.have.been.calledWith("layerParam1", "wmsLayerParam1");
@@ -353,7 +353,7 @@ describe("Geoserver Wms Layer Test ", function () {
         it("should return because there is no layers to delete", function (done) {
             var layersToDelete = [];
 
-            geoserverRepository.deleteAllUnnecessaryGeoserverLayers(wmsLayerConfig, layersToDelete).then(function () {
+            geoserverRepository.deleteAllUnnecessaryGeoserverWmsLayers(wmsLayerConfig, layersToDelete).then(function () {
                 expect(geoserverRepository.getWmsLayerRequestParameters).callCount(0);
                 expect(geoserverRepository.deleteWmsLayerEverywhere).callCount(0);
                 done();
@@ -366,9 +366,9 @@ describe("Geoserver Wms Layer Test ", function () {
 
             geoserverRepository.layerGroupExists = sinon.stub().returns(new Q(true));
 
-            geoserverRepository.createNotExistingLayers = sinon.stub().returns(new Q(["ch.blw.alpprodukte", "ch.vbs.armeelogistikcenter"]));
+            geoserverRepository.createNotExistingWmsLayers = sinon.stub().returns(new Q(["ch.blw.alpprodukte", "ch.vbs.armeelogistikcenter"]));
             geoserverRepository.updateLayerGroup = sinon.stub();
-            geoserverRepository.deleteAllUnnecessaryGeoserverLayers = sinon.stub();
+            geoserverRepository.deleteAllUnnecessaryGeoserverWmsLayers = sinon.stub();
         });
 
         it("should update wms layer", function (done) {
@@ -376,12 +376,12 @@ describe("Geoserver Wms Layer Test ", function () {
             existingExternalWmsLayer.layerNames = "ch.blw.alpprodukte,ch.vbs.armeelogistikcenter";
 
             geoserverRepository.updateWmsLayer(wmsLayerConfig, existingExternalWmsLayer).then(function () {
-                expect(geoserverRepository.createNotExistingLayers).callCount(1);
-                expect(geoserverRepository.createNotExistingLayers).to.have.been.calledWith(wmsLayerConfig);
-                expect(geoserverRepository.createNotExistingLayers).to.have.been.calledWith(wmsLayerConfig);
+                expect(geoserverRepository.createNotExistingWmsLayers).callCount(1);
+                expect(geoserverRepository.createNotExistingWmsLayers).to.have.been.calledWith(wmsLayerConfig);
+                expect(geoserverRepository.createNotExistingWmsLayers).to.have.been.calledWith(wmsLayerConfig);
                 expect(geoserverRepository.updateLayerGroup)
                     .to.have.been.calledWith(wmsLayerConfig, ["ch.blw.alpprodukte", "ch.vbs.armeelogistikcenter"]);
-                expect(geoserverRepository.deleteAllUnnecessaryGeoserverLayers)
+                expect(geoserverRepository.deleteAllUnnecessaryGeoserverWmsLayers)
                     .to.have.been.calledWith(wmsLayerConfig, ["ch.vbs.armeelogistikcenter"]);
                 done();
             }).catch(done);

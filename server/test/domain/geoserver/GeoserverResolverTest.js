@@ -25,6 +25,8 @@ describe("Geoserver Resolver unit tests ", function () {
     var featureTypeName = "testFeatureType";
     var wmsStoreName = "ch";
     var wmsLayerName = "ch.blw.alpprodukte";
+    var wmtsStoreName = "at";
+    var wmtsLayerName = "at.basis";
     var layerGroupName = "alpprodukte";
 
     var geoserverTypesConfigs = {
@@ -38,6 +40,8 @@ describe("Geoserver Resolver unit tests ", function () {
         WorkspaceStyle: config.style,
         WmsStore: { name: wmsStoreName },
         WmsLayer: { layerName: wmsLayerName, externalWmsService: { name: wmsStoreName } },
+        WmtsStore: { name: wmtsStoreName },
+        WmtsLayer: { layerName: wmtsLayerName, externalWmtsService: { name: wmtsStoreName } },
         LayerGroup: { name: layerGroupName }
     };
 
@@ -52,6 +56,8 @@ describe("Geoserver Resolver unit tests ", function () {
         WorkspaceStyle: [workspaceName, config.style.name],
         WmsStore: [workspaceName, wmsStoreName],
         WmsLayer: [workspaceName, wmsStoreName, wmsLayerName],
+        WmtsStore: [workspaceName, wmtsStoreName],
+        WmtsLayer: [workspaceName, wmtsStoreName, wmtsLayerName],
         LayerGroup: [layerGroupName]
     };
 

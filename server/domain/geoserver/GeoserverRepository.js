@@ -10,6 +10,8 @@ var GeoserverResolver = require("./GeoserverResolver");
 var GeoserverDatastore = require("./GeoserverDatastore");
 var GeoserverWmsStore = require("./GeoserverWmsStore");
 var GeoserverWmsLayer = require("./GeoserverWmsLayer");
+var GeoserverWmtsStore = require("./GeoserverWmtsStore");
+var GeoserverWmtsLayer = require("./GeoserverWmtsLayer");
 var GeoserverCoverageStore = require("./GeoserverCoverageStore");
 var GeoserverCoverage = require("./GeoserverCoverage");
 var GeoserverWorkspace = require("./GeoserverWorkspace");
@@ -77,6 +79,8 @@ function GeoserverRepository(config) {
         COVERAGESTORE: "CoverageStore",
         WMSSTORE: "WmsStore",
         WMSLAYER: "WmsLayer",
+        WMTSSTORE: "WmtsStore",
+        WMTSLAYER: "WmtsLayer",
         COVERAGE: "Coverage",
         WORKSPACE: "Workspace",
         STYLE: "Style",
@@ -321,5 +325,7 @@ GeoserverLayerGroup.call(GeoserverRepository.prototype);
 GeoserverStyle.call(GeoserverRepository.prototype);
 GeoserverWmsStore.call(GeoserverRepository.prototype);
 GeoserverWmsLayer.call(GeoserverRepository.prototype);
+GeoserverWmtsStore.call(GeoserverRepository.prototype);
+GeoserverWmtsLayer.call(GeoserverRepository.prototype);
 
 module.exports = GeoserverRepository;

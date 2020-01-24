@@ -29,6 +29,12 @@ function GeoserverResolver(geoserverRepositoryConfig) {
         getWmsLayers: "/workspaces/%s/wmsstores/%s/wmslayers",
         getWmsLayer: "/workspaces/%s/wmsstores/%s/wmslayers/%s",
 
+        getWmtsStores: "/workspaces/%s/wmtsstores/",
+        getWmtsStore: "/workspaces/%s/wmtsstores/%s",
+
+        getWmtsLayers: "/workspaces/%s/wmtsstores/%s/wmtslayers",
+        getWmtsLayer: "/workspaces/%s/wmtsstores/%s/wmtslayers/%s",
+
         getLayerGroups: "/layergroups",
         getLayerGroup: "/layergroups/%s",
 
@@ -131,6 +137,19 @@ function GeoserverResolver(geoserverRepositoryConfig) {
             return this.formatReturnUrl(restUrl, parameters);
         },
 
+        resolveWmtsStore: function (config, method) {
+            var restUrl = method === "create" ? this.restAPI.getWmtsStores : this.restAPI.getWmtsStore;
+            var parameters = this.getParameters.getWmtsStoreParameters(config, method);
+
+            return this.formatReturnUrl(restUrl, parameters);
+        },
+
+        resolveWmtsLayer: function (config, method) {
+            var restUrl = method === "create" ? this.restAPI.getWmtsLayers : this.restAPI.getWmtsLayer;
+            var parameters = this.getParameters.getWmtsLayerParameters(config, method);
+            return this.formatReturnUrl(restUrl, parameters);
+        },
+
         resolveLayerGroup: function (config, method) {
             var restUrl = method === "create" ? this.restAPI.getLayerGroups : this.restAPI.getLayerGroup;
             var parameters = this.getParameters.getLayerGroupParameters(config, method);
@@ -224,6 +243,19 @@ function GeoserverResolver(geoserverRepositoryConfig) {
             var wmsStoreName = config.externalWmsService.name;
             var workspaceName = this.resolveWorkspaceName(config);
             return _.compact([ workspaceName, wmsStoreName, wmsLayerName ]);
+        },
+
+        getWmtsStoreParameters: function (config, method) {
+            var wmtsStoreName = method === "create" ? void 0 : encodeURIComponent(config.name);
+            var workspaceName = encodeURIComponent(this.resolveWorkspaceName(config));
+            return _.compact([ workspaceName, wmtsStoreName ]);
+        },
+
+        getWmtsLayerParameters: function (config, method) {
+            var wmtsLayerName = method === "create" ? void 0 : config.layerName;
+            var wmtsStoreName = config.externalWmtsService.name;
+            var workspaceName = this.resolveWorkspaceName(config);
+            return _.compact([ workspaceName, wmtsStoreName, wmtsLayerName ]);
         },
 
         getLayerGroupParameters: function (config, method) {
