@@ -10,11 +10,11 @@ module.exports = function (grunt) {
     ];
 
     grunt.initConfig({
-        jshint: {
-            jsFiles: jsFiles,
+        eslint: {
             options: {
-                jshintrc: true
-            }
+                fix: grunt.option("fix")
+            },
+            src: jsFiles
         },
 
         watch: {
@@ -119,13 +119,6 @@ module.exports = function (grunt) {
 
         clean: ["./mocha.json", "./coverage/server/clover.xml"],
 
-        jscs: {
-            src: jsFiles,
-            options: {
-                config: "./.jscsrc"
-            }
-        },
-
         david: {
             check: {}
         },
@@ -143,7 +136,7 @@ module.exports = function (grunt) {
 
     require("load-grunt-tasks")(grunt);
 
-    grunt.registerTask("code-check", ["jshint", "jscs", "todo"]);
+    grunt.registerTask("code-check", ["eslint", "todo"]);
     grunt.registerTask("coverage", ["code-check", "env:test", "mocha_istanbul", "plato"]);
     grunt.registerTask("mocha", ["code-check", "env:test", "mochaTest"]);
     grunt.registerTask("test", ["code-check", "env:test", "mocha_istanbul"]);
