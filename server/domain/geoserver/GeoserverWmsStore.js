@@ -1,39 +1,36 @@
 "use strict";
 
-var Q = require("q");
+const GeoserverRepository = require("./GeoserverRepository");
 
 
-module.exports = function GeoserverWmsStore() {
+class GeoserverWmsStore extends GeoserverRepository {
 
-    this.wmsStoreExists = function (config) {
+    wmsStoreExists(config) {
         return this.geoserverObjectExists(this.types.WMSSTORE, config);
-    };
+    }
 
-    this.getWmsStore = function (config) {
-        var wmsStoreName = config && config.name;
-        var workspaceName = config && config.workspace || this.geoserver.workspace;
+    getWmsStore(config) {
+        const wmsStoreName = config && config.name;
+        const workspaceName = config && config.workspace || this.geoserver.workspace;
 
-        var wmsStoreConfig = { name: wmsStoreName, workspace: workspaceName };
-        return this.getGeoserverObject(this.types.WMSSTORE, wmsStoreConfig).then(function (datastoreObject) {
-            return datastoreObject.wmsStore;
-        });
-    };
+        const wmsStoreConfig = { name: wmsStoreName, workspace: workspaceName };
+        return this.getGeoserverObject(this.types.WMSSTORE, wmsStoreConfig).then((datastoreObject) => datastoreObject.wmsStore);
+    }
 
-    this.createWmsStore = function (config) {
-        return this.wmsStoreExists(config).then(function (exists) {
+    createWmsStore(config) {
+        return this.wmsStoreExists(config).then((exists) => {
             if (exists) {
-                return Q.reject("Wms Store already exists");
+                throw new Error("Wms Store already exists");
             }
             return this.issueWmsStoreCreateRequest(config);
-        }.bind(this));
-    };
+        });
+    }
 
-    this.issueWmsStoreCreateRequest = function (config) {
+    issueWmsStoreCreateRequest(config) {
+        const deferred = this._makeDeferred();
 
-        var deferred = Q.defer();
-
-        var restUrl = this.resolver.create(this.types.WMSSTORE, config);
-        var requestObject = JSON.stringify(this.wmsStoreRequestObject(config));
+        const restUrl = this.resolver.create(this.types.WMSSTORE, config);
+        const requestObject = JSON.stringify(this.wmsStoreRequestObject(config));
 
         this.dispatcher.post({
             url: restUrl,
@@ -46,16 +43,16 @@ module.exports = function GeoserverWmsStore() {
         });
 
         return deferred.promise;
-    };
+    }
 
-    this.deleteWmsStore = function (externalWmsService) {
+    deleteWmsStore(externalWmsService) {
         return this.deleteGeoserverObject(this.types.WMSSTORE, externalWmsService);
-    };
+    }
 
-    this.updateWmsStore = function (config) {
-        var deferred = Q.defer();
-        var restUrl = this.resolver.get(this.types.WMSSTORE, config);
-        var requestObject = JSON.stringify(this.wmsStoreRequestObject(config));
+    updateWmsStore(config) {
+        const deferred = this._makeDeferred();
+        const restUrl = this.resolver.get(this.types.WMSSTORE, config);
+        const requestObject = JSON.stringify(this.wmsStoreRequestObject(config));
 
         this.dispatcher.put({
             url: restUrl,
@@ -68,9 +65,9 @@ module.exports = function GeoserverWmsStore() {
         });
 
         return deferred.promise;
-    };
+    }
 
-    this.wmsStoreRequestObject = function (config) {
+    wmsStoreRequestObject(config) {
         return {
             wmsStore: {
                 name: config.name,
@@ -87,5 +84,8 @@ module.exports = function GeoserverWmsStore() {
                 connectTimeout: 30
             }
         };
-    };
-};
+    }
+
+}
+
+module.exports = GeoserverWmsStore;

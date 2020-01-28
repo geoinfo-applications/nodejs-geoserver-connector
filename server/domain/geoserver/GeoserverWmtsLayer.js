@@ -1,78 +1,76 @@
 "use strict";
 
+const GeoserverRepository = require("./GeoserverRepository");
+const _ = require("underscore");
 
-var Q = require("q");
-var _ = require("underscore");
 
+class GeoserverWmtsLayer extends GeoserverRepository {
 
-module.exports = function GeoserverWmtsLayer() {
-
-    this.resolveWmtsLayerConfig = function (config) {
-        var wmtsLayerName = config && config.layerName;
-        var workspaceName = config && config.workspace || this.geoserver.workspace;
+    resolveWmtsLayerConfig(config) {
+        const wmtsLayerName = config && config.layerName;
+        const workspaceName = config && config.workspace || this.geoserver.workspace;
 
         return { name: wmtsLayerName, workspace: workspaceName };
-    };
+    }
 
 
-    this.wmtsLayerExists = function (layerSearchingParameters, wmtsLayerSearchingParameters) {
-        return Q.all([
+    async wmtsLayerExists(layerSearchingParameters, wmtsLayerSearchingParameters) {
+        return Promise.all([
             this.geoserverObjectExists(this.types.LAYER, layerSearchingParameters),
             this.geoserverObjectExists(this.types.WMTSLAYER, wmtsLayerSearchingParameters)
-        ]).spread(function (layerExists, wmtsLayerExists) {
-            return Q.when(wmtsLayerExists && layerExists);
+        ]).then(([layerExists, wmtsLayerExists]) => {
+            return !!(wmtsLayerExists && layerExists);
         });
-    };
+    }
 
-    this.getWmtsLayer = function (config) {
+    async getWmtsLayer(config) {
         return this.getGeoserverObject(this.types.WMTSLAYER, config);
-    };
+    }
 
-    this.getWmtsLayerRequestParameters = function (config, layerList) {
-        var layers = layerList ? layerList : config.layerNames.split(",");
+    async getWmtsLayerRequestParameters(config, layerList) {
+        const layers = layerList ? layerList : config.layerNames.split(",");
 
-        return Q.all(_.map(layers, function (nativeName) {
-            var layerConfig = _.clone(config);
+        return Promise.all(_.map(layers, (nativeName) => {
+            const layerConfig = _.clone(config);
 
             layerConfig.layerName = (config.externalWmtsService.name + "_" + nativeName).replace(/[^A-Za-z0-9_-]/g, "_");
             layerConfig.nativeName = nativeName;
 
-            var layerSearchingParameters = this.resolveWmtsLayerConfig(layerConfig);
+            const layerSearchingParameters = this.resolveWmtsLayerConfig(layerConfig);
 
             return {
                 wmtsLayerRequestParameters: layerConfig,
                 layerRequestParameters: layerSearchingParameters
             };
-        }.bind(this)));
-    };
+        }));
+    }
 
-    this.createWmtsLayer = function (externalWmtsLayer) {
-        return this.createNotExistingWmtsLayers(externalWmtsLayer).then(function (allLayers) {
-            return this.createLayerGroup(externalWmtsLayer, allLayers);
-        }.bind(this));
-    };
+    async createWmtsLayer(externalWmtsLayer) {
+        const allLayers = await this.createNotExistingWmtsLayers(externalWmtsLayer);
+        return this.createLayerGroup(externalWmtsLayer, allLayers);
+    }
 
-    this.createNotExistingWmtsLayers = function (externalWmtsLayer) {
-        return this.getWmtsLayerRequestParameters(externalWmtsLayer).then(function (requestParameters) {
-            return Q.all(_.map(requestParameters, function (requestParameter) {
-                return this.makeSureWmtsLayerExists(requestParameter.layerRequestParameters, requestParameter.wmtsLayerRequestParameters);
-            }.bind(this)));
-        }.bind(this));
-    };
+    async createNotExistingWmtsLayers(externalWmtsLayer) {
+        const requestParameters = await this.getWmtsLayerRequestParameters(externalWmtsLayer);
 
-    this.makeSureWmtsLayerExists = function (searchingParameters, config) {
-        return this.wmtsLayerExists(searchingParameters, config).then(function (exists) {
-            return Q.when(exists || this.issueWmtsLayerCreateRequest(config)).then(function () {
-                return config.layerName;
-            });
-        }.bind(this));
-    };
+        return Promise.all(_.map(requestParameters, (requestParameter) => {
+            return this.makeSureWmtsLayerExists(requestParameter.layerRequestParameters, requestParameter.wmtsLayerRequestParameters);
+        }));
+    }
 
-    this.issueWmtsLayerCreateRequest = function (config) {
-        var deferred = Q.defer();
+    async makeSureWmtsLayerExists(searchingParameters, config) {
+        if (!await this.wmtsLayerExists(searchingParameters, config)) {
+            await this.issueWmtsLayerCreateRequest(config);
+        }
 
-        var restUrl = this.resolver.create(this.types.WMTSLAYER, config);
-        var requestObject = JSON.stringify(this.wmtsLayerRequestObject(config));
+        return config.layerName;
+    }
+
+    async issueWmtsLayerCreateRequest(config) {
+        const deferred = this._makeDeferred();
+
+        const restUrl = this.resolver.create(this.types.WMTSLAYER, config);
+        const requestObject = JSON.stringify(this.wmtsLayerRequestObject(config));
 
         this.dispatcher.post({
             url: restUrl,
@@ -85,9 +83,9 @@ module.exports = function GeoserverWmtsLayer() {
         });
 
         return deferred.promise;
-    };
+    }
 
-    this.wmtsLayerRequestObject = function (config) {
+    wmtsLayerRequestObject(config) {
         return {
             wmtsLayer: {
                 name: config.layerName,
@@ -98,59 +96,61 @@ module.exports = function GeoserverWmtsLayer() {
                 projectionPolicy: "REPROJECT_TO_DECLARED"
             }
         };
-    };
+    }
 
-    this.deleteWmtsLayer = function (config) {
-        return this.deleteGeoserverObject(this.types.LAYERGROUP, config).then(function () {
-            return this.getWmtsLayerRequestParameters(config).then(function (requestParameters) {
-                return Q.all(_.map(requestParameters, function (requestParameter) {
-                    return this.deleteWmtsLayerEverywhere(requestParameter.layerRequestParameters,
-                        requestParameter.wmtsLayerRequestParameters);
-                }.bind(this)));
-            }.bind(this));
-        }.bind(this));
-    };
+    async deleteWmtsLayer(config) {
+        await this.deleteGeoserverObject(this.types.LAYERGROUP, config);
+        const requestParameters = await this.getWmtsLayerRequestParameters(config);
 
-    this.deleteWmtsLayerEverywhere = function (layerRequestParameters, wmtsLayerRequestParameters) {
-        return this.wmtsLayerExists(layerRequestParameters, wmtsLayerRequestParameters).then(function (exists) {
-            if (exists) {
-                return this.deleteGeoserverObject(this.types.LAYER, layerRequestParameters).then(function () {
-                    return this.deleteGeoserverObject(this.types.WMTSLAYER, wmtsLayerRequestParameters);
-                }.bind(this)).catch(function () {
-                    return Q.when();
-                });
-            }
-        }.bind(this));
-    };
+        return Promise.all(_.map(requestParameters, (requestParameter) => {
+            return this.deleteWmtsLayerEverywhere(requestParameter.layerRequestParameters, requestParameter.wmtsLayerRequestParameters);
+        }));
+    }
 
-    this.updateWmtsLayer = function (externalWmtsLayer, existingExternalWmtsLayer) {
-        return this.layerGroupExists(externalWmtsLayer).then(function (exists) {
-            if (!exists) {
-                return Q.reject("WmtsLayer doesn't exist");
-            }
-            var layerNativeNames = externalWmtsLayer.layerNames.split(",");
-            var existingLayerNativeNames = existingExternalWmtsLayer.layerNames.split(",");
-            var layersToDelete = _.difference(existingLayerNativeNames, layerNativeNames);
+    async deleteWmtsLayerEverywhere(layerRequestParameters, wmtsLayerRequestParameters) {
+        const exists = await this.wmtsLayerExists(layerRequestParameters, wmtsLayerRequestParameters);
 
-            return this.createNotExistingWmtsLayers(externalWmtsLayer).then(function (allLayerNames) {
-                return this.updateLayerGroup(externalWmtsLayer, allLayerNames);
-            }.bind(this)).then(function () {
-                return this.deleteAllUnnecessaryGeoserverWmtsLayers(externalWmtsLayer, layersToDelete);
-            }.bind(this));
-        }.bind(this));
-    };
-
-    this.deleteAllUnnecessaryGeoserverWmtsLayers = function (externalWmtsLayer, layersToDelete) {
-        if (layersToDelete.length) {
-            return this.getWmtsLayerRequestParameters(externalWmtsLayer, layersToDelete)
-                .then(function (requestParameters) {
-                    return Q.all(_.map(requestParameters, function (requestParameter) {
-                        return this.deleteWmtsLayerEverywhere(requestParameter.layerRequestParameters,
-                            requestParameter.wmtsLayerRequestParameters);
-                    }.bind(this)));
-                }.bind(this));
+        if (!exists) {
+            return;
         }
-        return new Q();
-    };
 
-};
+        try {
+            await this.deleteGeoserverObject(this.types.LAYER, layerRequestParameters);
+            return this.deleteGeoserverObject(this.types.WMTSLAYER, wmtsLayerRequestParameters);
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+        }
+    }
+
+    async updateWmtsLayer(externalWmtsLayer, existingExternalWmtsLayer) {
+        const exists = await this.layerGroupExists(externalWmtsLayer);
+
+        if (!exists) {
+            throw new Error("WmtsLayer doesn't exist");
+        }
+
+        const layerNativeNames = externalWmtsLayer.layerNames.split(",");
+        const existingLayerNativeNames = existingExternalWmtsLayer.layerNames.split(",");
+        const layersToDelete = _.difference(existingLayerNativeNames, layerNativeNames);
+        const allLayerNames = await this.createNotExistingWmtsLayers(externalWmtsLayer);
+        await this.updateLayerGroup(externalWmtsLayer, allLayerNames);
+
+        return this.deleteAllUnnecessaryGeoserverWmtsLayers(externalWmtsLayer, layersToDelete);
+    }
+
+    async deleteAllUnnecessaryGeoserverWmtsLayers(externalWmtsLayer, layersToDelete) {
+        if (!layersToDelete.length) {
+            return;
+        }
+
+        const requestParameters = await this.getWmtsLayerRequestParameters(externalWmtsLayer, layersToDelete);
+
+        return Promise.all(_.map(requestParameters, (requestParameter) => {
+            return this.deleteWmtsLayerEverywhere(requestParameter.layerRequestParameters, requestParameter.wmtsLayerRequestParameters);
+        }));
+    }
+
+}
+
+module.exports = GeoserverWmtsLayer;

@@ -8,7 +8,7 @@ describe.skip("Geoserver load testing ", () => {
     const config = require("../config");
 
     const testUtils = new TestUtils(config.functional_test);
-    const gsRepository = testUtils.gsRepository;
+    const gsConnector = testUtils.gsConnector;
 
     const style = config.style;
 
@@ -44,12 +44,12 @@ describe.skip("Geoserver load testing ", () => {
                     name: style.name + styleId,
                     sldBody: sldContent
                 };
-                return gsRepository.createGlobalStyle(styleConfig);
+                return gsConnector.createGlobalStyle(styleConfig);
             }
 
             await testUtils.throttleActions(createSyle, numberOfStyles, throttleValue);
 
-            const globalStyles = await gsRepository.getGlobalStyles();
+            const globalStyles = await gsConnector.getGlobalStyles();
             expect(globalStyles.length).to.be.gt(numberOfStyles);
         });
 
@@ -60,12 +60,12 @@ describe.skip("Geoserver load testing ", () => {
                     name: style.name + styleId,
                     sldBody: sldContent
                 };
-                return gsRepository.createWorkspaceStyle(styleConfig);
+                return gsConnector.createWorkspaceStyle(styleConfig);
             }
 
             await testUtils.throttleActions(createSyle, numberOfStyles, throttleValue);
 
-            const workspaceStyles = await gsRepository.getWorkspaceStyles();
+            const workspaceStyles = await gsConnector.getWorkspaceStyles();
             expect(workspaceStyles.length).to.be.equal(numberOfStyles);
         });
 

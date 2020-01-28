@@ -1,5 +1,5 @@
 "use strict";
 
-module.exports = require("./server/domain/geoserver/GeoserverRepository");
+module.exports = require("./server/domain/geoserver/GeoserverConnector");
 
 

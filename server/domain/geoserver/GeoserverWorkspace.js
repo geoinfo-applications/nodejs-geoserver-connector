@@ -1,43 +1,43 @@
 "use strict";
 
-module.exports = function GeoserverWorkspace() {
+const GeoserverRepository = require("./GeoserverRepository");
 
-    this.createWorkspace = function (config) {
 
-        var wsName = config && config.name || this.geoserver.workspace;
+class GeoserverWorkspace extends GeoserverRepository {
 
-        return this.workspaceExists(config).then(function (exists) {
+    async createWorkspace(config) {
 
-            if (exists) {
-                return true;
-            }
+        const wsName = config && config.name || this.geoserver.workspace;
 
-            var workspaceConfig = {
-                workspace: {
-                    name: wsName
-                },
-                name: wsName
-            };
+        const exists = await this.workspaceExists(config);
 
-            return this.createGeoserverObject(this.types.WORKSPACE, workspaceConfig);
-
-        }.bind(this));
-    };
-
-    this.workspaceExists = function (config) {
-        return this.geoserverObjectExists(this.types.WORKSPACE, config);
-    };
-
-    this.deleteWorkspace = function (config) {
-
-        return this.workspaceExists(config).then(function (exists) {
-
-            if (exists) {
-                return this.deleteGeoserverObject(this.types.WORKSPACE, config, { recurse: true });
-            }
-
+        if (exists) {
             return true;
+        }
 
-        }.bind(this));
-    };
-};
+        const workspaceConfig = {
+            workspace: {
+                name: wsName
+            },
+            name: wsName
+        };
+
+        return this.createGeoserverObject(this.types.WORKSPACE, workspaceConfig);
+    }
+
+    async workspaceExists(config) {
+        return this.geoserverObjectExists(this.types.WORKSPACE, config);
+    }
+
+    async deleteWorkspace(config) {
+        const exists = await this.workspaceExists(config);
+
+        if (exists) {
+            return this.deleteGeoserverObject(this.types.WORKSPACE, config, { recurse: true });
+        }
+
+        return true;
+    }
+}
+
+module.exports = GeoserverWorkspace;

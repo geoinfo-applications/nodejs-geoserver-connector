@@ -7,14 +7,14 @@ describe("Geoserver Resolver unit tests ", () => {
     const util = require("util");
     const expect = require("chai").expect;
 
-    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const GeoserverConnector = require("../../../../server/domain/geoserver/GeoserverConnector");
     const GeoserverResolver = require("../../../../server/domain/geoserver/GeoserverResolver");
 
     const config = require("../../config");
 
     const functionalTestConfig = config.functional_test;
-    const geoserverRepository = new GeoserverRepository(functionalTestConfig);
-    const geoserverTypes = geoserverRepository.types;
+    const geoserverConnector = new GeoserverConnector(functionalTestConfig);
+    const geoserverTypes = geoserverConnector.types;
     let resolver;
     createGeoserverResolver();
 
@@ -62,9 +62,9 @@ describe("Geoserver Resolver unit tests ", () => {
 
     function createGeoserverResolver() {
         resolver = new GeoserverResolver({
-            baseURL: geoserverRepository.restURL,
-            workspace: geoserverRepository.geoserver.workspace,
-            datastore: geoserverRepository.geoserver.datastore
+            baseURL: geoserverConnector.restURL,
+            workspace: geoserverConnector.geoserver.workspace,
+            datastore: geoserverConnector.geoserver.datastore
         });
     }
 

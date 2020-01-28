@@ -1,21 +1,23 @@
 "use strict";
 
+const GeoserverRepository = require("./GeoserverRepository");
 
-module.exports = function GeoserverLayer() {
 
-    this.getLayer = function (config) {
-        return this.getGeoserverObject(this.types.LAYER, config).
-            then(function (layerObject) {
-                return layerObject.layer;
-            });
-    };
+class GeoserverLayer extends GeoserverRepository {
 
-    this.updateLayer = function (config) {
+    async getLayer(config) {
+        const layerObject = await this.getGeoserverObject(this.types.LAYER, config);
+        return layerObject.layer;
+    }
+
+    async updateLayer(config) {
         return this.updateGeoserverObject(this.types.LAYER, config);
-    };
+    }
 
-    this.layerExists = function (config) {
+    async layerExists(config) {
         return this.geoserverObjectExists(this.types.LAYER, config);
-    };
+    }
 
-};
+}
+
+module.exports = GeoserverLayer;

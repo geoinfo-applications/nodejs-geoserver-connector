@@ -9,7 +9,7 @@ describe("Geoserver functional tests ", () => {
     const config = require("../config");
 
     const testUtils = new TestUtils(config.functional_test);
-    const gsRepository = testUtils.gsRepository;
+    const gsConnector = testUtils.gsConnector;
 
     describe("testing access ", () => {
 
@@ -21,16 +21,16 @@ describe("Geoserver functional tests ", () => {
             await testUtils.cleanWorkspace();
         });
 
-        it("GS repository should be disabled if Geoserver instance is not initialized", () => {
-            expect(gsRepository.isEnabled).to.be.equal(false);
+        it("GS Connector should be disabled if Geoserver instance is not initialized", () => {
+            expect(gsConnector.isEnabled).to.be.equal(false);
         });
 
         it("should correctly fetch Geoserver details upon initialization", async () => {
 
-            await gsRepository.initializeWorkspace();
+            await gsConnector.initializeWorkspace();
 
-            expect(gsRepository.isEnabled).to.be.equal(true);
-            expect(gsRepository.geoserverDetails["@name"]).to.be.equal("GeoServer");
+            expect(gsConnector.isEnabled).to.be.equal(true);
+            expect(gsConnector.geoserverDetails["@name"]).to.be.equal("GeoServer");
         });
 
     });
@@ -56,35 +56,35 @@ describe("Geoserver functional tests ", () => {
 
             it("should return false if non-default workspace does not exist ", async () => {
 
-                const exists = await gsRepository.workspaceExists(newWorkspace);
+                const exists = await gsConnector.workspaceExists(newWorkspace);
 
                 expect(!!exists).to.not.be.eql(true, "Workspace should not exist in GS workspaces!");
             });
 
             it("should return true if default workspace exists ", async () => {
 
-                const exists = await gsRepository.workspaceExists();
+                const exists = await gsConnector.workspaceExists();
 
                 expect(!!exists).to.be.eql(true, "Workspace should exist in GS workspaces!");
             });
 
             it("should return true if workspace already exists", async () => {
 
-                const result = await gsRepository.createWorkspace();
+                const result = await gsConnector.createWorkspace();
 
                 expect(!!result).to.be.equal(true);
             });
 
             it("should delete default GS workspace", async () => {
 
-                await gsRepository.deleteWorkspace();
+                await gsConnector.deleteWorkspace();
 
             });
 
             it("should create non-default GS workspace", async () => {
-                await gsRepository.createWorkspace(newWorkspace);
+                await gsConnector.createWorkspace(newWorkspace);
 
-                await gsRepository.deleteWorkspace(newWorkspace);
+                await gsConnector.deleteWorkspace(newWorkspace);
 
             });
 
@@ -94,36 +94,36 @@ describe("Geoserver functional tests ", () => {
 
             it("should return true if default GS datastore exists in default workspace", async () => {
 
-                const exists = await gsRepository.datastoreExists();
+                const exists = await gsConnector.datastoreExists();
 
                 expect(!!exists).to.be.eql(true, "Datastore should exist in GS workspace!");
             });
 
             it("should delete default GS datastore  in default workspace", async () => {
 
-                await gsRepository.deleteDatastore();
+                await gsConnector.deleteDatastore();
             });
 
             it("should return false if non-default GS datastore does not exist in default workspace", async () => {
 
-                const exists = await gsRepository.datastoreExists(newDatastore);
+                const exists = await gsConnector.datastoreExists(newDatastore);
 
                 expect(!!exists).to.not.be.eql(true, "Datastore should not exist in GS workspace!");
             });
 
             it("should create non-default GS datastore", async () => {
 
-                await gsRepository.createDatastore(newDatastore);
+                await gsConnector.createDatastore(newDatastore);
             });
 
             it("should create non-default datastore in non-default workspace", async () => {
-                await gsRepository.createWorkspace(newWorkspace);
+                await gsConnector.createWorkspace(newWorkspace);
                 const datastoreConfig = _.extend({}, newDatastore, { workspace: newWorkspace.name });
 
 
-                await gsRepository.createDatastore(datastoreConfig);
+                await gsConnector.createDatastore(datastoreConfig);
 
-                const datastore = await gsRepository.getDatastore(datastoreConfig);
+                const datastore = await gsConnector.getDatastore(datastoreConfig);
                 expect(datastore.name).to.be.equal(datastoreConfig.name);
                 expect(datastore.workspace.name).to.be.equal(datastoreConfig.workspace);
             });
@@ -134,7 +134,7 @@ describe("Geoserver functional tests ", () => {
 
             it("should return false if feature type does not exist in default store", async () => {
 
-                const exists = await gsRepository.featureTypeExists(layer);
+                const exists = await gsConnector.featureTypeExists(layer);
 
                 expect(!!exists).to.be.eql(false, "feature type should not exist in store!");
             });
@@ -142,7 +142,7 @@ describe("Geoserver functional tests ", () => {
             it("should fail if name is not supplied", async () => {
 
                 try {
-                    await gsRepository.createFeatureType({});
+                    await gsConnector.createFeatureType({});
                 } catch (error) {
                     expect(error.message).to.match(/name required/);
                     return;
@@ -153,7 +153,7 @@ describe("Geoserver functional tests ", () => {
 
             it("should fail if feature type does not exist in flat DB", async () => {
                 try {
-                    await gsRepository.createFeatureType(nonExistingLayer);
+                    await gsConnector.createFeatureType(nonExistingLayer);
                 } catch (error) {
                     expect(
                         error === null || /* database is not accessible error = null */
@@ -184,9 +184,9 @@ describe("Geoserver functional tests ", () => {
                 coverageStoreConfig.coverageDirectory = coverageBasePath + "mosaic_sample";
 
                 // HINT by default geoserver creates layer named "mosaic"
-                await gsRepository.createCoverageStore(coverageStoreConfig);
+                await gsConnector.createCoverageStore(coverageStoreConfig);
 
-                const mosaicLayerExists = await gsRepository.layerExists({ name: "mosaic" });
+                const mosaicLayerExists = await gsConnector.layerExists({ name: "mosaic" });
                 expect(mosaicLayerExists).to.be.eql(true);
             });
 
@@ -194,16 +194,16 @@ describe("Geoserver functional tests ", () => {
                 coverageStoreConfig.coverageDirectory = coverageBasePath + "pyramid_sample";
 
                 // HINT by default geoserver creates layer named as pyramid directory
-                await gsRepository.createCoverageStore(coverageStoreConfig);
+                await gsConnector.createCoverageStore(coverageStoreConfig);
 
-                const pyramidLayerExists = await gsRepository.layerExists({ name: "pyramid_sample" });
+                const pyramidLayerExists = await gsConnector.layerExists({ name: "pyramid_sample" });
                 expect(pyramidLayerExists).to.be.eql(true);
             });
 
             it("should create coverage store w/ layer, then update layer parameters ", async () => {
                 coverageStoreConfig.coverageStoreType = "imagemosaic";
                 coverageStoreConfig.coverageDirectory = coverageBasePath + "mosaic_sample";
-                await gsRepository.createCoverageStore(coverageStoreConfig);
+                await gsConnector.createCoverageStore(coverageStoreConfig);
                 const newConfig = {
                     name: "mosaic",
                     store: coverageStoreConfig.name,
@@ -231,9 +231,9 @@ describe("Geoserver functional tests ", () => {
                         }
                     }
                 };
-                await gsRepository.updateCoverage(newConfig);
+                await gsConnector.updateCoverage(newConfig);
 
-                const mosaicLayerExists = await gsRepository.layerExists({ name: "new_name" });
+                const mosaicLayerExists = await gsConnector.layerExists({ name: "new_name" });
                 expect(mosaicLayerExists).to.be.eql(true);
             });
         });
@@ -270,42 +270,42 @@ describe("Geoserver functional tests ", () => {
             }
 
             async function cleanStyleWorkspace() {
-                await gsRepository.deleteGlobalStyle(style);
-                await gsRepository.deleteWorkspaceStyle(style);
-                await gsRepository.deleteWorkspaceStyle(secondStyle);
+                await gsConnector.deleteGlobalStyle(style);
+                await gsConnector.deleteWorkspaceStyle(style);
+                await gsConnector.deleteWorkspaceStyle(secondStyle);
                 await testUtils.cleanWorkspace();
             }
 
             async function createStyleInNonDefaultWorkspace() {
-                await gsRepository.createWorkspace(newWorkspace);
-                return gsRepository.createWorkspaceStyle(newWorkspaceStyleConfig);
+                await gsConnector.createWorkspace(newWorkspace);
+                return gsConnector.createWorkspaceStyle(newWorkspaceStyleConfig);
             }
 
             it("should return global styles", async () => {
 
-                const styles = await gsRepository.getGlobalStyles();
+                const styles = await gsConnector.getGlobalStyles();
 
                 expect(styles).to.be.instanceof(Array);
             });
 
             it("should get a global style ", async () => {
 
-                const styleObject = await gsRepository.getGlobalStyle(existingGlobalStyle);
+                const styleObject = await gsConnector.getGlobalStyle(existingGlobalStyle);
 
                 expect(styleObject.name).to.be.equal(existingGlobalStyle.name);
             });
 
             it("should create a global style", async () => {
 
-                await gsRepository.createGlobalStyle(styleConfig);
+                await gsConnector.createGlobalStyle(styleConfig);
 
-                const layerObject = await gsRepository.getGlobalStyle(style);
+                const layerObject = await gsConnector.getGlobalStyle(style);
                 expect(layerObject.name).to.be.equal(style.name);
             });
 
             it("should not return any styles for new workspace", async () => {
 
-                const styles = await gsRepository.getWorkspaceStyles();
+                const styles = await gsConnector.getWorkspaceStyles();
 
                 expect(styles).to.be.instanceof(Array);
                 expect(styles.length).to.be.equal(0);
@@ -314,7 +314,7 @@ describe("Geoserver functional tests ", () => {
             it("should fail creating workspace style if style is not supplied", async () => {
 
                 try {
-                    await gsRepository.createWorkspaceStyle();
+                    await gsConnector.createWorkspaceStyle();
                 } catch (error) {
                     expect(error.message).to.match(/layer name required/);
                     return;
@@ -325,30 +325,30 @@ describe("Geoserver functional tests ", () => {
 
             it("should create a workspace style in a default workspace", async () => {
 
-                await gsRepository.createWorkspaceStyle(styleConfig);
+                await gsConnector.createWorkspaceStyle(styleConfig);
 
-                const styleObject = await gsRepository.getWorkspaceStyle(style);
+                const styleObject = await gsConnector.getWorkspaceStyle(style);
                 expect(styleObject.name).to.be.equal(style.name);
             });
 
             it("should only upload new SLD file on style create if style already exists in workspace", async () => {
-                await gsRepository.createWorkspaceStyle(styleConfig);
+                await gsConnector.createWorkspaceStyle(styleConfig);
                 const styleWithDifferentSLDFileConfig = {
                     name: style.name,
                     sldBody: styleConfig.sldBody
                 };
 
-                await gsRepository.createWorkspaceStyle(styleWithDifferentSLDFileConfig);
+                await gsConnector.createWorkspaceStyle(styleWithDifferentSLDFileConfig);
 
-                const styleObject = await gsRepository.getWorkspaceStyle(styleConfig);
+                const styleObject = await gsConnector.getWorkspaceStyle(styleConfig);
                 expect(styleObject.name).to.be.equal(style.name);
             });
 
             it("should delete a workspace style from a default workspace", async () => {
 
-                await gsRepository.deleteWorkspaceStyle(style);
+                await gsConnector.deleteWorkspaceStyle(style);
 
-                const workspaceStyles = await gsRepository.getWorkspaceStyles();
+                const workspaceStyles = await gsConnector.getWorkspaceStyles();
                 expect(workspaceStyles.length).to.be.equal(0);
             });
 
@@ -356,36 +356,36 @@ describe("Geoserver functional tests ", () => {
 
                 await createStyleInNonDefaultWorkspace();
 
-                const styleObject = await gsRepository.getWorkspaceStyle(newWorkspaceStyle);
+                const styleObject = await gsConnector.getWorkspaceStyle(newWorkspaceStyle);
                 expect(styleObject.name).to.be.equal(newWorkspaceStyle.name);
             });
 
             it("should delete a workspace style from a non-default workspace", async () => {
                 await createStyleInNonDefaultWorkspace();
 
-                await gsRepository.deleteWorkspaceStyle(newWorkspaceStyle);
+                await gsConnector.deleteWorkspaceStyle(newWorkspaceStyle);
 
-                const workspaceStyles = await gsRepository.getWorkspaceStyles();
+                const workspaceStyles = await gsConnector.getWorkspaceStyles();
                 expect(workspaceStyles.length).to.be.equal(0);
             });
 
             it("should get all workspace styles", async () => {
-                await gsRepository.createWorkspaceStyle(styleConfig);
+                await gsConnector.createWorkspaceStyle(styleConfig);
 
-                await gsRepository.createWorkspaceStyle(secondStyleConfig);
+                await gsConnector.createWorkspaceStyle(secondStyleConfig);
 
-                const workspaceStyles = await gsRepository.getWorkspaceStyles();
+                const workspaceStyles = await gsConnector.getWorkspaceStyles();
                 expect(workspaceStyles.length).to.be.equal(2);
                 expect(workspaceStyles[0].name).to.be.equal(style.name);
                 expect(workspaceStyles[1].name).to.be.equal(secondStyle.name);
             });
 
             it("should delete a workspace style", async () => {
-                await gsRepository.createWorkspaceStyle(styleConfig);
+                await gsConnector.createWorkspaceStyle(styleConfig);
 
-                await gsRepository.deleteWorkspaceStyle(style);
+                await gsConnector.deleteWorkspaceStyle(style);
 
-                const workspaceStlyes = await gsRepository.getWorkspaceStyles();
+                const workspaceStlyes = await gsConnector.getWorkspaceStyles();
                 expect(workspaceStlyes).to.be.instanceof(Array);
                 expect(workspaceStlyes.length).to.be.equal(0);
             });

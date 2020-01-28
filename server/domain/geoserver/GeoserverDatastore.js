@@ -1,65 +1,59 @@
 "use strict";
 
+const GeoserverRepository = require("./GeoserverRepository");
 
-// TODO clean up a bit
-module.exports = function GeoserverDatastore() {
+
+class GeoserverDatastore extends GeoserverRepository {
 
     // eslint-disable-next-line complexity
-    this.createDatastore = function (config) {
+    async createDatastore(config) {
+        const storeName = config && config.name || this.geoserver.datastore;
+        const wsName = config && config.workspace || this.geoserver.workspace;
+        const dbParams = config && config.connectionParameters || this.db;
 
-        var storeName = config && config.name || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-        var dbParams = config && config.connectionParameters || this.db;
-
-        return this.datastoreExists(config).then(function (exists) {
-
-            if (exists) {
-                return true;
-            }
-
-            var datastoreConfig = {
-                dataStore: {
-                    name: storeName,
-                    enabled: true,
-                    workspace: { name: wsName },
-                    connectionParameters: dbParams
-                },
-                name: storeName,
-                workspace: wsName
-            };
-
-            return this.createGeoserverObject(this.types.DATASTORE, datastoreConfig);
-
-        }.bind(this));
-    };
-
-    this.datastoreExists = function (config) {
-        return this.geoserverObjectExists(this.types.DATASTORE, config);
-    };
-
-    this.getDatastore = function (config) {
-        var storeName = config && config.name || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-
-        var datastoreConfig = { name: storeName, workspace: wsName };
-        return this.getGeoserverObject(this.types.DATASTORE, datastoreConfig).then(function (datastoreObject) {
-            return datastoreObject.dataStore;
-        });
-    };
-
-    this.deleteDatastore = function (config) {
-
-        var dsName = config && config.name || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-
-        return this.datastoreExists({ name: dsName, workspace: wsName }).then(function (exists) {
-
-            if (exists) {
-                return this.deleteGeoserverObject(this.types.DATASTORE, config, { recurse: true });
-            }
-
+        if (await this.datastoreExists(config)) {
             return true;
+        }
 
-        }.bind(this));
-    };
-};
+        const datastoreConfig = {
+            dataStore: {
+                name: storeName,
+                enabled: true,
+                workspace: { name: wsName },
+                connectionParameters: dbParams
+            },
+            name: storeName,
+            workspace: wsName
+        };
+
+        return this.createGeoserverObject(this.types.DATASTORE, datastoreConfig);
+    }
+
+    async datastoreExists(config) {
+        return this.geoserverObjectExists(this.types.DATASTORE, config);
+    }
+
+    async getDatastore(config) {
+        const storeName = config && config.name || this.geoserver.datastore;
+        const wsName = config && config.workspace || this.geoserver.workspace;
+
+        const datastoreConfig = { name: storeName, workspace: wsName };
+        const datastoreObject = await this.getGeoserverObject(this.types.DATASTORE, datastoreConfig);
+        return datastoreObject.dataStore;
+    }
+
+    // eslint-disable-next-line complexity
+    async deleteDatastore(config) {
+        const dsName = config && config.name || this.geoserver.datastore;
+        const wsName = config && config.workspace || this.geoserver.workspace;
+
+        if (await this.datastoreExists({ name: dsName, workspace: wsName })) {
+            return this.deleteGeoserverObject(this.types.DATASTORE, config, { recurse: true });
+        }
+
+        return true;
+    }
+
+}
+
+module.exports = GeoserverDatastore;

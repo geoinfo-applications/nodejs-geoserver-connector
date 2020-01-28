@@ -4,21 +4,20 @@ const request = require("request");
 const _ = require("underscore");
 
 
-function GeoserverDispatcher(geoserverRepositoryConfig) {
+class GeoserverDispatcher {
 
-    this.geoserverConfig = _.extend({}, geoserverRepositoryConfig);
+    constructor(geoserverRepositoryConfig) {
+        this.geoserverConfig = _.extend({}, geoserverRepositoryConfig);
 
-    this.timeout = this.geoserverConfig.timeout;
-    this.user = this.geoserverConfig.user;
-    this.pass = this.geoserverConfig.pass;
+        this.timeout = this.geoserverConfig.timeout;
+        this.user = this.geoserverConfig.user;
+        this.pass = this.geoserverConfig.pass;
 
-    this.defaultContentType = "application/json";
-}
-
-GeoserverDispatcher.prototype = {
+        this.defaultContentType = "application/json";
+    }
 
     // eslint-disable-next-line complexity
-    get: function (config) {
+    get(config) {
         const geoserverRestCall = config.url;
         const callback = config.callback;
 
@@ -26,7 +25,8 @@ GeoserverDispatcher.prototype = {
             throw new Error("URL and Callback required");
         }
 
-        const headers = addRequestHeaders.call(null, this.defaultContentType);
+        const headers = this.addRequestHeaders(this.defaultContentType, config);
+
         if (config.headers) {
             _.extend(headers, config.headers);
         }
@@ -43,27 +43,27 @@ GeoserverDispatcher.prototype = {
                 sendImmediately: true
             }
         }, callback);
+    }
 
-        function addRequestHeaders(defaultContentType) {
-            const headers = {
-                Accept: defaultContentType,
-                "Content-type": config.contentType || defaultContentType
-            };
-            return headers;
-        }
-    },
+    addRequestHeaders(defaultContentType, config) {
+        return {
+            Accept: defaultContentType,
+            "Content-type": config.contentType || defaultContentType
+        };
+    }
 
-    post: function (config) {
+    post(config) {
         this.get(_.extend({ method: "POST" }, config));
-    },
+    }
 
-    put: function (config) {
+    put(config) {
         this.get(_.extend({ method: "PUT" }, config));
-    },
+    }
 
-    delete: function (config) {
+    delete(config) {
         this.get(_.extend({ method: "DELETE" }, config));
     }
-};
+}
+
 
 module.exports = GeoserverDispatcher;

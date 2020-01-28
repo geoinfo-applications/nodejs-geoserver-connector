@@ -1,39 +1,36 @@
 "use strict";
 
-var Q = require("q");
+const GeoserverRepository = require("./GeoserverRepository");
 
 
-module.exports = function GeoserverWmtsStore() {
+class GeoserverWmtsStore extends GeoserverRepository {
 
-    this.wmtsStoreExists = function (config) {
+    wmtsStoreExists(config) {
         return this.geoserverObjectExists(this.types.WMTSSTORE, config);
-    };
+    }
 
-    this.getWmtsStore = function (config) {
-        var wmtsStoreName = config && config.name;
-        var workspaceName = config && config.workspace || this.geoserver.workspace;
+    getWmtsStore(config) {
+        const wmtsStoreName = config && config.name;
+        const workspaceName = config && config.workspace || this.geoserver.workspace;
 
-        var wmtsStoreConfig = { name: wmtsStoreName, workspace: workspaceName };
-        return this.getGeoserverObject(this.types.WMTSSTORE, wmtsStoreConfig).then(function (datastoreObject) {
-            return datastoreObject.wmtsStore;
-        });
-    };
+        const wmtsStoreConfig = { name: wmtsStoreName, workspace: workspaceName };
+        return this.getGeoserverObject(this.types.WMTSSTORE, wmtsStoreConfig).then((datastoreObject) => datastoreObject.wmtsStore);
+    }
 
-    this.createWmtsStore = function (config) {
-        return this.wmtsStoreExists(config).then(function (exists) {
+    createWmtsStore(config) {
+        return this.wmtsStoreExists(config).then((exists) => {
             if (exists) {
-                return Q.reject("Wmts Store already exists");
+                throw new Error("Wmts Store already exists");
             }
             return this.issueWmtsStoreCreateRequest(config);
-        }.bind(this));
-    };
+        });
+    }
 
-    this.issueWmtsStoreCreateRequest = function (config) {
+    issueWmtsStoreCreateRequest(config) {
+        const deferred = this._makeDeferred();
 
-        var deferred = Q.defer();
-
-        var restUrl = this.resolver.create(this.types.WMTSSTORE, config);
-        var requestObject = JSON.stringify(this.wmtsStoreRequestObject(config));
+        const restUrl = this.resolver.create(this.types.WMTSSTORE, config);
+        const requestObject = JSON.stringify(this.wmtsStoreRequestObject(config));
 
         this.dispatcher.post({
             url: restUrl,
@@ -46,16 +43,16 @@ module.exports = function GeoserverWmtsStore() {
         });
 
         return deferred.promise;
-    };
+    }
 
-    this.deleteWmtsStore = function (externalWmtsService) {
+    deleteWmtsStore(externalWmtsService) {
         return this.deleteGeoserverObject(this.types.WMTSSTORE, externalWmtsService);
-    };
+    }
 
-    this.updateWmtsStore = function (config) {
-        var deferred = Q.defer();
-        var restUrl = this.resolver.get(this.types.WMTSSTORE, config);
-        var requestObject = JSON.stringify(this.wmtsStoreRequestObject(config));
+    updateWmtsStore(config) {
+        const deferred = this._makeDeferred();
+        const restUrl = this.resolver.get(this.types.WMTSSTORE, config);
+        const requestObject = JSON.stringify(this.wmtsStoreRequestObject(config));
 
         this.dispatcher.put({
             url: restUrl,
@@ -68,9 +65,9 @@ module.exports = function GeoserverWmtsStore() {
         });
 
         return deferred.promise;
-    };
+    }
 
-    this.wmtsStoreRequestObject = function (config) {
+    wmtsStoreRequestObject(config) {
         return {
             wmtsStore: {
                 name: config.name,
@@ -87,5 +84,8 @@ module.exports = function GeoserverWmtsStore() {
                 connectTimeout: 30
             }
         };
-    };
-};
+    }
+
+}
+
+module.exports = GeoserverWmtsStore;

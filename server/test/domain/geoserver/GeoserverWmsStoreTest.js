@@ -9,9 +9,9 @@ describe("Geoserver Wms Store Test ", () => {
     chai.use(sinonChai);
 
     const config = require("../../config");
-    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const GeoserverConnector = require("../../../../server/domain/geoserver/GeoserverConnector");
 
-    let geoserverRepository, geoserverMockServer, type;
+    let geoserverConnector, geoserverMockServer, type;
     let wmsStoreConfig;
 
     before(() => {
@@ -31,64 +31,64 @@ describe("Geoserver Wms Store Test ", () => {
             password: null
         };
 
-        geoserverRepository = new GeoserverRepository(config.unit_test);
+        geoserverConnector = new GeoserverConnector(config.unit_test);
 
-        sinon.stub(geoserverRepository, GeoserverRepository.prototype.isGeoserverRunning.name);
-        geoserverRepository.isGeoserverRunning.returns(Promise.resolve(JSON.stringify({ about: { resource: {} } })));
+        sinon.stub(geoserverConnector, GeoserverConnector.prototype.isGeoserverRunning.name);
+        geoserverConnector.isGeoserverRunning.returns(Promise.resolve(JSON.stringify({ about: { resource: {} } })));
 
-        sinon.stub(geoserverRepository, GeoserverRepository.prototype.initializeWorkspace.name);
-        geoserverRepository.initializeWorkspace.returns(Promise.resolve());
+        sinon.stub(geoserverConnector, GeoserverConnector.prototype.initializeWorkspace.name);
+        geoserverConnector.initializeWorkspace.returns(Promise.resolve());
 
-        type = geoserverRepository.types.WMSSTORE;
-        await geoserverRepository.initializeWorkspace();
+        type = geoserverConnector.types.WMSSTORE;
+        await geoserverConnector.initializeWorkspace();
     });
 
     afterEach(() => {
-        geoserverRepository = null;
+        geoserverConnector = null;
     });
 
     it("should check wms store existance", async () => {
-        geoserverRepository.getGeoserverObject = sinon.stub().returns(Promise.resolve(true));
+        geoserverConnector.getGeoserverObject = sinon.stub().returns(Promise.resolve(true));
 
-        const result = await geoserverRepository.wmsStoreExists(wmsStoreConfig);
+        const result = await geoserverConnector.wmsStoreExists(wmsStoreConfig);
 
-        expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, wmsStoreConfig);
+        expect(geoserverConnector.getGeoserverObject).to.have.been.calledWith(type, wmsStoreConfig);
         expect(result).to.be.eql(true);
     });
 
     it("should get wms store", async () => {
         const wmsStoreDetails = { wmsStore: wmsStoreConfig };
-        geoserverRepository.getGeoserverObject = sinon.stub().returns(Promise.resolve(wmsStoreDetails));
+        geoserverConnector.getGeoserverObject = sinon.stub().returns(Promise.resolve(wmsStoreDetails));
         const getWmsStoreConfig = { name: "ch", workspace: "geoportal" };
 
-        const result = await geoserverRepository.getWmsStore(wmsStoreConfig);
+        const result = await geoserverConnector.getWmsStore(wmsStoreConfig);
 
         expect(result).to.be.eql(wmsStoreDetails.wmsStore);
-        expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, {
+        expect(geoserverConnector.getGeoserverObject).to.have.been.calledWith(type, {
             name: getWmsStoreConfig.name,
             workspace: getWmsStoreConfig.workspace
         });
     });
 
     it("should create wms store", async () => {
-        geoserverRepository.wmsStoreExists = sinon.stub().returns(Promise.resolve(false));
-        geoserverRepository.issueWmsStoreCreateRequest = sinon.stub().returns(Promise.resolve());
+        geoserverConnector.wmsStoreExists = sinon.stub().returns(Promise.resolve(false));
+        geoserverConnector.issueWmsStoreCreateRequest = sinon.stub().returns(Promise.resolve());
 
-        await geoserverRepository.createWmsStore(wmsStoreConfig);
+        await geoserverConnector.createWmsStore(wmsStoreConfig);
 
-        expect(geoserverRepository.issueWmsStoreCreateRequest).to.have.been.calledWith(wmsStoreConfig);
+        expect(geoserverConnector.issueWmsStoreCreateRequest).to.have.been.calledWith(wmsStoreConfig);
     });
 
     it("should delete wms store", async () => {
-        geoserverRepository.deleteGeoserverObject = sinon.stub().returns(Promise.resolve(true));
+        geoserverConnector.deleteGeoserverObject = sinon.stub().returns(Promise.resolve(true));
 
-        await geoserverRepository.deleteWmsStore(wmsStoreConfig);
+        await geoserverConnector.deleteWmsStore(wmsStoreConfig);
 
-        expect(geoserverRepository.deleteGeoserverObject).to.have.been.calledWith(type, wmsStoreConfig);
+        expect(geoserverConnector.deleteGeoserverObject).to.have.been.calledWith(type, wmsStoreConfig);
     });
 
     it("should return wms store request object", () => {
-        const requestObject = geoserverRepository.wmsStoreRequestObject(wmsStoreConfig);
+        const requestObject = geoserverConnector.wmsStoreRequestObject(wmsStoreConfig);
 
         expect(requestObject).to.be.eql({
             wmsStore: {
@@ -98,7 +98,7 @@ describe("Geoserver Wms Store Test ", () => {
                 enabled: true,
                 workspace: {
                     name: wmsStoreConfig.workspace ? wmsStoreConfig.workspace :
-                        geoserverRepository.geoserver.workspace
+                        geoserverConnector.geoserver.workspace
                 },
                 capabilitiesURL: wmsStoreConfig.url,
                 user: wmsStoreConfig.username,

@@ -6,42 +6,42 @@ const readFileAsync = util.promisify(fs.readFile);
 const path = require("path");
 const _ = require("underscore");
 const qthrottle = require("./qthrottle/Throttle.js");
-const GeoserverRepository = require("../../server/domain/geoserver/GeoserverRepository");
+const GeoserverConnector = require("../../server/domain/geoserver/GeoserverConnector");
 
 
 class TestUtils {
 
     constructor(config) {
         this.config = config;
-        this.gsRepository = new GeoserverRepository(this.config);
+        this.gsConnector = new GeoserverConnector(this.config);
 
         this.newWorkspace = { name: "newWorkspace" };
         this.newDatastore = { name: "newDatastore" };
     }
 
-    createRepository() {
-        this.gsRepository = new GeoserverRepository(this.config);
+    createConnector() {
+        this.gsConnector = new GeoserverConnector(this.config);
     }
 
-    tearDownRepository() {
-        this.gsRepository = null;
+    tearDownConnector() {
+        this.gsConnector = null;
     }
 
-    rebuildRepository() {
-        this.tearDownRepository();
-        this.createRepository();
+    rebuildConnector() {
+        this.tearDownConnector();
+        this.createConnector();
     }
 
     async initializeWorkspace() {
-        this.rebuildRepository();
-        await this.gsRepository.initializeWorkspace();
+        this.rebuildConnector();
+        await this.gsConnector.initializeWorkspace();
     }
 
     async cleanWorkspace() {
-        this.rebuildRepository();
-        await this.gsRepository.deleteWorkspace();
-        await this.gsRepository.deleteWorkspace(this.newWorkspace);
-        this.tearDownRepository();
+        this.rebuildConnector();
+        await this.gsConnector.deleteWorkspace();
+        await this.gsConnector.deleteWorkspace(this.newWorkspace);
+        this.tearDownConnector();
     }
 
     async readStyleContent() {
@@ -55,7 +55,7 @@ class TestUtils {
             };
             return this.deleteWorkspaceStyle(styleConfig)
                 .then(this.deleteGlobalStyle(styleConfig));
-        }.bind(this.gsRepository);
+        }.bind(this.gsConnector);
 
         return this.throttleActions(deleteStyle, numberOfStylesToDelete);
     }

@@ -1,34 +1,32 @@
 "use strict";
 
+const _ = require("underscore");
+const GeoserverRepository = require("./GeoserverRepository");
 
-var Q = require("q");
-var _ = require("underscore");
 
+class GeoserverLayerGroup extends GeoserverRepository {
 
-module.exports = function GeoserverLayerGroup() {
-
-    this.layerGroupExists = function (config) {
+    async layerGroupExists(config) {
         return this.geoserverObjectExists(this.types.LAYERGROUP, config);
-    };
+    }
 
-    this.getLayerGroup = function (config) {
+    async getLayerGroup(config) {
         return this.getGeoserverObject(this.types.LAYERGROUP, config);
-    };
+    }
 
-    this.createLayerGroup = function (config, allLayerNames) {
-        return this.layerGroupExists(config).then(function (exists) {
-            if (exists) {
-                return Q.reject("Layer Group already exists");
-            }
-            return this.issueLayerGroupCreateRequest(config, allLayerNames);
-        }.bind(this));
-    };
+    async createLayerGroup(config, allLayerNames) {
+        if (await this.layerGroupExists(config)) {
+            throw new Error("Layer Group already exists");
+        }
 
-    this.issueLayerGroupCreateRequest = function (config, allLayerNames) {
-        var deferred = Q.defer();
+        return this.issueLayerGroupCreateRequest(config, allLayerNames);
+    }
 
-        var restUrl = this.resolver.create(this.types.LAYERGROUP, config);
-        var requestObject = JSON.stringify(this.layerGroupRequestObject(config, allLayerNames));
+    async issueLayerGroupCreateRequest(config, allLayerNames) {
+        const deferred = this._makeDeferred();
+
+        const restUrl = this.resolver.create(this.types.LAYERGROUP, config);
+        const requestObject = JSON.stringify(this.layerGroupRequestObject(config, allLayerNames));
 
         this.dispatcher.post({
             url: restUrl,
@@ -41,14 +39,11 @@ module.exports = function GeoserverLayerGroup() {
         });
 
         return deferred.promise;
-    };
+    }
 
-    this.layerGroupRequestObject = function (config, allLayerNames) {
-        var layers = _.map(allLayerNames, function (layerName) {
-            return { enabled: true, name: layerName };
-        });
-
-        var styles = new Array(allLayerNames.length).fill("");
+    layerGroupRequestObject(config, allLayerNames) {
+        const layers = _.map(allLayerNames, (layerName) => ({ enabled: true, name: layerName }));
+        const styles = new Array(allLayerNames.length).fill("");
 
         return {
             layerGroup: {
@@ -64,13 +59,13 @@ module.exports = function GeoserverLayerGroup() {
             srs: config.srs ? config.srs : "EPSG:2056",
             projectionPolicy: "REPROJECT_TO_DECLARED"
         };
-    };
+    }
 
-    this.updateLayerGroup = function (config, allLayerNames) {
-        var deferred = Q.defer();
+    updateLayerGroup(config, allLayerNames) {
+        const deferred = this._makeDeferred();
 
-        var restUrl = this.resolver.get(this.types.LAYERGROUP, config);
-        var requestObject = JSON.stringify(this.layerGroupRequestObject(config, allLayerNames));
+        const restUrl = this.resolver.get(this.types.LAYERGROUP, config);
+        const requestObject = JSON.stringify(this.layerGroupRequestObject(config, allLayerNames));
 
         this.dispatcher.put({
             url: restUrl,
@@ -83,6 +78,8 @@ module.exports = function GeoserverLayerGroup() {
         });
 
         return deferred.promise;
-    };
+    }
 
-};
+}
+
+module.exports = GeoserverLayerGroup;

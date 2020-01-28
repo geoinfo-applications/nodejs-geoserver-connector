@@ -9,9 +9,9 @@ describe("Geoserver Coverage Test ", () => {
     chai.use(sinonChai);
 
     const config = require("../../config");
-    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const GeoserverConnector = require("../../../../server/domain/geoserver/GeoserverConnector");
 
-    let geoserverRepository, geoserverMockServer, type;
+    let geoserverConnector, geoserverMockServer, type;
     let coverageConfig;
 
     before(() => {
@@ -24,48 +24,48 @@ describe("Geoserver Coverage Test ", () => {
 
     beforeEach(() => {
         coverageConfig = { name: "AR_2014", store: "AR_2014", workspace: "geoportal" };
-        geoserverRepository = new GeoserverRepository(config.unit_test);
+        geoserverConnector = new GeoserverConnector(config.unit_test);
 
-        sinon.stub(geoserverRepository, GeoserverRepository.prototype.isGeoserverRunning.name);
-        geoserverRepository.isGeoserverRunning.returns(Promise.resolve(JSON.stringify({ about: { resource: {} } })));
+        sinon.stub(geoserverConnector, GeoserverConnector.prototype.isGeoserverRunning.name);
+        geoserverConnector.isGeoserverRunning.returns(Promise.resolve(JSON.stringify({ about: { resource: {} } })));
 
-        sinon.stub(geoserverRepository, GeoserverRepository.prototype.initializeWorkspace.name);
-        geoserverRepository.initializeWorkspace.returns(Promise.resolve());
+        sinon.stub(geoserverConnector, GeoserverConnector.prototype.initializeWorkspace.name);
+        geoserverConnector.initializeWorkspace.returns(Promise.resolve());
 
-        type = geoserverRepository.types.COVERAGE;
+        type = geoserverConnector.types.COVERAGE;
     });
 
     afterEach(() => {
-        geoserverRepository = null;
+        geoserverConnector = null;
     });
 
     it("should check coverage existance ", async () => {
-        geoserverRepository.getGeoserverObject = sinon.stub().returns(Promise.resolve(true));
+        geoserverConnector.getGeoserverObject = sinon.stub().returns(Promise.resolve(true));
 
-        const result = await geoserverRepository.coverageExists(coverageConfig);
+        const result = await geoserverConnector.coverageExists(coverageConfig);
 
-        expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, coverageConfig);
+        expect(geoserverConnector.getGeoserverObject).to.have.been.calledWith(type, coverageConfig);
         expect(result).to.be.eql(true);
     });
 
     it("should get coverage ", async () => {
         const coverageStoreDetails = { coverage: coverageConfig };
-        geoserverRepository.getGeoserverObject = sinon.stub().returns(Promise.resolve(coverageStoreDetails));
+        geoserverConnector.getGeoserverObject = sinon.stub().returns(Promise.resolve(coverageStoreDetails));
 
-        const result = await geoserverRepository.getCoverage(coverageConfig);
+        const result = await geoserverConnector.getCoverage(coverageConfig);
 
-        expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, coverageConfig);
+        expect(geoserverConnector.getGeoserverObject).to.have.been.calledWith(type, coverageConfig);
         expect(result).to.be.eql(coverageStoreDetails.coverage);
     });
 
     it("should update coverage ", async () => {
         const config = { name: coverageConfig.name, updatedConfig: { name: "new_name" } };
-        geoserverRepository.coverageExists = sinon.stub().returns(Promise.resolve(true));
-        geoserverRepository.issueCoverageUpdateRequest = sinon.stub().returns(Promise.resolve());
+        geoserverConnector.coverageExists = sinon.stub().returns(Promise.resolve(true));
+        geoserverConnector.issueCoverageUpdateRequest = sinon.stub().returns(Promise.resolve());
 
-        await geoserverRepository.updateCoverage(config);
+        await geoserverConnector.updateCoverage(config);
 
-        expect(geoserverRepository.issueCoverageUpdateRequest).to.have.been.calledWith(config);
+        expect(geoserverConnector.issueCoverageUpdateRequest).to.have.been.calledWith(config);
     });
 
 });

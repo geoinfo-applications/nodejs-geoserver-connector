@@ -3,14 +3,14 @@
 describe("Geoserver Styles tests", () => {
     const expect = require("chai").expect;
 
-    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const GeoserverConnector = require("../../../../server/domain/geoserver/GeoserverConnector");
     const TestUtils = require("../../TestUtils.js");
     const GeoserverMockServer = require("../../test-server.js");
     const config = require("../../config");
 
 
     const testUtils = new TestUtils(config.unit_test);
-    let gsRepository = testUtils.gsRepository;
+    let gsConnector = testUtils.gsConnector;
 
     let geoserverMockServer;
 
@@ -29,12 +29,12 @@ describe("Geoserver Styles tests", () => {
     });
 
     beforeEach(async () => {
-        gsRepository = new GeoserverRepository(config.unit_test);
-        await gsRepository.initializeWorkspace();
+        gsConnector = new GeoserverConnector(config.unit_test);
+        await gsConnector.initializeWorkspace();
     });
 
     afterEach(() => {
-        testUtils.tearDownRepository();
+        testUtils.tearDownConnector();
     });
 
     describe("global styles", () => {
@@ -49,7 +49,7 @@ describe("Geoserver Styles tests", () => {
 
         it("should fail if global style name is not defined ", async () => {
             try {
-                await gsRepository.getGlobalStyle();
+                await gsConnector.getGlobalStyle();
             } catch (error) {
                 expect(error.message).to.match(/name required/);
                 return;
@@ -59,14 +59,14 @@ describe("Geoserver Styles tests", () => {
 
         it("should get a global style ", async () => {
 
-            const styleObject = await gsRepository.getGlobalStyle(style);
+            const styleObject = await gsConnector.getGlobalStyle(style);
 
             expect(styleObject.name).to.be.equal(style.name);
         });
 
         it("should get all global styles ", async () => {
 
-            const styles = await gsRepository.getGlobalStyles();
+            const styles = await gsConnector.getGlobalStyles();
 
             expect(styles).to.be.instanceof(Array);
             expect(styles.length).to.be.equal(4);
@@ -75,7 +75,7 @@ describe("Geoserver Styles tests", () => {
 
         it("should return false if global style name is not defined ", async () => {
             try {
-                await gsRepository.createGlobalStyleConfiguration();
+                await gsConnector.createGlobalStyleConfiguration();
             } catch (error) {
                 expect(error.message).to.match(/name required/);
                 return;
@@ -85,26 +85,26 @@ describe("Geoserver Styles tests", () => {
 
         it("should return false if global style does not exist ", async () => {
 
-            const exists = await gsRepository.globalStyleExists({ name: "notExistingStyle" });
+            const exists = await gsConnector.globalStyleExists({ name: "notExistingStyle" });
 
             expect(exists).to.be.equal(false);
         });
 
         it("should return true if global style exist ", async () => {
 
-            const exists = await gsRepository.globalStyleExists(style);
+            const exists = await gsConnector.globalStyleExists(style);
 
             expect(exists).to.be.equal(true);
         });
 
         it("should create new global style configuration", async () => {
-            await gsRepository.createGlobalStyleConfiguration(style);
+            await gsConnector.createGlobalStyleConfiguration(style);
         });
 
         it("should fail uploading global style if name is not defined", async () => {
 
             try {
-                await gsRepository.uploadGlobalStyleContent({ sldBody: "<xml />" });
+                await gsConnector.uploadGlobalStyleContent({ sldBody: "<xml />" });
             } catch (error) {
                 expect(error.message).to.match(/content required/);
                 return;
@@ -116,7 +116,7 @@ describe("Geoserver Styles tests", () => {
         it("should fail uploading global style if sld body is not defined", async () => {
 
             try {
-                await gsRepository.uploadGlobalStyleContent(style);
+                await gsConnector.uploadGlobalStyleContent(style);
             } catch (error) {
                 expect(error.message).to.match(/content required/);
                 return;
@@ -126,7 +126,7 @@ describe("Geoserver Styles tests", () => {
 
         it("should fail uploading global style if config is not defined", async () => {
             try {
-                await gsRepository.uploadGlobalStyleContent();
+                await gsConnector.uploadGlobalStyleContent();
             } catch (error) {
                 expect(error.message).to.match(/content required/);
                 return;
@@ -140,7 +140,7 @@ describe("Geoserver Styles tests", () => {
                 sldBody: sldContent
             };
 
-            const result = await gsRepository.uploadGlobalStyleContent(styleConfig);
+            const result = await gsConnector.uploadGlobalStyleContent(styleConfig);
 
             expect(result).to.be.equal(true);
         });
@@ -151,13 +151,13 @@ describe("Geoserver Styles tests", () => {
                 sldBody: sldContent
             };
 
-            const result = await gsRepository.createGlobalStyle(styleConfig);
+            const result = await gsConnector.createGlobalStyle(styleConfig);
 
             expect(result).to.be.equal(true);
         });
 
         it("should delete global style", async () => {
-            await gsRepository.deleteGlobalStyle(style);
+            await gsConnector.deleteGlobalStyle(style);
         });
 
     });
@@ -174,7 +174,7 @@ describe("Geoserver Styles tests", () => {
 
         it("should fail if workspace style name is not defined", async () => {
             try {
-                await gsRepository.getWorkspaceStyle();
+                await gsConnector.getWorkspaceStyle();
             } catch (error) {
                 expect(error.message).to.match(/name required/);
                 return;
@@ -184,7 +184,7 @@ describe("Geoserver Styles tests", () => {
 
         it("should get workspace style ", async () => {
 
-            const workspaceStyle = await gsRepository.getWorkspaceStyle(style);
+            const workspaceStyle = await gsConnector.getWorkspaceStyle(style);
 
             expect(workspaceStyle).to.be.instanceof(Object);
             expect(workspaceStyle.name).to.be.equal(style.name);
@@ -193,7 +193,7 @@ describe("Geoserver Styles tests", () => {
 
         it("should fetch all workspace styles ", async () => {
 
-            const styles = await gsRepository.getWorkspaceStyles();
+            const styles = await gsConnector.getWorkspaceStyles();
 
             expect(styles).to.be.instanceof(Array);
             expect(styles.length).to.be.equal(4);
@@ -202,21 +202,21 @@ describe("Geoserver Styles tests", () => {
 
         it("should return false if workspace style does not exist ", async () => {
 
-            const exists = await gsRepository.workspaceStyleExists({ name: "notExistingStyle" });
+            const exists = await gsConnector.workspaceStyleExists({ name: "notExistingStyle" });
 
             expect(exists).to.be.equal(false);
         });
 
         it("should return true if workspace style exists ", async () => {
 
-            const exists = await gsRepository.workspaceStyleExists(style);
+            const exists = await gsConnector.workspaceStyleExists(style);
 
             expect(exists).to.be.equal(true);
         });
 
         it("should return false if workspace style name is not defined ", async () => {
             try {
-                await gsRepository.createWorkspaceStyleConfiguration();
+                await gsConnector.createWorkspaceStyleConfiguration();
             } catch (error) {
                 expect(error.message).to.match(/name required/);
                 return;
@@ -225,12 +225,12 @@ describe("Geoserver Styles tests", () => {
         });
 
         it("should create new workspace style ", async () => {
-            await gsRepository.createWorkspaceStyleConfiguration(style);
+            await gsConnector.createWorkspaceStyleConfiguration(style);
         });
 
         it("should fail uploading workspace style if name is not defined", async () => {
             try {
-                await gsRepository.uploadWorkspaceStyleContent({ sldBody: "<xml />" });
+                await gsConnector.uploadWorkspaceStyleContent({ sldBody: "<xml />" });
             } catch (error) {
                 expect(error.message).to.match(/content required/);
                 return;
@@ -241,7 +241,7 @@ describe("Geoserver Styles tests", () => {
         it("should fail uploading workspace style if SLD body is not defined", async () => {
 
             try {
-                await gsRepository.uploadWorkspaceStyleContent(style);
+                await gsConnector.uploadWorkspaceStyleContent(style);
             } catch (error) {
                 expect(error.message).to.match(/content required/);
                 return;
@@ -251,7 +251,7 @@ describe("Geoserver Styles tests", () => {
 
         it("should fail uploading workspace style if config is not defined", async () => {
             try {
-                await gsRepository.uploadWorkspaceStyleContent();
+                await gsConnector.uploadWorkspaceStyleContent();
             } catch (error) {
                 expect(error.message).to.match(/content required/);
                 return;
@@ -265,7 +265,7 @@ describe("Geoserver Styles tests", () => {
                 sldBody: sldContent
             };
 
-            const result = await gsRepository.uploadWorkspaceStyleContent(styleConfig);
+            const result = await gsConnector.uploadWorkspaceStyleContent(styleConfig);
 
             expect(result).to.be.equal(true);
         });
@@ -276,13 +276,13 @@ describe("Geoserver Styles tests", () => {
                 sldBody: sldContent
             };
 
-            const result = await gsRepository.createWorkspaceStyle(styleConfig);
+            const result = await gsConnector.createWorkspaceStyle(styleConfig);
 
             expect(result).to.be.equal(true);
         });
 
         it("should delete workspace style ", async () => {
-            await gsRepository.deleteWorkspaceStyle(style);
+            await gsConnector.deleteWorkspaceStyle(style);
         });
 
     });
@@ -291,7 +291,7 @@ describe("Geoserver Styles tests", () => {
 
         it("should fail if layer name is not defined", async () => {
             try {
-                await gsRepository.getLayerStyles();
+                await gsConnector.getLayerStyles();
             } catch (error) {
                 expect(error.message).to.match(/name required/);
                 return;
@@ -300,13 +300,13 @@ describe("Geoserver Styles tests", () => {
         });
 
         it("should get default layer style name", async () => {
-            const defaultStyle = await gsRepository.getLayerDefaultStyle(layer);
+            const defaultStyle = await gsConnector.getLayerDefaultStyle(layer);
 
             expect(defaultStyle.name).to.be.equal(layer.defaultStyleName);
         });
 
         it("should get all layer styles ", async () => {
-            const styles = await gsRepository.getLayerStyles(layer);
+            const styles = await gsConnector.getLayerStyles(layer);
 
             expect(styles).to.be.instanceof(Array);
             expect(styles.length).to.be.equal(4);
@@ -314,7 +314,7 @@ describe("Geoserver Styles tests", () => {
         });
 
         it("should update default layer style ", async () => {
-            await gsRepository.setLayerDefaultStyle(layer, style.name);
+            await gsConnector.setLayerDefaultStyle(layer, style.name);
         });
 
     });

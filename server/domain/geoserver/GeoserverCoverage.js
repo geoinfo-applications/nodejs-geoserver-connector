@@ -1,48 +1,46 @@
 "use strict";
 
-const Q = require("q");
+const GeoserverRepository = require("./GeoserverRepository");
 
-module.exports = function GeoserverCoverage() {
+
+class GeoserverCoverage extends GeoserverRepository {
+
+    async coverageExists(config) {
+        const coverageConfig = this.resolveCoverageConfig(config);
+        return this.geoserverObjectExists(this.types.COVERAGE, coverageConfig);
+    }
+
+    async getCoverage(config) {
+        const coverageConfig = this.resolveCoverageConfig(config);
+        const coverageObject = await this.getGeoserverObject(this.types.COVERAGE, coverageConfig);
+        return coverageObject.coverage;
+    }
 
     // eslint-disable-next-line complexity
-    const resolveCoverageConfig = function (config) {
+    resolveCoverageConfig(config) {
         const coverageName = config && config.name;
         const coverageStoreName = config && config.store || coverageName;
         const workspaceName = config && config.workspace || this.geoserver.workspace;
 
         return { name: coverageName, store: coverageStoreName, workspace: workspaceName };
-    };
+    }
 
-    this.coverageExists = function (config) {
-        const coverageConfig = resolveCoverageConfig.call(this, config);
-        return this.geoserverObjectExists(this.types.COVERAGE, coverageConfig);
-    };
-
-    this.getCoverage = function (config) {
-        const coverageConfig = resolveCoverageConfig.call(this, config);
-        return this.getGeoserverObject(this.types.COVERAGE, coverageConfig).then(function (coverageObject) {
-            return coverageObject.coverage;
-        });
-    };
-
-    this.updateCoverage = function (config) {
-        return this.coverageExists(config).then(function (exists) {
-            if (!exists) {
-                return Q.reject("Coverage doesn't exist");
-            }
-
-            return this.issueCoverageUpdateRequest(config);
-        }.bind(this));
-    };
-
-    this.issueCoverageUpdateRequest = function (config) {
-
-        if (!config || !config.updatedConfig) {
-            return Q.reject("updatedConfig parameter required");
+    async updateCoverage(config) {
+        if (!await this.coverageExists(config)) {
+            throw new Error("Coverage doesn't exist");
         }
+
+        return this.issueCoverageUpdateRequest(config);
+    }
+
+    async issueCoverageUpdateRequest(config) {
+        if (!config || !config.updatedConfig) {
+            throw new Error("updatedConfig parameter required");
+        }
+
         const restUrl = this.resolver.get(this.types.COVERAGE, config);
 
-        const deferred = Q.defer();
+        const deferred = this._makeDeferred();
         this.dispatcher.put({
             url: restUrl,
             body: JSON.stringify(config.updatedConfig),
@@ -54,6 +52,8 @@ module.exports = function GeoserverCoverage() {
         });
 
         return deferred.promise;
-    };
+    }
 
-};
+}
+
+module.exports = GeoserverCoverage;

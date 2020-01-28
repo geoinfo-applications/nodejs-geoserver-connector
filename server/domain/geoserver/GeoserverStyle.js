@@ -1,159 +1,142 @@
 "use strict";
 
-const Q = require("q");
+const GeoserverRepository = require("./GeoserverRepository");
 
 
-// eslint-disable-next-line max-statements
-module.exports = function GeoserverStyle() {
+class GeoserverStyle extends GeoserverRepository {
 
-    function nameDoesntExist(config) {
-        return !!(!config || !config.name);
+    async getGlobalStyle(config) {
+        if (!config || !config.name) {
+            throw new Error("layer name required");
+        }
 
+        const styleObject = await this.getGeoserverObject(this.types.STYLE, config);
+        return styleObject.style;
     }
 
-    function rejectRequest(errorMessage) {
-        return Q.reject(new Error(errorMessage));
+    async getGlobalStyles() {
+        const styleObject = await this.getGeoserverObject(this.types.STYLE);
+        return styleObject.styles.style || [];
     }
 
-    this.getGlobalStyle = function (config) {
-        if (nameDoesntExist(config)) {
-            return rejectRequest("layer name required");
+    async globalStyleExists(config) {
+        if (!config || !config.name) {
+            throw new Error("layer name required");
         }
-        return this.getGeoserverObject(this.types.STYLE, config)
-            .then(function (styleObject) {
-                return styleObject.style;
-            });
-    };
 
-    this.getGlobalStyles = function () {
-        return this.getGeoserverObject(this.types.STYLE)
-            .then(function (styleObject) {
-                return styleObject.styles.style || [];
-            });
-    };
-
-    this.globalStyleExists = function (config) {
-        if (nameDoesntExist(config)) {
-            return rejectRequest("layer name required");
-        }
         return this.geoserverObjectExists(this.types.STYLE, config);
-    };
+    }
 
-    this.createGlobalStyle = function (config) {
+    async createGlobalStyle(config) {
         this.defineGlobalStyle(config);
-        return this.globalStyleExists(config).then(function (exists) {
-            if (exists) {
-                return this.uploadGlobalStyleContent(config);
-            } else {
-                return this.createStyle(config);
-            }
-        }.bind(this));
-    };
 
-    this.createGlobalStyleConfiguration = function (config) {
+        if (await this.globalStyleExists(config)) {
+            return this.uploadGlobalStyleContent(config);
+        } else {
+            return this.createStyle(config);
+        }
+    }
+
+    async createGlobalStyleConfiguration(config) {
         this.defineGlobalStyle(config);
         return this.createStyleConfiguration(config);
-    };
+    }
 
-    this.uploadGlobalStyleContent = function (config) {
+    async uploadGlobalStyleContent(config) {
         this.defineGlobalStyle(config);
         return this.uploadStyleContent(config);
-    };
+    }
 
-    this.deleteGlobalStyle = function (config) {
-        if (nameDoesntExist(config)) {
-            return rejectRequest("layer name required");
+    async deleteGlobalStyle(config) {
+        if (!config || !config.name) {
+            throw new Error("layer name required");
         }
-        return this.globalStyleExists(config).then(function (exists) {
-            if (exists) {
-                return this.deleteGeoserverObject(this.types.STYLE, config, { purge: true });
-            }
-            return true;
-        }.bind(this));
-    };
 
-
-    this.getWorkspaceStyle = function (config) {
-        if (nameDoesntExist(config)) {
-            return rejectRequest("layer name required");
+        if (await this.globalStyleExists(config)) {
+            return this.deleteGeoserverObject(this.types.STYLE, config, { purge: true });
         }
-        return this.getGeoserverObject(this.types.WORKSPACESTYLE, config)
-            .then(function (styleObject) {
-                return styleObject.style;
-            });
-    };
 
-    this.getWorkspaceStyles = function (config) {
-        return this.getGeoserverObject(this.types.WORKSPACESTYLE, config)
-            .then(function (styleObject) {
-                return styleObject.styles.style || [];
-            });
-    };
+        return true;
+    }
 
-    this.workspaceStyleExists = function (config) {
-        if (nameDoesntExist(config)) {
-            return rejectRequest("layer name required");
+
+    async getWorkspaceStyle(config) {
+        if (!config || !config.name) {
+            throw new Error("layer name required");
         }
+
+        const styleObject = await this.getGeoserverObject(this.types.WORKSPACESTYLE, config);
+        return styleObject.style;
+    }
+
+    async getWorkspaceStyles(config) {
+        const styleObject = await this.getGeoserverObject(this.types.WORKSPACESTYLE, config);
+        return styleObject.styles.style || [];
+    }
+
+    async workspaceStyleExists(config) {
+        if (!config || !config.name) {
+            throw new Error("layer name required");
+        }
+
         return this.geoserverObjectExists(this.types.WORKSPACESTYLE, config);
-    };
+    }
 
-    this.createWorkspaceStyle = function (config) {
+    async createWorkspaceStyle(config) {
         this.defineWorkspaceStyle(config);
-        return this.workspaceStyleExists(config).then(function (exists) {
-            if (exists) {
-                return this.uploadWorkspaceStyleContent(config);
-            } else {
-                return this.createStyle(config);
-            }
-        }.bind(this));
-    };
+        if (await this.workspaceStyleExists(config)) {
+            return this.uploadWorkspaceStyleContent(config);
+        } else {
+            return this.createStyle(config);
+        }
+    }
 
-    this.createWorkspaceStyleConfiguration = function (config) {
+    async createWorkspaceStyleConfiguration(config) {
         this.defineWorkspaceStyle(config);
         return this.createStyleConfiguration(config);
-    };
+    }
 
-    this.uploadWorkspaceStyleContent = function (config) {
+    async uploadWorkspaceStyleContent(config) {
         this.defineWorkspaceStyle(config);
         return this.uploadStyleContent(config);
-    };
+    }
 
-    this.deleteWorkspaceStyle = function (config) {
-        if (nameDoesntExist(config)) {
-            return rejectRequest("layer name required");
-        }
-        return this.workspaceStyleExists(config).then(function (exists) {
-            if (exists) {
-                return this.deleteGeoserverObject(this.types.WORKSPACESTYLE, config);
-            }
-            return true;
-        }.bind(this));
-    };
-
-
-    this.getLayerDefaultStyle = function (config) {
-        if (nameDoesntExist(config)) {
-            return rejectRequest("layer name required");
-        }
-        return this.getLayer(config).then(function (layer) {
-            return layer.defaultStyle;
-        });
-    };
-
-    this.getLayerStyles = function (config) {
-        if (nameDoesntExist(config)) {
-            return rejectRequest("layer name required");
+    async deleteWorkspaceStyle(config) {
+        if (!config || !config.name) {
+            throw new Error("layer name required");
         }
 
-        return this.getLayer(config).then(function (layer) {
-            return layer.styles.style;
-        });
-    };
-
-    this.setLayerDefaultStyle = function (config, styleName) {
-        if (!styleName || nameDoesntExist(config)) {
-            return Q.reject(new Error("layer and style name required"));
+        if (await this.workspaceStyleExists(config)) {
+            return this.deleteGeoserverObject(this.types.WORKSPACESTYLE, config);
         }
+
+        return true;
+    }
+
+
+    async getLayerDefaultStyle(config) {
+        if (!config || !config.name) {
+            throw new Error("layer name required");
+        }
+
+        const layer = await this.getLayer(config);
+        return layer.defaultStyle;
+    }
+
+    async getLayerStyles(config) {
+        if (!config || !config.name) {
+            throw new Error("layer name required");
+        }
+
+        const layer = await this.getLayer(config);
+        return layer.styles.style;
+    }
+
+    async setLayerDefaultStyle(config, styleName) {
+        if (!styleName || !!(!config || !config.name)) {
+            throw new Error("layer and style name required");
+        }
+
         const updateLayerConfig = {
             layer: {
                 defaultStyle: {
@@ -162,14 +145,15 @@ module.exports = function GeoserverStyle() {
             },
             name: config.name
         };
+
         return this.updateLayer(updateLayerConfig);
-    };
+    }
 
-    this.setLayerDefaultWorkspaceStyle = function (config, styleName) {
-
-        if (nameDoesntExist(config) && !styleName) {
-            return rejectRequest("layer and style name required");
+    async setLayerDefaultWorkspaceStyle(config, styleName) {
+        if (!!(!config || !config.name) && !styleName) {
+            throw new Error("layer and style name required");
         }
+
         const updateLayerConfig = {
             layer: {
                 defaultStyle: {
@@ -179,35 +163,30 @@ module.exports = function GeoserverStyle() {
             },
             name: config.name
         };
-        return this.updateLayer(updateLayerConfig);
-    };
 
-    this.defineGlobalStyle = function (config) {
+        return this.updateLayer(updateLayerConfig);
+    }
+
+    defineGlobalStyle(config) {
         if (config) {
             config.styleType = this.types.STYLE;
         }
-    };
+    }
 
-    this.defineWorkspaceStyle = function (config) {
+    defineWorkspaceStyle(config) {
         if (config) {
             config.styleType = this.types.WORKSPACESTYLE;
         }
-    };
+    }
 
-    this.createStyle = function (config) {
+    async createStyle(config) {
+        await this.createStyleConfiguration(config);
+        return this.uploadStyleContent(config);
+    }
 
-        const uploadSLDContent = function () {
-            return this.uploadStyleContent(config);
-        }.bind(this, config);
-
-        return this.createStyleConfiguration(config)
-            .then(uploadSLDContent);
-
-    };
-
-    this.createStyleConfiguration = function (config) {
-        if (nameDoesntExist(config)) {
-            return rejectRequest("layer name required");
+    async createStyleConfiguration(config) {
+        if (!config || !config.name) {
+            throw new Error("layer name required");
         }
 
         const styleConfig = {
@@ -222,14 +201,14 @@ module.exports = function GeoserverStyle() {
         }
 
         return this.createGeoserverObject(config.styleType, styleConfig);
-    };
+    }
 
     // eslint-disable-next-line complexity
-    this.uploadStyleContent = function (config) {
+    async uploadStyleContent(config) {
         const styleName = config && config.name;
         const sldBody = config && config.sldBody;
         if (!sldBody || !styleName) {
-            return Q.reject(new Error("style name and sld content required"));
+            throw new Error("style name and sld content required");
         }
 
         const styleConfig = { name: styleName };
@@ -238,12 +217,12 @@ module.exports = function GeoserverStyle() {
         }
 
         const restUrl = this.resolver.get(config.styleType, styleConfig);
-        const deferred = Q.defer();
+        const deferred = this._makeDeferred();
 
         // TODO reuse createResponseListener
-        function response(err, resp, body) {
-            if (err) {
-                return deferred.reject(new Error(err));
+        const response = (error, resp, body) => {
+            if (error) {
+                return deferred.reject(new Error(error));
             }
             if (resp.statusCode !== 200) {
                 // eslint-disable-next-line no-console
@@ -252,7 +231,7 @@ module.exports = function GeoserverStyle() {
             }
             // console.info("SLD file uploaded>", body);
             return deferred.resolve(true);
-        }
+        };
 
         this.dispatcher.put({
             url: restUrl,
@@ -262,6 +241,8 @@ module.exports = function GeoserverStyle() {
         });
 
         return deferred.promise;
-    };
+    }
 
-};
+}
+
+module.exports = GeoserverStyle;

@@ -6,14 +6,14 @@ describe("Geoserver LegendGraphic tests", () => {
     const expect = require("chai").expect;
     const _ = require("underscore");
 
-    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const GeoserverConnector = require("../../../../server/domain/geoserver/GeoserverConnector");
     const TestUtils = require("../../TestUtils.js");
     const config = require("../../config");
 
 
     const testUtils = new TestUtils(config.unit_test);
-    let gsRepository = testUtils.gsRepository;
-    const legend = gsRepository.legend;
+    let gsConnector = testUtils.gsConnector;
+    const legend = gsConnector.legend;
 
     const layer = config.layer;
     const style = config.style;
@@ -35,11 +35,11 @@ describe("Geoserver LegendGraphic tests", () => {
     const parametersWithStyle = parameters.concat(["STYLE=" + style.name]);
 
     beforeEach(() => {
-        gsRepository = new GeoserverRepository(config.unit_test);
+        gsConnector = new GeoserverConnector(config.unit_test);
     });
 
     afterEach(() => {
-        testUtils.tearDownRepository();
+        testUtils.tearDownConnector();
     });
 
     describe("rules ", () => {
@@ -51,7 +51,7 @@ describe("Geoserver LegendGraphic tests", () => {
         });
 
         it("getBaseURL should return correct workspace url ", () => {
-            const expectedURL = gsRepository.baseURL + legend.defaultWorkspace + "/wms?";
+            const expectedURL = gsConnector.baseURL + legend.defaultWorkspace + "/wms?";
 
             const baseURL = legend.getBaseURL();
 

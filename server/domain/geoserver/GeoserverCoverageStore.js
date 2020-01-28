@@ -1,45 +1,41 @@
 "use strict";
 
-var Q = require("q");
+const GeoserverRepository = require("./GeoserverRepository");
 
 
-module.exports = function GeoserverCoverageStore() {
+class GeoserverCoverageStore extends GeoserverRepository {
 
-    this.coverageStoreExists = function (config) {
+    async coverageStoreExists(config) {
         return this.geoserverObjectExists(this.types.COVERAGESTORE, config);
-    };
+    }
 
-    this.getCoverageStore = function (config) {
-        var coverageStoreName = config && config.name;
-        var workspaceName = config && config.workspace || this.geoserver.workspace;
+    async getCoverageStore(config) {
+        const coverageStoreName = config && config.name;
+        const workspaceName = config && config.workspace || this.geoserver.workspace;
 
-        var datastoreConfig = { name: coverageStoreName, workspace: workspaceName };
-        return this.getGeoserverObject(this.types.COVERAGESTORE, datastoreConfig).then(function (datastoreObject) {
-            return datastoreObject.coverageStore;
-        });
-    };
+        const datastoreConfig = { name: coverageStoreName, workspace: workspaceName };
+        const datastoreObject = await this.getGeoserverObject(this.types.COVERAGESTORE, datastoreConfig);
+        return datastoreObject.coverageStore;
+    }
 
-    this.createCoverageStore = function (config) {
-        return this.coverageStoreExists(config).then(function (exists) {
-            if (exists) {
-                return Q.reject("Coverage Store already exists");
-            }
-
-            return this.issueCoverageStoreCreateRequest(config);
-        }.bind(this));
-    };
-
-    this.issueCoverageStoreCreateRequest = function (config) {
-
-        var coverageStoreType = config.coverageStoreType || "imagepyramid";
-        if (!config || !config.coverageDirectory) {
-            return Q.reject("coverageDirectory parameter required");
+    async createCoverageStore(config) {
+        if (await this.coverageStoreExists(config)) {
+            throw new Error("Coverage Store already exists");
         }
 
-        var restUrl = this.resolver.create(this.types.COVERAGESTORE, config);
+        return this.issueCoverageStoreCreateRequest(config);
+    }
+
+    async issueCoverageStoreCreateRequest(config) {
+        const coverageStoreType = config.coverageStoreType || "imagepyramid";
+        if (!config || !config.coverageDirectory) {
+            throw new Error("coverageDirectory parameter required");
+        }
+
+        let restUrl = this.resolver.create(this.types.COVERAGESTORE, config);
         restUrl += "/external." + coverageStoreType;
 
-        var deferred = Q.defer();
+        const deferred = this._makeDeferred();
         this.dispatcher.put({
             url: restUrl,
             body: config.coverageDirectory,
@@ -52,21 +48,22 @@ module.exports = function GeoserverCoverageStore() {
         });
 
         return deferred.promise;
-    };
+    }
 
-    this.deleteCoverageStore = function (config) {
-        var coverageStoreName = config && config.name;
-        var workspaceName = config && config.workspace || this.geoserver.workspace;
+    async deleteCoverageStore(config) {
+        const coverageStoreName = config && config.name;
+        const workspaceName = config && config.workspace || this.geoserver.workspace;
 
-        return this.coverageStoreExists({ name: coverageStoreName, workspace: workspaceName }).then(function (exists) {
-            if (exists) {
-                return this.deleteGeoserverObject(this.types.COVERAGESTORE, config, {
-                    recurse: true,
-                    purge: "metadata"
-                });
-            }
-            return true;
-        }.bind(this));
-    };
+        if (await this.coverageStoreExists({ name: coverageStoreName, workspace: workspaceName })) {
+            return this.deleteGeoserverObject(this.types.COVERAGESTORE, config, {
+                recurse: true,
+                purge: "metadata"
+            });
+        }
 
-};
+        return true;
+    }
+
+}
+
+module.exports = GeoserverCoverageStore;

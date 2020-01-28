@@ -1,78 +1,76 @@
 "use strict";
 
+const GeoserverRepository = require("./GeoserverRepository");
+const _ = require("underscore");
 
-var Q = require("q");
-var _ = require("underscore");
 
+class GeoserverWmsLayer extends GeoserverRepository {
 
-module.exports = function GeoserverWmsLayer() {
-
-    this.resolveWmsLayerConfig = function (config) {
-        var wmsLayerName = config && config.layerName;
-        var workspaceName = config && config.workspace || this.geoserver.workspace;
+    resolveWmsLayerConfig(config) {
+        const wmsLayerName = config && config.layerName;
+        const workspaceName = config && config.workspace || this.geoserver.workspace;
 
         return { name: wmsLayerName, workspace: workspaceName };
-    };
+    }
 
 
-    this.wmsLayerExists = function (layerSearchingParameters, wmsLayerSearchingParameters) {
-        return Q.all([
+    async wmsLayerExists(layerSearchingParameters, wmsLayerSearchingParameters) {
+        return Promise.all([
             this.geoserverObjectExists(this.types.LAYER, layerSearchingParameters),
             this.geoserverObjectExists(this.types.WMSLAYER, wmsLayerSearchingParameters)
-        ]).spread(function (layerExists, wmsLayerExists) {
-            return Q.when(wmsLayerExists && layerExists);
+        ]).then(([layerExists, wmsLayerExists]) => {
+            return !!(wmsLayerExists && layerExists);
         });
-    };
+    }
 
-    this.getWmsLayer = function (config) {
+    async getWmsLayer(config) {
         return this.getGeoserverObject(this.types.WMSLAYER, config);
-    };
+    }
 
-    this.getWmsLayerRequestParameters = function (config, layerList) {
-        var layers = layerList ? layerList : config.layerNames.split(",");
+    async getWmsLayerRequestParameters(config, layerList) {
+        const layers = layerList ? layerList : config.layerNames.split(",");
 
-        return Q.all(_.map(layers, function (nativeName) {
-            var layerConfig = _.clone(config);
+        return Promise.all(_.map(layers, (nativeName) => {
+            const layerConfig = _.clone(config);
 
             layerConfig.layerName = (config.externalWmsService.name + "_" + nativeName).replace(/[^A-Za-z0-9_-]/g, "_");
             layerConfig.nativeName = nativeName;
 
-            var layerSearchingParameters = this.resolveWmsLayerConfig(layerConfig);
+            const layerSearchingParameters = this.resolveWmsLayerConfig(layerConfig);
 
             return {
                 wmsLayerRequestParameters: layerConfig,
                 layerRequestParameters: layerSearchingParameters
             };
-        }.bind(this)));
-    };
+        }));
+    }
 
-    this.createWmsLayer = function (externalWmsLayer) {
-        return this.createNotExistingWmsLayers(externalWmsLayer).then(function (allLayers) {
-            return this.createLayerGroup(externalWmsLayer, allLayers);
-        }.bind(this));
-    };
+    async createWmsLayer(externalWmsLayer) {
+        const allLayers = await this.createNotExistingWmsLayers(externalWmsLayer);
+        return this.createLayerGroup(externalWmsLayer, allLayers);
+    }
 
-    this.createNotExistingWmsLayers = function (externalWmsLayer) {
-        return this.getWmsLayerRequestParameters(externalWmsLayer).then(function (requestParameters) {
-            return Q.all(_.map(requestParameters, function (requestParameter) {
-                return this.makeSureWmsLayerExists(requestParameter.layerRequestParameters, requestParameter.wmsLayerRequestParameters);
-            }.bind(this)));
-        }.bind(this));
-    };
+    async createNotExistingWmsLayers(externalWmsLayer) {
+        const requestParameters = await this.getWmsLayerRequestParameters(externalWmsLayer);
 
-    this.makeSureWmsLayerExists = function (searchingParameters, config) {
-        return this.wmsLayerExists(searchingParameters, config).then(function (exists) {
-            return Q.when(exists || this.issueWmsLayerCreateRequest(config)).then(function () {
-                return config.layerName;
-            });
-        }.bind(this));
-    };
+        return Promise.all(_.map(requestParameters, (requestParameter) => {
+            return this.makeSureWmsLayerExists(requestParameter.layerRequestParameters, requestParameter.wmsLayerRequestParameters);
+        }));
+    }
 
-    this.issueWmsLayerCreateRequest = function (config) {
-        var deferred = Q.defer();
+    async makeSureWmsLayerExists(searchingParameters, config) {
+        if (!await this.wmsLayerExists(searchingParameters, config)) {
+            await this.issueWmsLayerCreateRequest(config);
+        }
 
-        var restUrl = this.resolver.create(this.types.WMSLAYER, config);
-        var requestObject = JSON.stringify(this.wmsLayerRequestObject(config));
+        return config.layerName;
+    }
+
+    async issueWmsLayerCreateRequest(config) {
+        const deferred = this._makeDeferred();
+
+        const restUrl = this.resolver.create(this.types.WMSLAYER, config);
+        const requestObject = JSON.stringify(this.wmsLayerRequestObject(config));
 
         this.dispatcher.post({
             url: restUrl,
@@ -85,9 +83,9 @@ module.exports = function GeoserverWmsLayer() {
         });
 
         return deferred.promise;
-    };
+    }
 
-    this.wmsLayerRequestObject = function (config) {
+    wmsLayerRequestObject(config) {
         return {
             wmsLayer: {
                 name: config.layerName,
@@ -98,59 +96,61 @@ module.exports = function GeoserverWmsLayer() {
                 projectionPolicy: "REPROJECT_TO_DECLARED"
             }
         };
-    };
+    }
 
-    this.deleteWmsLayer = function (config) {
-        return this.deleteGeoserverObject(this.types.LAYERGROUP, config).then(function () {
-            return this.getWmsLayerRequestParameters(config).then(function (requestParameters) {
-                return Q.all(_.map(requestParameters, function (requestParameter) {
-                    return this.deleteWmsLayerEverywhere(requestParameter.layerRequestParameters,
-                        requestParameter.wmsLayerRequestParameters);
-                }.bind(this)));
-            }.bind(this));
-        }.bind(this));
-    };
+    async deleteWmsLayer(config) {
+        await this.deleteGeoserverObject(this.types.LAYERGROUP, config);
+        const requestParameters = await this.getWmsLayerRequestParameters(config);
 
-    this.deleteWmsLayerEverywhere = function (layerRequestParameters, wmsLayerRequestParameters) {
-        return this.wmsLayerExists(layerRequestParameters, wmsLayerRequestParameters).then(function (exists) {
-            if (exists) {
-                return this.deleteGeoserverObject(this.types.LAYER, layerRequestParameters).then(function () {
-                    return this.deleteGeoserverObject(this.types.WMSLAYER, wmsLayerRequestParameters);
-                }.bind(this)).catch(function () {
-                    return Q.when();
-                });
-            }
-        }.bind(this));
-    };
+        return Promise.all(_.map(requestParameters, (requestParameter) => {
+            return this.deleteWmsLayerEverywhere(requestParameter.layerRequestParameters, requestParameter.wmsLayerRequestParameters);
+        }));
+    }
 
-    this.updateWmsLayer = function (externalWmsLayer, existingExternalWmsLayer) {
-        return this.layerGroupExists(externalWmsLayer).then(function (exists) {
-            if (!exists) {
-                return Q.reject("WmsLayer doesn't exist");
-            }
-            var layerNativeNames = externalWmsLayer.layerNames.split(",");
-            var existingLayerNativeNames = existingExternalWmsLayer.layerNames.split(",");
-            var layersToDelete = _.difference(existingLayerNativeNames, layerNativeNames);
+    async deleteWmsLayerEverywhere(layerRequestParameters, wmsLayerRequestParameters) {
+        const exists = await this.wmsLayerExists(layerRequestParameters, wmsLayerRequestParameters);
 
-            return this.createNotExistingWmsLayers(externalWmsLayer).then(function (allLayerNames) {
-                return this.updateLayerGroup(externalWmsLayer, allLayerNames);
-            }.bind(this)).then(function () {
-                return this.deleteAllUnnecessaryGeoserverWmsLayers(externalWmsLayer, layersToDelete);
-            }.bind(this));
-        }.bind(this));
-    };
-
-    this.deleteAllUnnecessaryGeoserverWmsLayers = function (externalWmsLayer, layersToDelete) {
-        if (layersToDelete.length) {
-            return this.getWmsLayerRequestParameters(externalWmsLayer, layersToDelete)
-                .then(function (requestParameters) {
-                    return Q.all(_.map(requestParameters, function (requestParameter) {
-                        return this.deleteWmsLayerEverywhere(requestParameter.layerRequestParameters,
-                            requestParameter.wmsLayerRequestParameters);
-                    }.bind(this)));
-                }.bind(this));
+        if (!exists) {
+            return;
         }
-        return new Q();
-    };
 
-};
+        try {
+            await this.deleteGeoserverObject(this.types.LAYER, layerRequestParameters);
+            return this.deleteGeoserverObject(this.types.WMSLAYER, wmsLayerRequestParameters);
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+        }
+    }
+
+    async updateWmsLayer(externalWmsLayer, existingExternalWmsLayer) {
+        const exists = await this.layerGroupExists(externalWmsLayer);
+
+        if (!exists) {
+            throw new Error("WmsLayer doesn't exist");
+        }
+
+        const layerNativeNames = externalWmsLayer.layerNames.split(",");
+        const existingLayerNativeNames = existingExternalWmsLayer.layerNames.split(",");
+        const layersToDelete = _.difference(existingLayerNativeNames, layerNativeNames);
+        const allLayerNames = await this.createNotExistingWmsLayers(externalWmsLayer);
+        await this.updateLayerGroup(externalWmsLayer, allLayerNames);
+
+        return this.deleteAllUnnecessaryGeoserverWmsLayers(externalWmsLayer, layersToDelete);
+    }
+
+    async deleteAllUnnecessaryGeoserverWmsLayers(externalWmsLayer, layersToDelete) {
+        if (!layersToDelete.length) {
+            return;
+        }
+
+        const requestParameters = await this.getWmsLayerRequestParameters(externalWmsLayer, layersToDelete);
+
+        return Promise.all(_.map(requestParameters, (requestParameter) => {
+            return this.deleteWmsLayerEverywhere(requestParameter.layerRequestParameters, requestParameter.wmsLayerRequestParameters);
+        }));
+    }
+
+}
+
+module.exports = GeoserverWmsLayer;

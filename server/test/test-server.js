@@ -11,7 +11,8 @@ const config = require("./config.js");
 class GeoserverMockServer {
 
     // eslint-disable-next-line max-statements
-    constructor() {        const options = config.unit_test.geoserver;
+    constructor() {
+        const options = config.unit_test.geoserver;
 
         this.gsMockServer = express();
         this.gsMockServer.use(bodyParser.urlencoded({ extended: false }));
