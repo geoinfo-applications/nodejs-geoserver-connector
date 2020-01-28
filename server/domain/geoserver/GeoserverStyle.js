@@ -1,9 +1,10 @@
 "use strict";
 
-var Q = require("q");
+const Q = require("q");
 
 
-module.exports = function GeoserverLayer() {
+// eslint-disable-next-line max-statements
+module.exports = function GeoserverStyle() {
 
     function nameDoesntExist(config) {
         return !!(!config || !config.name);
@@ -153,7 +154,7 @@ module.exports = function GeoserverLayer() {
         if (!styleName || nameDoesntExist(config)) {
             return Q.reject(new Error("layer and style name required"));
         }
-        var updateLayerConfig = {
+        const updateLayerConfig = {
             layer: {
                 defaultStyle: {
                     name: styleName
@@ -169,7 +170,7 @@ module.exports = function GeoserverLayer() {
         if (nameDoesntExist(config) && !styleName) {
             return rejectRequest("layer and style name required");
         }
-        var updateLayerConfig = {
+        const updateLayerConfig = {
             layer: {
                 defaultStyle: {
                     name: styleName,
@@ -195,7 +196,7 @@ module.exports = function GeoserverLayer() {
 
     this.createStyle = function (config) {
 
-        var uploadSLDContent = function () {
+        const uploadSLDContent = function () {
             return this.uploadStyleContent(config);
         }.bind(this, config);
 
@@ -209,7 +210,7 @@ module.exports = function GeoserverLayer() {
             return rejectRequest("layer name required");
         }
 
-        var styleConfig = {
+        const styleConfig = {
             style: {
                 name: config.name,
                 filename: config.name + ".sld"
@@ -223,21 +224,21 @@ module.exports = function GeoserverLayer() {
         return this.createGeoserverObject(config.styleType, styleConfig);
     };
 
+    // eslint-disable-next-line complexity
     this.uploadStyleContent = function (config) {
-
-        var styleName = config && config.name;
-        var sldBody = config && config.sldBody;
+        const styleName = config && config.name;
+        const sldBody = config && config.sldBody;
         if (!sldBody || !styleName) {
             return Q.reject(new Error("style name and sld content required"));
         }
 
-        var styleConfig = { name: styleName };
+        const styleConfig = { name: styleName };
         if (config.workspace) {
             styleConfig.workspace = config.workspace;
         }
 
-        var restUrl = this.resolver.get(config.styleType, styleConfig);
-        var deferred = Q.defer();
+        const restUrl = this.resolver.get(config.styleType, styleConfig);
+        const deferred = Q.defer();
 
         // TODO reuse createResponseListener
         function response(err, resp, body) {
@@ -245,6 +246,7 @@ module.exports = function GeoserverLayer() {
                 return deferred.reject(new Error(err));
             }
             if (resp.statusCode !== 200) {
+                // eslint-disable-next-line no-console
                 console.error("Error uploading style SLD file", body);
                 return deferred.reject(new Error(body));
             }

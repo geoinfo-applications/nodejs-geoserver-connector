@@ -1,7 +1,8 @@
 "use strict";
 
-var request = require("request");
-var _ = require("underscore");
+const request = require("request");
+const _ = require("underscore");
+
 
 function GeoserverDispatcher(geoserverRepositoryConfig) {
 
@@ -16,16 +17,16 @@ function GeoserverDispatcher(geoserverRepositoryConfig) {
 
 GeoserverDispatcher.prototype = {
 
+    // eslint-disable-next-line complexity
     get: function (config) {
-
-        var geoserverRestCall = config.url;
-        var callback = config.callback;
+        const geoserverRestCall = config.url;
+        const callback = config.callback;
 
         if (!callback || !geoserverRestCall) {
             throw new Error("URL and Callback required");
         }
 
-        var headers = addRequestHeaders.call(null, this.defaultContentType);
+        const headers = addRequestHeaders.call(null, this.defaultContentType);
         if (config.headers) {
             _.extend(headers, config.headers);
         }
@@ -44,7 +45,7 @@ GeoserverDispatcher.prototype = {
         }, callback);
 
         function addRequestHeaders(defaultContentType) {
-            var headers = {
+            const headers = {
                 Accept: defaultContentType,
                 "Content-type": config.contentType || defaultContentType
             };

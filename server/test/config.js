@@ -1,6 +1,6 @@
 "use strict";
 
-var dbConfig = {
+const dbConfig = {
     host: "localhost",
     port: process.env.TESTSERVER_DB_PORT,
     user: process.env.TESTSERVER_DB_USER,
@@ -9,7 +9,7 @@ var dbConfig = {
     charset: "utf8"
 };
 
-var config = {
+const config = {
 
     unit_test: {
         db: {

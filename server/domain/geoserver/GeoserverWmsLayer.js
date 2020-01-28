@@ -144,11 +144,11 @@ module.exports = function GeoserverWmsLayer() {
         if (layersToDelete.length) {
             return this.getWmsLayerRequestParameters(externalWmsLayer, layersToDelete)
                 .then(function (requestParameters) {
-                return Q.all(_.map(requestParameters, function (requestParameter) {
-                    return this.deleteWmsLayerEverywhere(requestParameter.layerRequestParameters,
-                        requestParameter.wmsLayerRequestParameters);
-                }.bind(this)));
-            }.bind(this));
+                    return Q.all(_.map(requestParameters, function (requestParameter) {
+                        return this.deleteWmsLayerEverywhere(requestParameter.layerRequestParameters,
+                            requestParameter.wmsLayerRequestParameters);
+                    }.bind(this)));
+                }.bind(this));
         }
         return new Q();
     };

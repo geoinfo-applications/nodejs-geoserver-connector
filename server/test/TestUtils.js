@@ -1,11 +1,13 @@
 "use strict";
 
-const Q = require("q");
 const fs = require("fs");
+const util = require("util");
+const readFileAsync = util.promisify(fs.readFile);
+const path = require("path");
 const _ = require("underscore");
 const qthrottle = require("./qthrottle/Throttle.js");
-
 const GeoserverRepository = require("../../server/domain/geoserver/GeoserverRepository");
+
 
 class TestUtils {
 
@@ -42,13 +44,8 @@ class TestUtils {
         this.tearDownRepository();
     }
 
-    readStyleContent(callback, done) {
-        fs.readFile(__dirname + "/data/teststyle.sld", "ascii", (err, sldContent) => {
-            if (err) {
-                done(new Error(err));
-            }
-            callback(sldContent);
-        });
+    async readStyleContent() {
+        return readFileAsync(path.join(__dirname, "/data/teststyle.sld"), "ascii");
     }
 
     deleteStyles(style, numberOfStylesToDelete) {

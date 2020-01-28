@@ -1,31 +1,32 @@
 "use strict";
 
-var Q = require("q");
-var _ = require("underscore");
-var util = require("util");
+const Q = require("q");
+const _ = require("underscore");
+const util = require("util");
 
-var GeoserverDispatcher = require("./GeoserverDispatcher");
-var GeoserverResolver = require("./GeoserverResolver");
+const GeoserverDispatcher = require("./GeoserverDispatcher");
+const GeoserverResolver = require("./GeoserverResolver");
 
-var GeoserverDatastore = require("./GeoserverDatastore");
-var GeoserverWmsStore = require("./GeoserverWmsStore");
-var GeoserverWmsLayer = require("./GeoserverWmsLayer");
-var GeoserverWmtsStore = require("./GeoserverWmtsStore");
-var GeoserverWmtsLayer = require("./GeoserverWmtsLayer");
-var GeoserverCoverageStore = require("./GeoserverCoverageStore");
-var GeoserverCoverage = require("./GeoserverCoverage");
-var GeoserverWorkspace = require("./GeoserverWorkspace");
-var GeoserverFeatureType = require("./GeoserverFeatureType");
-var GeoserverLayer = require("./GeoserverLayer");
-var GeoserverLayerGroup = require("./GeoserverLayerGroup");
-var GeoserverStyle = require("./GeoserverStyle");
-var GeoserverLegend = require("./GeoserverLegend");
+const GeoserverDatastore = require("./GeoserverDatastore");
+const GeoserverWmsStore = require("./GeoserverWmsStore");
+const GeoserverWmsLayer = require("./GeoserverWmsLayer");
+const GeoserverWmtsStore = require("./GeoserverWmtsStore");
+const GeoserverWmtsLayer = require("./GeoserverWmtsLayer");
+const GeoserverCoverageStore = require("./GeoserverCoverageStore");
+const GeoserverCoverage = require("./GeoserverCoverage");
+const GeoserverWorkspace = require("./GeoserverWorkspace");
+const GeoserverFeatureType = require("./GeoserverFeatureType");
+const GeoserverLayer = require("./GeoserverLayer");
+const GeoserverLayerGroup = require("./GeoserverLayerGroup");
+const GeoserverStyle = require("./GeoserverStyle");
+const GeoserverLegend = require("./GeoserverLegend");
 
 
+// eslint-disable-next-line max-statements
 function GeoserverRepository(config) {
 
-    var gsConfig = config.geoserver;
-    var dbConfig = config.db.flat;
+    const gsConfig = config.geoserver;
+    const dbConfig = config.db.flat;
 
     this.geoserver = _.extend({}, gsConfig);
     if (this.geoserver.context) {
@@ -92,8 +93,8 @@ function GeoserverRepository(config) {
 GeoserverRepository.prototype = {
 
     isGeoserverRunning: function () {
-        var deferred = Q.defer();
-        var self = this;
+        const deferred = Q.defer();
+        const self = this;
 
         this.dispatcher.get({
             url: this.restURL + this.resolver.restAPI.about,
@@ -111,14 +112,16 @@ GeoserverRepository.prototype = {
                 }
 
                 function logError() {
-                    var errorMsg = (error && error.message) || body;
+                    const errorMsg = (error && error.message) || body;
+                    // eslint-disable-next-line no-console
                     console.error("Error accessing Geoserver instance > " + self.baseURL, errorMsg);
                 }
 
                 function updateGeoserverStatus() {
                     self.isEnabled = true;
-                    var responseDetails = JSON.parse(body);
+                    const responseDetails = JSON.parse(body);
                     self.geoserverDetails = responseDetails.about.resource[0];
+                    // eslint-disable-next-line no-console
                     console.info("Geoserver instance initialized @ " + self.baseURL);
                 }
             }
@@ -128,7 +131,7 @@ GeoserverRepository.prototype = {
     },
 
     reloadCatalog: function () {
-        var deferred = Q.defer();
+        const deferred = Q.defer();
 
         this.dispatcher.post({
             url: this.restURL + this.resolver.restAPI.reloadCatalog,
@@ -142,7 +145,7 @@ GeoserverRepository.prototype = {
     },
 
     resetCache: function () {
-        var deferred = Q.defer();
+        const deferred = Q.defer();
 
         this.dispatcher.post({
             url: this.restURL + this.resolver.restAPI.resetCache,
@@ -156,7 +159,7 @@ GeoserverRepository.prototype = {
     },
 
     getFonts: function () {
-        var deferred = Q.defer();
+        const deferred = Q.defer();
 
         this.dispatcher.get({
             url: this.restURL + this.resolver.restAPI.getFonts,
@@ -174,9 +177,8 @@ GeoserverRepository.prototype = {
     },
 
     createResponseListener: function (config) {
-
-        var deferred = config.deferred;
-        var responseStatusCode = config.responseStatusCode || 200;
+        const deferred = config.deferred;
+        const responseStatusCode = config.responseStatusCode || 200;
 
         return function responseListener(error, response, body) {
             if (responseHasError()) {
@@ -191,24 +193,24 @@ GeoserverRepository.prototype = {
             }
 
             function logError() {
+                // eslint-disable-next-line no-console
                 console.error(config.errorMessage, getErrorMessage());
             }
 
             function getErrorMessage() {
-                var errorMessage = (error && error.message);
-                var bodyMessage = body === ":null" ? null : body;
+                const errorMessage = (error && error.message);
+                const bodyMessage = body === ":null" ? null : body;
                 return errorMessage || bodyMessage;
             }
         };
     },
 
     initializeWorkspace: function () {
-
-        var createDefaultWorkspace = function () {
+        const createDefaultWorkspace = function () {
             return this.createWorkspace({ name: this.geoserver.workspace });
         }.bind(this);
 
-        var createDefaultDatastore = function () {
+        const createDefaultDatastore = function () {
             return this.createDatastore({ name: this.geoserver.datastore });
         }.bind(this);
 
@@ -221,7 +223,6 @@ GeoserverRepository.prototype = {
     },
 
     geoserverObjectExists: function (type, config) {
-
         return this.getGeoserverObject(type, config).then(function () {
             return true;
         }).catch(function () {
@@ -230,9 +231,8 @@ GeoserverRepository.prototype = {
     },
 
     getGeoserverObject: function (type, config) {
-
-        var deferred = Q.defer();
-        var restUrl = this.resolver.get(type, config);
+        const deferred = Q.defer();
+        const restUrl = this.resolver.get(type, config);
 
         function response(err, resp, body) {
 
@@ -242,7 +242,7 @@ GeoserverRepository.prototype = {
             if (resp.statusCode !== 200) {
                 return deferred.reject(new Error(body));
             }
-            var receivedObject = JSON.parse(body);
+            const receivedObject = JSON.parse(body);
             return deferred.resolve(receivedObject);
         }
 
@@ -252,10 +252,9 @@ GeoserverRepository.prototype = {
     },
 
     updateGeoserverObject: function (type, config) {
-
-        var deferred = Q.defer();
-        var restUrl = this.resolver.get(type, config);
-        var payload = JSON.stringify(config);
+        const deferred = Q.defer();
+        const restUrl = this.resolver.get(type, config);
+        const payload = JSON.stringify(config);
 
         this.dispatcher.put({
             url: restUrl,
@@ -270,11 +269,10 @@ GeoserverRepository.prototype = {
     },
 
     createGeoserverObject: function (type, config) {
+        const deferred = Q.defer();
 
-        var deferred = Q.defer();
-
-        var restUrl = this.resolver.create(type, config);
-        var payload = JSON.stringify(config);
+        const restUrl = this.resolver.create(type, config);
+        const payload = JSON.stringify(config);
 
         this.dispatcher.post({
             url: restUrl,
@@ -291,9 +289,8 @@ GeoserverRepository.prototype = {
     },
 
     deleteGeoserverObject: function (type, config, options) {
-
-        var deferred = Q.defer();
-        var restUrl = this.resolver.delete(type, config) + "?";
+        const deferred = Q.defer();
+        let restUrl = this.resolver.delete(type, config) + "?";
 
         if (options && options.purge) {
             restUrl += "&purge=" + options.purge;

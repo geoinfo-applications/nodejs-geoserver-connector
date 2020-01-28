@@ -1,329 +1,320 @@
 "use strict";
 
-var expect = require("chai").expect;
+describe("Geoserver Styles tests", () => {
+    const expect = require("chai").expect;
 
-var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
-var TestUtils = require("../../TestUtils.js");
-var GeoserverMockServer = require("../../test-server.js");
-var config = require("../../config");
+    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const TestUtils = require("../../TestUtils.js");
+    const GeoserverMockServer = require("../../test-server.js");
+    const config = require("../../config");
 
-describe("Geoserver Styles tests", function () {
 
-    this.timeout(500);
+    const testUtils = new TestUtils(config.unit_test);
+    let gsRepository = testUtils.gsRepository;
 
-    var testUtils = new TestUtils(config.unit_test);
-    var gsRepository = testUtils.gsRepository;
+    let geoserverMockServer;
 
-    var geoserverMockServer;
+    const layer = config.layer;
+    const style = config.style;
+    let sldContent;
 
-    var layer = config.layer;
-    var style = config.style;
-    var sldContent;
-
-    before(function (done) {
+    before(async () => {
         geoserverMockServer = new GeoserverMockServer();
         geoserverMockServer.addDefaultRequestHandlers();
-        geoserverMockServer.listen(done);
+        await geoserverMockServer.listen();
     });
 
-    after(function () {
+    after(() => {
         geoserverMockServer.tearDown();
     });
 
-    beforeEach(function (done) {
+    beforeEach(async () => {
         gsRepository = new GeoserverRepository(config.unit_test);
-        gsRepository.initializeWorkspace().then(function () {
-            done();
-        });
+        await gsRepository.initializeWorkspace();
     });
 
-    afterEach(function () {
+    afterEach(() => {
         testUtils.tearDownRepository();
     });
 
-    describe("global styles", function () {
+    describe("global styles", () => {
 
-        before(function (done) {
-            testUtils.readStyleContent(function (sldFileContent) {
-                sldContent = sldFileContent;
-                done();
-            }, done);
+        before(async () => {
+            sldContent = await testUtils.readStyleContent();
         });
 
-        after(function () {
+        after(() => {
             sldContent = null;
         });
 
-        it("should fail if global style name is not defined ", function (done) {
-            gsRepository.getGlobalStyle().catch(function (error) {
+        it("should fail if global style name is not defined ", async () => {
+            try {
+                await gsRepository.getGlobalStyle();
+            } catch (error) {
                 expect(error.message).to.match(/name required/);
-                done();
-            });
+                return;
+            }
+            throw new Error("should fail");
         });
 
-        it("should get a global style ", function (done) {
-            gsRepository.getGlobalStyle(style).then(function (styleObject) {
-                expect(styleObject.name).to.be.equal(style.name);
-                done();
-            }).catch(done);
+        it("should get a global style ", async () => {
+
+            const styleObject = await gsRepository.getGlobalStyle(style);
+
+            expect(styleObject.name).to.be.equal(style.name);
         });
 
-        it("should get all global styles ", function (done) {
-            gsRepository.getGlobalStyles().then(function (styles) {
-                expect(styles).to.be.instanceof(Array);
-                expect(styles.length).to.be.equal(4);
-                expect(styles[0].name).to.be.equal("point");
-                done();
-            }).catch(done);
+        it("should get all global styles ", async () => {
+
+            const styles = await gsRepository.getGlobalStyles();
+
+            expect(styles).to.be.instanceof(Array);
+            expect(styles.length).to.be.equal(4);
+            expect(styles[0].name).to.be.equal("point");
         });
 
-        it("should return false if global style name is not defined ", function (done) {
-            gsRepository.createGlobalStyleConfiguration().catch(function (error) {
+        it("should return false if global style name is not defined ", async () => {
+            try {
+                await gsRepository.createGlobalStyleConfiguration();
+            } catch (error) {
                 expect(error.message).to.match(/name required/);
-                done();
-            });
+                return;
+            }
+            throw new Error("should fail");
         });
 
-        it("should return false if global style does not exist ", function (done) {
+        it("should return false if global style does not exist ", async () => {
 
-            gsRepository.globalStyleExists({ name: "notExistingStyle" }).then(function (exists) {
-                expect(exists).to.be.equal(false);
-                done();
-            }).catch(done);
+            const exists = await gsRepository.globalStyleExists({ name: "notExistingStyle" });
+
+            expect(exists).to.be.equal(false);
         });
 
-        it("should return true if global style exist ", function (done) {
+        it("should return true if global style exist ", async () => {
 
-            gsRepository.globalStyleExists(style).then(function (exists) {
-                expect(exists).to.be.equal(true);
-                done();
-            }).catch(done);
+            const exists = await gsRepository.globalStyleExists(style);
+
+            expect(exists).to.be.equal(true);
         });
 
-        it("should create new global style configuration", function (done) {
-
-            gsRepository.createGlobalStyleConfiguration(style).then(function () {
-                done();
-            }).catch(done);
+        it("should create new global style configuration", async () => {
+            await gsRepository.createGlobalStyleConfiguration(style);
         });
 
-        it("should fail uploading global style if name is not defined", function (done) {
+        it("should fail uploading global style if name is not defined", async () => {
 
-            gsRepository.uploadGlobalStyleContent({ sldBody: "<xml />" })
-                .catch(function (error) {
-                    expect(error.message).to.match(/content required/);
-                    done();
-                }).catch(done);
-        });
-
-        it("should fail uploading global style if sld body is not defined", function (done) {
-
-            gsRepository.uploadGlobalStyleContent(style).catch(function (error) {
+            try {
+                await gsRepository.uploadGlobalStyleContent({ sldBody: "<xml />" });
+            } catch (error) {
                 expect(error.message).to.match(/content required/);
-                done();
-            }).catch(done);
+                return;
+            }
+
+            throw new Error("should fail");
         });
 
-        it("should fail uploading global style if config is not defined", function (done) {
+        it("should fail uploading global style if sld body is not defined", async () => {
 
-            gsRepository.uploadGlobalStyleContent()
-                .catch(function (error) {
-                    expect(error.message).to.match(/content required/);
-                    done();
-                }).catch(done);
+            try {
+                await gsRepository.uploadGlobalStyleContent(style);
+            } catch (error) {
+                expect(error.message).to.match(/content required/);
+                return;
+            }
+            throw new Error("should fail");
         });
 
-        it("should replace existing global style SLD file", function (done) {
+        it("should fail uploading global style if config is not defined", async () => {
+            try {
+                await gsRepository.uploadGlobalStyleContent();
+            } catch (error) {
+                expect(error.message).to.match(/content required/);
+                return;
+            }
+            throw new Error("should fail");
+        });
 
-            var styleConfig = {
+        it("should replace existing global style SLD file", async () => {
+            const styleConfig = {
                 name: style.name,
                 sldBody: sldContent
             };
 
-            gsRepository.uploadGlobalStyleContent(styleConfig).then(function (result) {
-                expect(result).to.be.equal(true);
-                done();
-            }).catch(done);
+            const result = await gsRepository.uploadGlobalStyleContent(styleConfig);
+
+            expect(result).to.be.equal(true);
         });
 
-        it("should create new global style configuration and upload SLD file content ", function (done) {
-
-            var styleConfig = {
+        it("should create new global style configuration and upload SLD file content ", async () => {
+            const styleConfig = {
                 name: style.name,
                 sldBody: sldContent
             };
 
-            gsRepository.createGlobalStyle(styleConfig).then(function (result) {
-                expect(result).to.be.equal(true);
-                done();
-            }).catch(done);
+            const result = await gsRepository.createGlobalStyle(styleConfig);
+
+            expect(result).to.be.equal(true);
         });
 
-        it("should delete global style", function (done) {
-            gsRepository.deleteGlobalStyle(style).then(function () {
-                done();
-            });
+        it("should delete global style", async () => {
+            await gsRepository.deleteGlobalStyle(style);
         });
 
     });
 
-    describe("workspace styles", function () {
+    describe("workspace styles", () => {
 
-        before(function (done) {
-            testUtils.readStyleContent(function (sldFileContent) {
-                sldContent = sldFileContent;
-                done();
-            }, done);
+        before(async () => {
+            sldContent = await testUtils.readStyleContent();
         });
 
-        after(function () {
+        after(() => {
             sldContent = null;
         });
 
-        it("should fail if workspace style name is not defined", function (done) {
-            gsRepository.getWorkspaceStyle().catch(function (error) {
+        it("should fail if workspace style name is not defined", async () => {
+            try {
+                await gsRepository.getWorkspaceStyle();
+            } catch (error) {
                 expect(error.message).to.match(/name required/);
-                done();
-            }).catch(done);
+                return;
+            }
+            throw new Error("should fail");
         });
 
-        it("should get workspace style ", function (done) {
-            gsRepository.getWorkspaceStyle(style).then(function (workspaceStyle) {
-                expect(workspaceStyle).to.be.instanceof(Object);
-                expect(workspaceStyle.name).to.be.equal(style.name);
-                expect(workspaceStyle.filename).to.be.equal(style.filename);
-                done();
-            }).catch(done);
+        it("should get workspace style ", async () => {
+
+            const workspaceStyle = await gsRepository.getWorkspaceStyle(style);
+
+            expect(workspaceStyle).to.be.instanceof(Object);
+            expect(workspaceStyle.name).to.be.equal(style.name);
+            expect(workspaceStyle.filename).to.be.equal(style.filename);
         });
 
-        it("should fetch all workspace styles ", function (done) {
+        it("should fetch all workspace styles ", async () => {
 
-            gsRepository.getWorkspaceStyles().then(function (styles) {
-                expect(styles).to.be.instanceof(Array);
-                expect(styles.length).to.be.equal(4);
-                expect(styles[0].name).to.be.equal("point");
-                done();
-            }).catch(done);
+            const styles = await gsRepository.getWorkspaceStyles();
+
+            expect(styles).to.be.instanceof(Array);
+            expect(styles.length).to.be.equal(4);
+            expect(styles[0].name).to.be.equal("point");
         });
 
-        it("should return false if workspace style does not exist ", function (done) {
+        it("should return false if workspace style does not exist ", async () => {
 
-            gsRepository.workspaceStyleExists({ name: "notExistingStyle" }).then(function (exists) {
-                expect(exists).to.be.equal(false);
-                done();
-            }).catch(done);
+            const exists = await gsRepository.workspaceStyleExists({ name: "notExistingStyle" });
+
+            expect(exists).to.be.equal(false);
         });
 
-        it("should return true if workspace style exists ", function (done) {
+        it("should return true if workspace style exists ", async () => {
 
-            gsRepository.workspaceStyleExists(style).then(function (exists) {
-                expect(exists).to.be.equal(true);
-                done();
-            }).catch(done);
+            const exists = await gsRepository.workspaceStyleExists(style);
+
+            expect(exists).to.be.equal(true);
         });
 
-        it("should return false if workspace style name is not defined ", function (done) {
-            gsRepository.createWorkspaceStyleConfiguration().catch(function (error) {
+        it("should return false if workspace style name is not defined ", async () => {
+            try {
+                await gsRepository.createWorkspaceStyleConfiguration();
+            } catch (error) {
                 expect(error.message).to.match(/name required/);
-                done();
-            });
+                return;
+            }
+            throw new Error("should fail");
         });
 
-        it("should create new workspace style ", function (done) {
-            gsRepository.createWorkspaceStyleConfiguration(style).then(function () {
-                done();
-            }).catch(done);
+        it("should create new workspace style ", async () => {
+            await gsRepository.createWorkspaceStyleConfiguration(style);
         });
 
-        it("should fail uploading workspace style if name is not defined", function (done) {
-
-            gsRepository.uploadWorkspaceStyleContent({ sldBody: "<xml />" })
-                .catch(function (error) {
-                    expect(error.message).to.match(/content required/);
-                    done();
-                });
-        });
-
-        it("should fail uploading workspace style if SLD body is not defined", function (done) {
-
-            gsRepository.uploadWorkspaceStyleContent(style).catch(function (error) {
+        it("should fail uploading workspace style if name is not defined", async () => {
+            try {
+                await gsRepository.uploadWorkspaceStyleContent({ sldBody: "<xml />" });
+            } catch (error) {
                 expect(error.message).to.match(/content required/);
-                done();
-            });
+                return;
+            }
+            throw new Error("should fail");
         });
 
-        it("should fail uploading workspace style if config is not defined", function (done) {
+        it("should fail uploading workspace style if SLD body is not defined", async () => {
 
-            gsRepository.uploadWorkspaceStyleContent()
-                .catch(function (error) {
-                    expect(error.message).to.match(/content required/);
-                    done();
-                });
+            try {
+                await gsRepository.uploadWorkspaceStyleContent(style);
+            } catch (error) {
+                expect(error.message).to.match(/content required/);
+                return;
+            }
+            throw new Error("should fail");
         });
 
-        it("should replace existing workspace style SLD file", function (done) {
+        it("should fail uploading workspace style if config is not defined", async () => {
+            try {
+                await gsRepository.uploadWorkspaceStyleContent();
+            } catch (error) {
+                expect(error.message).to.match(/content required/);
+                return;
+            }
+            throw new Error("should fail");
+        });
 
-            var styleConfig = {
+        it("should replace existing workspace style SLD file", async () => {
+            const styleConfig = {
                 name: style.name,
                 sldBody: sldContent
             };
 
-            gsRepository.uploadWorkspaceStyleContent(styleConfig).then(function (result) {
-                expect(result).to.be.equal(true);
-                done();
-            }).catch(done);
+            const result = await gsRepository.uploadWorkspaceStyleContent(styleConfig);
+
+            expect(result).to.be.equal(true);
         });
 
-        it("should create new workspace style configuration and upload SLD file content ", function (done) {
-
-            var styleConfig = {
+        it("should create new workspace style configuration and upload SLD file content ", async () => {
+            const styleConfig = {
                 name: style.name,
                 sldBody: sldContent
             };
 
-            gsRepository.createWorkspaceStyle(styleConfig).then(function (result) {
-                expect(result).to.be.equal(true);
-                done();
-            }).catch(done);
+            const result = await gsRepository.createWorkspaceStyle(styleConfig);
+
+            expect(result).to.be.equal(true);
         });
 
-        it("should delete workspace style ", function (done) {
-            gsRepository.deleteWorkspaceStyle(style).then(function () {
-                done();
-            });
+        it("should delete workspace style ", async () => {
+            await gsRepository.deleteWorkspaceStyle(style);
         });
 
     });
 
-    describe("layer styles", function () {
+    describe("layer styles", () => {
 
-        it("should fail if layer name is not defined", function (done) {
-            gsRepository.getLayerStyles().catch(function (error) {
+        it("should fail if layer name is not defined", async () => {
+            try {
+                await gsRepository.getLayerStyles();
+            } catch (error) {
                 expect(error.message).to.match(/name required/);
-                done();
-            }).catch(done);
+                return;
+            }
+            throw new Error("should fail");
         });
 
-        it("should get default layer style name", function (done) {
-            gsRepository.getLayerDefaultStyle(layer).then(function (defaultStyle) {
-                expect(defaultStyle.name).to.be.equal(layer.defaultStyleName);
-                done();
-            }).catch(done);
+        it("should get default layer style name", async () => {
+            const defaultStyle = await gsRepository.getLayerDefaultStyle(layer);
+
+            expect(defaultStyle.name).to.be.equal(layer.defaultStyleName);
         });
 
-        it("should get all layer styles ", function (done) {
-            gsRepository.getLayerStyles(layer).then(function (styles) {
-                expect(styles).to.be.instanceof(Array);
-                expect(styles.length).to.be.equal(4);
-                expect(styles[0].name).to.be.equal("point");
-                done();
-            }).catch(done);
+        it("should get all layer styles ", async () => {
+            const styles = await gsRepository.getLayerStyles(layer);
+
+            expect(styles).to.be.instanceof(Array);
+            expect(styles.length).to.be.equal(4);
+            expect(styles[0].name).to.be.equal("point");
         });
 
-        it("should update default layer style ", function (done) {
-            gsRepository.setLayerDefaultStyle(layer, style.name).then(function () {
-                done();
-            }).catch(done);
+        it("should update default layer style ", async () => {
+            await gsRepository.setLayerDefaultStyle(layer, style.name);
         });
 
     });

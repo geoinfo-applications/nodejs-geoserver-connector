@@ -1,31 +1,30 @@
 "use strict";
 
-describe("Geoserver Layer Group Test ", function () {
+// eslint-disable-next-line max-statements
+describe("Geoserver Layer Group Test ", () => {
 
-    var Q = require("q");
-    var _ = require("underscore");
-    var chai = require("chai");
-    var expect = chai.expect;
-    var sinon = require("sinon");
-    var sinonChai = require("sinon-chai");
+    const _ = require("underscore");
+    const chai = require("chai");
+    const expect = chai.expect;
+    const sinon = require("sinon");
+    const sinonChai = require("sinon-chai");
     chai.use(sinonChai);
 
-    this.timeout(50);
-    var config = require("../../config");
-    var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const config = require("../../config");
+    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
 
-    var geoserverRepository, geoserverMockServer, type;
-    var layerGroupConfig, allLayerNames;
+    let geoserverRepository, geoserverMockServer, type;
+    let layerGroupConfig, allLayerNames;
 
-    before(function () {
+    before(() => {
         geoserverMockServer = sinon.fakeServer.create();
     });
 
-    after(function () {
+    after(() => {
         geoserverMockServer.restore();
     });
 
-    beforeEach(function (done) {
+    beforeEach(() => {
         layerGroupConfig = {
             id: 227,
             name: "alpprodukte",
@@ -45,44 +44,41 @@ describe("Geoserver Layer Group Test ", function () {
 
         geoserverRepository = new GeoserverRepository(config.unit_test);
 
-        geoserverRepository.isGeoserverRunning = sinon.stub().returns(
-            new Q(JSON.stringify({ about: { resource: {} } }))
-        );
-        geoserverRepository.initializeWorkspace = sinon.stub().returns(new Q());
-        type = geoserverRepository.types.LAYERGROUP;
+        sinon.stub(geoserverRepository, GeoserverRepository.prototype.isGeoserverRunning.name);
+        geoserverRepository.isGeoserverRunning.returns(Promise.resolve(JSON.stringify({ about: { resource: {} } })));
 
-        geoserverRepository.initializeWorkspace().then(function () {
-            done();
-        }).catch(done);
+        sinon.stub(geoserverRepository, GeoserverRepository.prototype.initializeWorkspace.name);
+        geoserverRepository.initializeWorkspace.returns(Promise.resolve());
+
+        type = geoserverRepository.types.LAYERGROUP;
     });
 
-    afterEach(function () {
+    afterEach(() => {
         geoserverRepository = null;
     });
 
-    it("should check wms layer existance", function (done) {
-        geoserverRepository.geoserverObjectExists = sinon.stub().returns(new Q(true));
-        geoserverRepository.layerGroupExists(layerGroupConfig).then(function (result) {
-            expect(geoserverRepository.geoserverObjectExists).to.have.been.calledWith(type, layerGroupConfig);
-            expect(result).to.be.eql(true);
-            done();
-        }).catch(done);
+    it("should check wms layer existance", async () => {
+        geoserverRepository.geoserverObjectExists = sinon.stub().returns(Promise.resolve(true));
+
+        const result = await geoserverRepository.layerGroupExists(layerGroupConfig);
+
+        expect(geoserverRepository.geoserverObjectExists).to.have.been.calledWith(type, layerGroupConfig);
+        expect(result).to.be.eql(true);
     });
 
-    it("should get layer group", function (done) {
-        var layerGroupDetails = { layerGroup: layerGroupConfig };
-        geoserverRepository.getGeoserverObject = sinon.stub().returns(new Q(layerGroupDetails));
+    it("should get layer group", async () => {
+        const layerGroupDetails = { layerGroup: layerGroupConfig };
+        geoserverRepository.getGeoserverObject = sinon.stub().returns(Promise.resolve(layerGroupDetails));
 
-        geoserverRepository.getLayerGroup(layerGroupConfig).then(function (result) {
-            expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, layerGroupConfig);
-            expect(result).to.be.eql(layerGroupDetails);
-            done();
-        }).catch(done);
+        const result = await geoserverRepository.getLayerGroup(layerGroupConfig);
+
+        expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, layerGroupConfig);
+        expect(result).to.be.eql(layerGroupDetails);
     });
 
-    it("should return layer group request object", function () {
+    it("should return layer group request object", () => {
 
-        var layerGroupRequestObject = geoserverRepository.layerGroupRequestObject(layerGroupConfig, allLayerNames);
+        const layerGroupRequestObject = geoserverRepository.layerGroupRequestObject(layerGroupConfig, allLayerNames);
 
         expect(layerGroupRequestObject).to.have.all.keys("layerGroup", "srs", "projectionPolicy");
         expect(layerGroupRequestObject.layerGroup).to.have.all.keys("name", "title", "layers", "styles");
@@ -93,51 +89,52 @@ describe("Geoserver Layer Group Test ", function () {
         expect(layerGroupRequestObject.layerGroup.styles.style[0]).to.be.eql("");
     });
 
-    describe("resolver", function () {
-        beforeEach(function () {
+    describe("resolver", () => {
+
+        beforeEach(() => {
             layerGroupConfig.layerName = "alpprodukte";
         });
 
-        it("should return correct url create", function () {
-            var correctCreateUrl = geoserverRepository.resolver.create(type, layerGroupConfig).split(["/"]);
+        it("should return correct url create", () => {
+            const correctCreateUrl = geoserverRepository.resolver.create(type, layerGroupConfig).split(["/"]);
 
             expect(_.contains(correctCreateUrl, "layergroups")).to.be.eql(true);
         });
 
-        it("should return correct url with get", function () {
-            var correctGetUrl = geoserverRepository.resolver.get(type, layerGroupConfig).split(["/"]);
+        it("should return correct url with get", () => {
+            const correctGetUrl = geoserverRepository.resolver.get(type, layerGroupConfig).split(["/"]);
 
             expect(_.contains(correctGetUrl, "layergroups")).to.be.eql(true);
             expect(_.contains(correctGetUrl, "alpprodukte")).to.be.eql(true);
         });
     });
 
-    describe("create layer group", function () {
-        beforeEach(function () {
+    describe("create layer group", () => {
+
+        beforeEach(() => {
             layerGroupConfig.layerName = "alpprodukte";
             geoserverRepository.layerGroupExists = sinon.stub();
             geoserverRepository.issueLayerGroupCreateRequest = sinon.stub();
         });
 
-        it("should create new layer group", function (done) {
-            geoserverRepository.layerGroupExists.returns(new Q(false));
+        it("should create new layer group", async () => {
+            geoserverRepository.layerGroupExists.returns(Promise.resolve(false));
 
-            geoserverRepository.createLayerGroup(layerGroupConfig, allLayerNames).then(function () {
-                expect(geoserverRepository.issueLayerGroupCreateRequest).callCount(1);
-                done();
-            }).catch(done);
+            await geoserverRepository.createLayerGroup(layerGroupConfig, allLayerNames);
+
+            expect(geoserverRepository.issueLayerGroupCreateRequest).callCount(1);
         });
 
-        it("should not create new layer group", function () {
-            geoserverRepository.layerGroupExists.returns(new Q(true));
+        it("should not create new layer group", async () => {
+            geoserverRepository.layerGroupExists.returns(Promise.resolve(true));
 
-            var promise = geoserverRepository.createLayerGroup(layerGroupConfig, allLayerNames);
-
-            return promise.then(function () {
-                expect(promise.isRejected()).to.be.eql(true);
-            }).catch(function (error) {
+            try {
+                await geoserverRepository.createLayerGroup(layerGroupConfig, allLayerNames);
+            } catch (error) {
                 expect(error).to.match(/already exists/);
-            });
+                return;
+            }
+            throw new Error("should fail");
         });
     });
 });

@@ -1,226 +1,190 @@
 "use strict";
 
-var expect = require("chai").expect;
+describe("Geoserver repository unit tests", () => {
 
-var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
-var TestUtils = require("../../TestUtils.js");
-var GeoserverMockServer = require("../../test-server.js");
-var config = require("../../config");
+    const expect = require("chai").expect;
 
-describe("Geoserver repository unit tests", function () {
+    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const TestUtils = require("../../TestUtils.js");
+    const GeoserverMockServer = require("../../test-server.js");
+    const config = require("../../config");
 
-    this.timeout(500);
+    const testUtils = new TestUtils(config.unit_test);
+    let gsRepository = testUtils.gsRepository;
 
-    var testUtils = new TestUtils(config.unit_test);
-    var gsRepository = testUtils.gsRepository;
+    let geoserverMockServer;
 
-    var geoserverMockServer;
+    describe("testing offline Geoserver handling ", () => {
 
-    describe("testing offline Geoserver handling ", function () {
-
-        before(function (done) {
+        before(async () => {
             geoserverMockServer = new GeoserverMockServer();
             geoserverMockServer.addTimeoutRequestHandler();
-            geoserverMockServer.listen(done);
+            await geoserverMockServer.listen();
         });
 
-        beforeEach(function () {
+        beforeEach(() => {
             testUtils.createRepository();
         });
 
-        afterEach(function () {
+        afterEach(() => {
             testUtils.tearDownRepository();
         });
 
-        after(function () {
+        after(() => {
             geoserverMockServer.tearDown();
         });
 
-        it("repository should be disabled if Geoserver instance is not initialized ", function (done) {
+        it("repository should be disabled if Geoserver instance is not initialized ", () => {
             expect(gsRepository.isEnabled).not.to.be.equal(true);
-            done();
         });
 
-        it("should handle repository initialization timeout ", function (done) {
+        it("should handle repository initialization timeout ", async () => {
 
             gsRepository.dispatcher.timeout = 1;
 
-            gsRepository.initializeWorkspace().then(function () {
-                done(new Error("repository shouldn't be initialized "));
-            }).catch(function (err) {
+            try {
+                await gsRepository.initializeWorkspace();
+            } catch (err) {
                 expect(gsRepository.isEnabled).to.be.equal(false);
                 expect(err.message).to.match(/ETIMEDOUT/);
-                done();
-            });
+                return;
+            }
+
+            throw new Error("repository shouldn't be initialized ");
         });
     });
 
-    describe("testing online Geoserver access", function () {
+    describe("testing online Geoserver access", () => {
 
-        var layer = config.layer;
-        var nonExistingLayer = config.nonExistingLayer;
+        const layer = config.layer;
+        const nonExistingLayer = config.nonExistingLayer;
 
-        before(function (done) {
+        before(async () => {
             geoserverMockServer = new GeoserverMockServer();
             geoserverMockServer.addDefaultRequestHandlers();
-            geoserverMockServer.listen(done);
+            await geoserverMockServer.listen();
         });
 
-        beforeEach(function () {
+        beforeEach(() => {
             gsRepository = new GeoserverRepository(config.unit_test);
         });
 
-        afterEach(function () {
+        afterEach(() => {
             testUtils.tearDownRepository();
         });
 
-        after(function () {
+        after(() => {
             geoserverMockServer.tearDown();
         });
 
-        describe("testing Geoserver config", function () {
+        describe("testing Geoserver config", () => {
 
-            it("should correctly add admin path to baseUrl if supplied", function () {
+            it("should correctly add admin path to baseUrl if supplied", () => {
 
-                var gsConfig = config.unit_test.geoserver;
-                var expectedAdminUrl = "http://" + gsConfig.host + ":" + gsConfig.port + "/" +
+                const gsConfig = config.unit_test.geoserver;
+                const expectedAdminUrl = "http://" + gsConfig.host + ":" + gsConfig.port + "/" +
                     gsConfig.context + "/" + gsConfig.adminPath + "/";
 
                 expect(gsRepository.baseURL).to.be.equal(expectedAdminUrl);
             });
         });
 
-        describe("testing Geoserver access functionalites", function () {
+        describe("testing Geoserver access functionalites", () => {
 
-            it("should correctly fetch Geoserver details", function (done) {
-
-                gsRepository.isGeoserverRunning().then(function () {
-                    expect(gsRepository.isEnabled).to.be.equal(true);
-                    done();
-                }).catch(done);
+            it("should correctly fetch Geoserver details", async () => {
+                await gsRepository.isGeoserverRunning();
+                expect(gsRepository.isEnabled).to.be.equal(true);
             });
 
-            it("should correctly initialize new Geoserver instance", function (done) {
+            it("should correctly initialize new Geoserver instance", async () => {
+                await gsRepository.initializeWorkspace();
 
-                gsRepository.initializeWorkspace().then(function () {
-                    expect(gsRepository.isEnabled).to.be.equal(true);
-                    expect(gsRepository.geoserverDetails["@name"]).to.be.equal("GeoServer");
-                    done();
-                }).catch(done);
+                expect(gsRepository.isEnabled).to.be.equal(true);
+                expect(gsRepository.geoserverDetails["@name"]).to.be.equal("GeoServer");
             });
 
-            it("should reload catalog", function (done) {
-
-                gsRepository.reloadCatalog().then(function () {
-                    done();
-                }).catch(done);
+            it("should reload catalog", async () => {
+                await gsRepository.reloadCatalog();
             });
 
-            it("should reset cache", function (done) {
-
-                gsRepository.resetCache().then(function () {
-                    done();
-                }).catch(done);
+            it("should reset cache", async () => {
+                await gsRepository.resetCache();
             });
         });
 
-        describe("testing Geoserver CRUD methods", function () {
+        describe("testing Geoserver CRUD methods", () => {
 
-            beforeEach(function (done) {
+            beforeEach(async () => {
                 gsRepository = new GeoserverRepository(config.unit_test);
-                gsRepository.initializeWorkspace().then(function () {
-                    done();
-                });
+                await gsRepository.initializeWorkspace();
             });
 
-            it("should fetch workspace ", function (done) {
-
-                gsRepository.workspaceExists().then(function () {
-                    done();
-                }).catch(done);
+            it("should fetch workspace ", async () => {
+                await gsRepository.workspaceExists();
             });
 
-            it("should fetch datastore ", function (done) {
-
-                gsRepository.datastoreExists().then(function () {
-                    done();
-                }).catch(done);
+            it("should fetch datastore ", async () => {
+                await gsRepository.datastoreExists();
             });
 
-            it("should return true if feature type exists", function (done) {
-
-                gsRepository.featureTypeExists(layer).then(function () {
-                    done();
-                }).catch(done);
+            it("should return true if feature type exists", async () => {
+                await gsRepository.featureTypeExists(layer);
             });
 
-            it("should get feature type details ", function (done) {
-
-                gsRepository.getFeatureType(layer).then(function () {
-                    done();
-                }).catch(done);
+            it("should get feature type details ", async () => {
+                await gsRepository.getFeatureType(layer);
             });
 
-            it("should delete feature type ", function (done) {
-
-                gsRepository.deleteFeatureType(layer).then(function () {
-                    done();
-                }).catch(done);
+            it("should delete feature type ", async () => {
+                await gsRepository.deleteFeatureType(layer);
             });
 
-            it("should fail renaming feature type if new name is not supplied ", function (done) {
-
-                gsRepository.renameFeatureType(layer).catch(function (error) {
+            it("should fail renaming feature type if new name is not supplied ", async () => {
+                try {
+                    await gsRepository.renameFeatureType(layer);
+                } catch (error) {
                     expect(error.message).to.match(/name required/);
-                    done();
-                });
+                    return;
+                }
+
+                throw new Error("should fail");
             });
 
-            it("should rename feature type ", function (done) {
-
-                gsRepository.renameFeatureType(layer, "newLayerName").then(function () {
-                    done();
-                }).catch(done);
+            it("should rename feature type ", async () => {
+                await gsRepository.renameFeatureType(layer, "newLayerName");
             });
 
-            it("should recalculate feature type BBOX ", function (done) {
-                gsRepository.recalculateFeatureTypeBBox(layer).then(function () {
-                    done();
-                }).catch(done);
+            it("should recalculate feature type BBOX ", async () => {
+                await gsRepository.recalculateFeatureTypeBBox(layer);
             });
 
-            it("should get layer details using /layers/layerName format", function (done) {
+            it("should get layer details using /layers/layerName format", async () => {
 
-                gsRepository.getLayer(layer).then(function (layerDetails) {
-                    expect(layerDetails.name).to.be.equal(layer.name);
-                    done();
-                }).catch(done);
+                const layerDetails = await gsRepository.getLayer(layer);
+
+                expect(layerDetails.name).to.be.equal(layer.name);
             });
 
-            it("should get layer details using /layers/workspace:layerName format ", function (done) {
+            it("should get layer details using /layers/workspace:layerName format ", async () => {
+                const layerWithWorkspace = { name: layer.name, wsName: "testWorkspace:" };
 
-                var layerWithWorkspace = { name: layer.name, wsName: "testWorkspace:" };
+                const layerDetails = await gsRepository.getLayer(layerWithWorkspace);
 
-                gsRepository.getLayer(layerWithWorkspace).then(function (layerDetails) {
-                    expect(layerDetails.name).to.be.equal(layer.name);
-                    done();
-                }).catch(done);
+                expect(layerDetails.name).to.be.equal(layer.name);
             });
 
-            it("should return false if layer does not exist ", function (done) {
+            it("should return false if layer does not exist ", async () => {
 
-                gsRepository.layerExists(nonExistingLayer).then(function (exists) {
-                    expect(exists).to.be.equal(false);
-                    done();
-                }).catch(done);
+                const exists = await gsRepository.layerExists(nonExistingLayer);
+
+                expect(exists).to.be.equal(false);
             });
 
-            it("should return true if layer exist ", function (done) {
+            it("should return true if layer exist ", async () => {
 
-                gsRepository.layerExists(layer).then(function (exists) {
-                    expect(exists).to.be.equal(true);
-                    done();
-                }).catch(done);
+                const exists = await gsRepository.layerExists(layer);
+
+                expect(exists).to.be.equal(true);
             });
 
         });

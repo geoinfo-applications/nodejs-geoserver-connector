@@ -1,32 +1,31 @@
 "use strict";
 
 
-describe("Geoserver Wmts Layer Test ", function () {
+// eslint-disable-next-line max-statements
+describe("Geoserver Wmts Layer Test ", () => {
 
-    var Q = require("q");
-    var _ = require("underscore");
-    var chai = require("chai");
-    var expect = chai.expect;
-    var sinon = require("sinon");
-    var sinonChai = require("sinon-chai");
+    const _ = require("underscore");
+    const chai = require("chai");
+    const expect = chai.expect;
+    const sinon = require("sinon");
+    const sinonChai = require("sinon-chai");
     chai.use(sinonChai);
 
-    this.timeout(50);
-    var config = require("../../config");
-    var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const config = require("../../config");
+    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
 
-    var geoserverRepository, geoserverMockServer, type, layerSearchingParameters, wmtsLayerSearchingParameters;
-    var wmtsLayerConfig;
+    let geoserverRepository, geoserverMockServer, type, layerSearchingParameters, wmtsLayerSearchingParameters;
+    let wmtsLayerConfig;
 
-    before(function () {
+    before(() => {
         geoserverMockServer = sinon.fakeServer.create();
     });
 
-    after(function () {
+    after(() => {
         geoserverMockServer.restore();
     });
 
-    beforeEach(function (done) {
+    beforeEach(async () => {
         wmtsLayerConfig = {
             id: 227,
             name: "produkte",
@@ -54,127 +53,116 @@ describe("Geoserver Wmts Layer Test ", function () {
 
         geoserverRepository = new GeoserverRepository(config.unit_test);
 
-        geoserverRepository.isGeoserverRunning = sinon.stub().returns(
-            new Q(JSON.stringify({ about: { resource: {} } }))
-        );
-        geoserverRepository.initializeWorkspace = sinon.stub().returns(new Q());
+        sinon.stub(geoserverRepository, GeoserverRepository.prototype.isGeoserverRunning.name);
+        geoserverRepository.isGeoserverRunning.returns(Promise.resolve(JSON.stringify({ about: { resource: {} } })));
+
+        sinon.stub(geoserverRepository, GeoserverRepository.prototype.initializeWorkspace.name);
+        geoserverRepository.initializeWorkspace.returns(Promise.resolve());
 
         type = geoserverRepository.types.WMTSLAYER;
-
-        geoserverRepository.initializeWorkspace().then(function () {
-            done();
-        }).catch(done);
     });
 
-    afterEach(function () {
+    afterEach(() => {
         geoserverRepository = null;
     });
 
-    describe("testing wmts layer existance", function () {
+    describe("testing wmts layer existance", () => {
 
-        beforeEach(function () {
+        beforeEach(() => {
             geoserverRepository.geoserverObjectExists = sinon.stub();
 
             layerSearchingParameters = { name: wmtsLayerConfig.layerName, workspace: geoserverRepository.geoserver.workspace };
             wmtsLayerSearchingParameters = wmtsLayerConfig;
         });
 
-        it("should return that layer exist", function (done) {
-            geoserverRepository.geoserverObjectExists.onFirstCall().returns(Q.when(true));
-            geoserverRepository.geoserverObjectExists.onSecondCall().returns(Q.when(true));
+        it("should return that layer exist", async () => {
+            geoserverRepository.geoserverObjectExists.onFirstCall().returns(Promise.resolve(true));
+            geoserverRepository.geoserverObjectExists.onSecondCall().returns(Promise.resolve(true));
 
-            geoserverRepository.wmtsLayerExists(layerSearchingParameters, wmtsLayerSearchingParameters).then(function (result) {
-                expect(result).to.be.eql(true);
-                done();
-            }).catch(done);
+            const result = await geoserverRepository.wmtsLayerExists(layerSearchingParameters, wmtsLayerSearchingParameters);
+
+            expect(result).to.be.eql(true);
         });
 
-        it("should return that layer don't exist", function (done) {
-            geoserverRepository.geoserverObjectExists.onFirstCall().returns(Q.when(false));
-            geoserverRepository.geoserverObjectExists.onSecondCall().returns(Q.when(true));
+        it("should return that layer don't exist", async () => {
+            geoserverRepository.geoserverObjectExists.onFirstCall().returns(Promise.resolve(false));
+            geoserverRepository.geoserverObjectExists.onSecondCall().returns(Promise.resolve(true));
 
-            geoserverRepository.wmtsLayerExists(layerSearchingParameters, wmtsLayerSearchingParameters).then(function (result) {
-                expect(result).to.be.eql(false);
-                done();
-            }).catch(done);
+            const result = await geoserverRepository.wmtsLayerExists(layerSearchingParameters, wmtsLayerSearchingParameters);
+
+            expect(result).to.be.eql(false);
         });
     });
 
-    describe("make sure layer exists", function () {
+    describe("make sure layer exists", () => {
 
-        beforeEach(function () {
+        beforeEach(() => {
             geoserverRepository.geoserverObjectExists = sinon.stub();
 
             layerSearchingParameters = { name: wmtsLayerConfig.layerName, workspace: geoserverRepository.geoserver.workspace };
             wmtsLayerSearchingParameters = wmtsLayerConfig;
         });
 
-        it("should return that layer exist", function (done) {
-            geoserverRepository.geoserverObjectExists.onFirstCall().returns(Q.when(true));
-            geoserverRepository.geoserverObjectExists.onSecondCall().returns(Q.when(true));
+        it("should return that layer exist", async () => {
+            geoserverRepository.geoserverObjectExists.onFirstCall().returns(Promise.resolve(true));
+            geoserverRepository.geoserverObjectExists.onSecondCall().returns(Promise.resolve(true));
 
-            geoserverRepository.wmtsLayerExists(layerSearchingParameters, wmtsLayerSearchingParameters).then(function (result) {
-                expect(result).to.be.eql(true);
-                done();
-            }).catch(done);
+            const result = await geoserverRepository.wmtsLayerExists(layerSearchingParameters, wmtsLayerSearchingParameters);
+
+            expect(result).to.be.eql(true);
         });
 
-        it("should return that layer don't exist", function (done) {
-            geoserverRepository.geoserverObjectExists.onFirstCall().returns(Q.when(false));
-            geoserverRepository.geoserverObjectExists.onSecondCall().returns(Q.when(true));
+        it("should return that layer don't exist", async () => {
+            geoserverRepository.geoserverObjectExists.onFirstCall().returns(Promise.resolve(false));
+            geoserverRepository.geoserverObjectExists.onSecondCall().returns(Promise.resolve(true));
 
-            geoserverRepository.wmtsLayerExists(layerSearchingParameters, wmtsLayerSearchingParameters).then(function (result) {
-                expect(result).to.be.eql(false);
-                done();
-            }).catch(done);
+            const result = await geoserverRepository.wmtsLayerExists(layerSearchingParameters, wmtsLayerSearchingParameters);
+
+            expect(result).to.be.eql(false);
         });
     });
 
-    it("should get wmts Layer", function (done) {
+    it("should get wmts Layer", async () => {
         wmtsLayerConfig.layerName = "ch.blw.alpprodukte";
+        const wmtsLayerDetails = { wmtsLayer: wmtsLayerConfig };
+        geoserverRepository.getGeoserverObject = sinon.stub().returns(Promise.resolve(wmtsLayerDetails));
 
-        var wmtsLayerDetails = { wmtsLayer: wmtsLayerConfig };
+        const result = await geoserverRepository.getWmtsLayer(wmtsLayerConfig);
 
-        geoserverRepository.getGeoserverObject = sinon.stub().returns(new Q(wmtsLayerDetails));
-
-        geoserverRepository.getWmtsLayer(wmtsLayerConfig).then(function (result) {
-            expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, wmtsLayerConfig);
-            expect(result).to.be.eql(wmtsLayerDetails);
-            done();
-        }).catch(done);
+        expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, wmtsLayerConfig);
+        expect(result).to.be.eql(wmtsLayerDetails);
     });
 
-    describe("get wmts layer request parameters", function () {
+    describe("get wmts layer request parameters", () => {
 
-        it("should return request parameters without special layer list", function (done) {
-            geoserverRepository.getWmtsLayerRequestParameters(wmtsLayerConfig).then(function (result) {
-                expect(result.length).to.be.eql(wmtsLayerConfig.layerNames.split(",").length);
-                expect(result[0] && result[1]).to.have.all.keys("wmtsLayerRequestParameters", "layerRequestParameters");
-                expect(result[0].layerRequestParameters && result[1].layerRequestParameters).to.have.all.keys("name", "workspace");
-                expect(result[0].wmtsLayerRequestParameters.layerName).to.be.eql("ch_ch_blw_alpprodukte");
-                expect(result[1].wmtsLayerRequestParameters.layerName).to.be.eql("ch_ch_blw_bergprodukte");
-                done();
-            }).catch(done);
+        it("should return request parameters without special layer list", async () => {
+
+            const result = await geoserverRepository.getWmtsLayerRequestParameters(wmtsLayerConfig);
+
+            expect(result.length).to.be.eql(wmtsLayerConfig.layerNames.split(",").length);
+            expect(result[0] && result[1]).to.have.all.keys("wmtsLayerRequestParameters", "layerRequestParameters");
+            expect(result[0].layerRequestParameters && result[1].layerRequestParameters).to.have.all.keys("name", "workspace");
+            expect(result[0].wmtsLayerRequestParameters.layerName).to.be.eql("ch_ch_blw_alpprodukte");
+            expect(result[1].wmtsLayerRequestParameters.layerName).to.be.eql("ch_ch_blw_bergprodukte");
         });
 
-        it("should return request parameters with special layer list", function (done) {
-            var layerList = ["ch.are.alpenkonvention"];
+        it("should return request parameters with special layer list", async () => {
+            const layerList = ["ch.are.alpenkonvention"];
 
-            geoserverRepository.getWmtsLayerRequestParameters(wmtsLayerConfig, layerList).then(function (result) {
-                expect(result.length).to.be.eql(layerList.length);
-                expect(result[0]).to.have.all.keys("wmtsLayerRequestParameters", "layerRequestParameters");
-                expect(result[0].layerRequestParameters).to.have.all.keys("name", "workspace");
-                expect(result[0].wmtsLayerRequestParameters.layerName).to.be.eql("ch_ch_are_alpenkonvention");
-                done();
-            }).catch(done);
+            const result = await geoserverRepository.getWmtsLayerRequestParameters(wmtsLayerConfig, layerList);
+
+            expect(result.length).to.be.eql(layerList.length);
+            expect(result[0]).to.have.all.keys("wmtsLayerRequestParameters", "layerRequestParameters");
+            expect(result[0].layerRequestParameters).to.have.all.keys("name", "workspace");
+            expect(result[0].wmtsLayerRequestParameters.layerName).to.be.eql("ch_ch_are_alpenkonvention");
         });
     });
 
-    it("should return wmts layer request object", function (done) {
+    it("should return wmts layer request object", () => {
         wmtsLayerConfig.layerName = "ch.blw.alpprodukte";
         wmtsLayerConfig.nativeName = "ch_ch_blw_alpprodukte";
 
-        var requestObject = geoserverRepository.wmtsLayerRequestObject(wmtsLayerConfig);
+        const requestObject = geoserverRepository.wmtsLayerRequestObject(wmtsLayerConfig);
         expect(requestObject).to.be.eql({
             wmtsLayer: {
                 name: wmtsLayerConfig.layerName,
@@ -185,16 +173,15 @@ describe("Geoserver Wmts Layer Test ", function () {
                 projectionPolicy: "REPROJECT_TO_DECLARED"
             }
         });
-        done();
-
     });
 
-    describe("resolver", function () {
-        beforeEach(function () {
+    describe("resolver", () => {
+
+        beforeEach(() => {
             wmtsLayerConfig.layerName = "ch_ch_blw_alpprodukte";
         });
 
-        it("should return correct url with create", function () {
+        it("should return correct url with create", () => {
             expect(_.contains(geoserverRepository.resolver.create(type, wmtsLayerConfig).split(["/"]), "geoportal"))
                 .to.be.eql(true);
             expect(_.contains(geoserverRepository.resolver.create(type, wmtsLayerConfig).split(["/"]), "wmtsstores"))
@@ -205,7 +192,7 @@ describe("Geoserver Wmts Layer Test ", function () {
                 .to.be.eql("wmtslayers");
         });
 
-        it("should return correct url with get", function () {
+        it("should return correct url with get", () => {
             expect(_.contains(geoserverRepository.resolver.get(type, wmtsLayerConfig).split(["/"]), "geoportal"))
                 .to.be.eql(true);
             expect(_.contains(geoserverRepository.resolver.get(type, wmtsLayerConfig).split(["/"]), "wmtsstores"))
@@ -218,173 +205,171 @@ describe("Geoserver Wmts Layer Test ", function () {
     });
 
 
-    describe("make sure layer exists", function () {
-        beforeEach(function () {
+    describe("make sure layer exists", () => {
+
+        beforeEach(() => {
             geoserverRepository.wmtsLayerExists = sinon.stub();
             geoserverRepository.issueWmtsLayerCreateRequest = sinon.stub();
 
             wmtsLayerConfig.layerName = "ch.blw.alpprodukte";
         });
 
-        it("should create new layer and return its name", function (done) {
-            geoserverRepository.wmtsLayerExists.returns(new Q.when(false));
+        it("should create new layer and return its name", async () => {
+            geoserverRepository.wmtsLayerExists.returns(Promise.resolve(false));
 
-            geoserverRepository.makeSureWmtsLayerExists({}, wmtsLayerConfig).then(function (result) {
-                expect(geoserverRepository.issueWmtsLayerCreateRequest).callCount(1);
-                expect(result).to.be.eql("ch.blw.alpprodukte");
-                done();
-            }).catch(done);
+            const result = await geoserverRepository.makeSureWmtsLayerExists({}, wmtsLayerConfig);
+
+            expect(geoserverRepository.issueWmtsLayerCreateRequest).callCount(1);
+            expect(result).to.be.eql("ch.blw.alpprodukte");
         });
 
-        it("should not create new layer and return its name", function (done) {
-            geoserverRepository.wmtsLayerExists.returns(new Q.when(true));
+        it("should not create new layer and return its name", async () => {
+            geoserverRepository.wmtsLayerExists.returns(Promise.resolve(true));
 
-            geoserverRepository.makeSureWmtsLayerExists({}, wmtsLayerConfig).then(function (result) {
-                expect(geoserverRepository.issueWmtsLayerCreateRequest).callCount(0);
-                expect(result).to.be.eql("ch.blw.alpprodukte");
-                done();
-            }).catch(done);
+            const result = await geoserverRepository.makeSureWmtsLayerExists({}, wmtsLayerConfig);
+
+            expect(geoserverRepository.issueWmtsLayerCreateRequest).callCount(0);
+            expect(result).to.be.eql("ch.blw.alpprodukte");
         });
     });
 
-    describe("create not existing layers", function () {
-        beforeEach(function () {
+    describe("create not existing layers", () => {
+
+        beforeEach(() => {
             geoserverRepository.getWmtsLayerRequestParameters = sinon.stub();
             geoserverRepository.makeSureWmtsLayerExists = sinon.stub();
 
             wmtsLayerConfig.layerName = "ch.blw.alpprodukte";
         });
 
-        it("should check two layers if exists", function (done) {
-            geoserverRepository.getWmtsLayerRequestParameters.returns(Q.when(["layer1", "layer2"]));
+        it("should check two layers if exists", async () => {
+            geoserverRepository.getWmtsLayerRequestParameters.returns(Promise.resolve(["layer1", "layer2"]));
 
-            geoserverRepository.createNotExistingWmtsLayers(wmtsLayerConfig).then(function () {
-                expect(geoserverRepository.makeSureWmtsLayerExists).callCount(2);
-                done();
-            }).catch(done);
+            await geoserverRepository.createNotExistingWmtsLayers(wmtsLayerConfig);
+
+            expect(geoserverRepository.makeSureWmtsLayerExists).callCount(2);
         });
+
     });
 
-    it("should create wmts layer", function (done) {
-        geoserverRepository.createNotExistingWmtsLayers = sinon.stub().returns(new Q(["layer1", "layer2"]));
+    it("should create wmts layer", async () => {
+        geoserverRepository.createNotExistingWmtsLayers = sinon.stub().returns(Promise.resolve(["layer1", "layer2"]));
         geoserverRepository.createLayerGroup = sinon.stub();
 
-        geoserverRepository.createWmtsLayer(wmtsLayerConfig).then(function () {
-            expect(geoserverRepository.createLayerGroup).to.have.been.calledWith(wmtsLayerConfig, ["layer1", "layer2"]);
-            done();
-        }).catch(done);
+        await geoserverRepository.createWmtsLayer(wmtsLayerConfig);
+
+        expect(geoserverRepository.createLayerGroup).to.have.been.calledWith(wmtsLayerConfig, ["layer1", "layer2"]);
     });
 
-    describe("delete wmts layer everywhere", function () {
-        beforeEach(function () {
+    describe("delete wmts layer everywhere", () => {
+
+        beforeEach(() => {
             layerSearchingParameters = { name: "ch.blw.alpprodukte", workspace: "ch" };
             wmtsLayerSearchingParameters = { layerName: "ch_ch_blw_alpprodukte", nativeName: "ch.blw.alpprodukte" };
 
             geoserverRepository.deleteGeoserverObject = sinon.stub();
-            geoserverRepository.deleteGeoserverObject.onFirstCall().returns(new Q());
+            geoserverRepository.deleteGeoserverObject.onFirstCall().returns(Promise.resolve());
 
             wmtsLayerConfig.layerName = "ch.blw.alpprodukte";
         });
 
-        it("should delte wmts layer from layer list and wmts store layer list", function (done) {
-            geoserverRepository.wmtsLayerExists = sinon.stub().returns(new Q(true));
-            geoserverRepository.deleteGeoserverObject = sinon.stub().returns(new Q(true));
+        it("should delte wmts layer from layer list and wmts store layer list", async () => {
+            geoserverRepository.wmtsLayerExists = sinon.stub().returns(Promise.resolve(true));
+            geoserverRepository.deleteGeoserverObject = sinon.stub().returns(Promise.resolve(true));
 
-            geoserverRepository.deleteWmtsLayerEverywhere(layerSearchingParameters, wmtsLayerSearchingParameters).then(function () {
-                expect(geoserverRepository.deleteGeoserverObject).callCount(2);
-                done();
-            }).catch(done);
+            await geoserverRepository.deleteWmtsLayerEverywhere(layerSearchingParameters, wmtsLayerSearchingParameters);
+
+            expect(geoserverRepository.deleteGeoserverObject).callCount(2);
         });
 
-        it("should not delte wmts layer from layer list and wmts store layer list because layer doesn't exists", function (done) {
-            geoserverRepository.wmtsLayerExists = sinon.stub().returns(new Q(false));
+        it("should not delte wmts layer from layer list and wmts store layer list because layer doesn't exists", async () => {
+            geoserverRepository.wmtsLayerExists = sinon.stub().returns(Promise.resolve(false));
 
-            geoserverRepository.deleteWmtsLayerEverywhere(layerSearchingParameters, wmtsLayerSearchingParameters).then(function () {
-                expect(geoserverRepository.deleteGeoserverObject).callCount(0);
-                done();
-            }).catch(done);
+            await geoserverRepository.deleteWmtsLayerEverywhere(layerSearchingParameters, wmtsLayerSearchingParameters);
+
+            expect(geoserverRepository.deleteGeoserverObject).callCount(0);
         });
     });
 
-    describe("delete wmts layer", function () {
-        beforeEach(function () {
+    describe("delete wmts layer", () => {
 
-            geoserverRepository.deleteGeoserverObject = sinon.stub().returns(new Q());
-            geoserverRepository.getWmtsLayerRequestParameters = sinon.stub().returns(new Q([
+        beforeEach(() => {
+            geoserverRepository.deleteGeoserverObject = sinon.stub().returns(Promise.resolve());
+            geoserverRepository.getWmtsLayerRequestParameters = sinon.stub().returns(Promise.resolve([
                 { layerRequestParameters: "layerParam1", wmtsLayerRequestParameters: "wmtsLayerParam1" },
                 { layerRequestParameters: "layerParam2", wmtsLayerRequestParameters: "wmtsLayerParam2" }
             ]));
             geoserverRepository.deleteWmtsLayerEverywhere = sinon.stub();
         });
 
-        it("should check 2 layers for deletion", function (done) {
-            geoserverRepository.deleteWmtsLayer(wmtsLayerConfig).then(function () {
-                expect(geoserverRepository.deleteGeoserverObject).callCount(1);
-                expect(geoserverRepository.deleteGeoserverObject).to.have.been.calledWith(geoserverRepository.types.LAYERGROUP, wmtsLayerConfig);
-                expect(geoserverRepository.deleteWmtsLayerEverywhere).callCount(2);
-                expect(geoserverRepository.deleteWmtsLayerEverywhere).to.have.been.calledWith("layerParam1", "wmtsLayerParam1");
-                expect(geoserverRepository.deleteWmtsLayerEverywhere).to.have.been.calledWith("layerParam2", "wmtsLayerParam2");
-                done();
-            }).catch(done);
+        it("should check 2 layers for deletion", async () => {
+
+            await geoserverRepository.deleteWmtsLayer(wmtsLayerConfig);
+
+            expect(geoserverRepository.deleteGeoserverObject).callCount(1);
+            expect(geoserverRepository.deleteGeoserverObject).to.have.been.calledWith(geoserverRepository.types.LAYERGROUP, wmtsLayerConfig);
+            expect(geoserverRepository.deleteWmtsLayerEverywhere).callCount(2);
+            expect(geoserverRepository.deleteWmtsLayerEverywhere).to.have.been.calledWith("layerParam1", "wmtsLayerParam1");
+            expect(geoserverRepository.deleteWmtsLayerEverywhere).to.have.been.calledWith("layerParam2", "wmtsLayerParam2");
         });
     });
 
-    describe("delete all unnecessary geoserver layers", function () {
-        beforeEach(function () {
+    describe("delete all unnecessary geoserver layers", () => {
 
-            geoserverRepository.getWmtsLayerRequestParameters = sinon.stub().returns(new Q([
+        beforeEach(() => {
+            geoserverRepository.getWmtsLayerRequestParameters = sinon.stub().returns(Promise.resolve([
                 { layerRequestParameters: "layerParam1", wmtsLayerRequestParameters: "wmtsLayerParam1" },
                 { layerRequestParameters: "layerParam2", wmtsLayerRequestParameters: "wmtsLayerParam2" }
             ]));
             geoserverRepository.deleteWmtsLayerEverywhere = sinon.stub();
         });
 
-        it("should delete layers", function (done) {
-            var layersToDelete = [ "layer1", "layer2" ];
+        it("should delete layers", async () => {
+            const layersToDelete = ["layer1", "layer2"];
 
-            geoserverRepository.deleteAllUnnecessaryGeoserverWmtsLayers(wmtsLayerConfig, layersToDelete).then(function () {
-                expect(geoserverRepository.getWmtsLayerRequestParameters).callCount(1);
-                expect(geoserverRepository.deleteWmtsLayerEverywhere).callCount(2);
-                expect(geoserverRepository.deleteWmtsLayerEverywhere).to.have.been.calledWith("layerParam1", "wmtsLayerParam1");
-                done();
-            }).catch(done);
+            await geoserverRepository.deleteAllUnnecessaryGeoserverWmtsLayers(wmtsLayerConfig, layersToDelete);
+
+            expect(geoserverRepository.getWmtsLayerRequestParameters).callCount(1);
+            expect(geoserverRepository.deleteWmtsLayerEverywhere).callCount(2);
+            expect(geoserverRepository.deleteWmtsLayerEverywhere).to.have.been.calledWith("layerParam1", "wmtsLayerParam1");
         });
 
-        it("should return because there is no layers to delete", function (done) {
-            var layersToDelete = [];
+        it("should return because there is no layers to delete", async () => {
+            const layersToDelete = [];
 
-            geoserverRepository.deleteAllUnnecessaryGeoserverWmtsLayers(wmtsLayerConfig, layersToDelete).then(function () {
-                expect(geoserverRepository.getWmtsLayerRequestParameters).callCount(0);
-                expect(geoserverRepository.deleteWmtsLayerEverywhere).callCount(0);
-                done();
-            }).catch(done);
+            await geoserverRepository.deleteAllUnnecessaryGeoserverWmtsLayers(wmtsLayerConfig, layersToDelete);
+
+            expect(geoserverRepository.getWmtsLayerRequestParameters).callCount(0);
+            expect(geoserverRepository.deleteWmtsLayerEverywhere).callCount(0);
         });
     });
 
-    describe("update wmts layers", function () {
-        beforeEach(function () {
+    describe("update wmts layers", () => {
 
-            geoserverRepository.layerGroupExists = sinon.stub().returns(new Q(true));
+        beforeEach(() => {
+            geoserverRepository.layerGroupExists = sinon.stub().returns(Promise.resolve(true));
 
-            geoserverRepository.createNotExistingWmtsLayers = sinon.stub().returns(new Q(["ch.blw.alpprodukte", "ch.vbs.armeelogistikcenter"]));
             geoserverRepository.updateLayerGroup = sinon.stub();
             geoserverRepository.deleteAllUnnecessaryGeoserverWmtsLayers = sinon.stub();
+            geoserverRepository.createNotExistingWmtsLayers = sinon.stub().returns(Promise.resolve([
+                "ch.blw.alpprodukte",
+                "ch.vbs.armeelogistikcenter"
+            ]));
         });
 
-        it("should update wmts layer", function (done) {
-            var existingExternalWmtsLayer = _.clone(wmtsLayerConfig);
+        it("should update wmts layer", async () => {
+            const existingExternalWmtsLayer = _.clone(wmtsLayerConfig);
             existingExternalWmtsLayer.layerNames = "ch.blw.alpprodukte,ch.vbs.armeelogistikcenter";
 
-            geoserverRepository.updateWmtsLayer(wmtsLayerConfig, existingExternalWmtsLayer).then(function () {
-                expect(geoserverRepository.createNotExistingWmtsLayers).callCount(1);
-                expect(geoserverRepository.createNotExistingWmtsLayers).to.have.been.calledWith(wmtsLayerConfig);
-                expect(geoserverRepository.createNotExistingWmtsLayers).to.have.been.calledWith(wmtsLayerConfig);
-                expect(geoserverRepository.updateLayerGroup)
-                    .to.have.been.calledWith(wmtsLayerConfig, ["ch.blw.alpprodukte", "ch.vbs.armeelogistikcenter"]);
-                expect(geoserverRepository.deleteAllUnnecessaryGeoserverWmtsLayers)
-                    .to.have.been.calledWith(wmtsLayerConfig, ["ch.vbs.armeelogistikcenter"]);
-                done();
-            }).catch(done);
+            await geoserverRepository.updateWmtsLayer(wmtsLayerConfig, existingExternalWmtsLayer);
+
+            expect(geoserverRepository.createNotExistingWmtsLayers).callCount(1);
+            expect(geoserverRepository.createNotExistingWmtsLayers).to.have.been.calledWith(wmtsLayerConfig);
+            expect(geoserverRepository.createNotExistingWmtsLayers).to.have.been.calledWith(wmtsLayerConfig);
+            expect(geoserverRepository.updateLayerGroup)
+                .to.have.been.calledWith(wmtsLayerConfig, ["ch.blw.alpprodukte", "ch.vbs.armeelogistikcenter"]);
+            expect(geoserverRepository.deleteAllUnnecessaryGeoserverWmtsLayers)
+                .to.have.been.calledWith(wmtsLayerConfig, ["ch.vbs.armeelogistikcenter"]);
         });
     });
 });

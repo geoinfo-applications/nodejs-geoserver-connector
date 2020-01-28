@@ -204,79 +204,79 @@ function GeoserverResolver(geoserverRepositoryConfig) {
     this.getParameters = {
         getLayerParameters: function (config) {
             var workspaceName = this.resolveWorkspaceName(config);
-            return [ workspaceName, config.name ];
+            return [workspaceName, config.name];
         },
 
         getFeatureTypeParameters: function (config) {
             var datastoreName = config && config.datastore || this.datastore;
             var workspaceName = this.resolveWorkspaceName(config);
-            return [ workspaceName, datastoreName, config.name ];
+            return [workspaceName, datastoreName, config.name];
         },
 
         getDatastoreParameters: function (config) {
             var datastoreName = config && config.name || this.datastore;
             var workspaceName = this.resolveWorkspaceName(config);
-            return [ workspaceName, datastoreName ];
+            return [workspaceName, datastoreName];
         },
 
         getCoverageParameters: function (config) {
             var coverageName = config && config.name;
             var coverageStoreName = config && config.store;
             var workspaceName = this.resolveWorkspaceName(config);
-            return [ workspaceName, coverageStoreName, coverageName ];
+            return [workspaceName, coverageStoreName, coverageName];
         },
 
         getCoverageStoreParameters: function (config) {
             var coverageStoreName = config.name;
             var workspaceName = this.resolveWorkspaceName(config);
-            return [ workspaceName, coverageStoreName ];
+            return [workspaceName, coverageStoreName];
         },
 
         getWmsStoreParameters: function (config, method) {
             var wmsStoreName = method === "create" ? void 0 : encodeURIComponent(config.name);
             var workspaceName = encodeURIComponent(this.resolveWorkspaceName(config));
-            return _.compact([ workspaceName, wmsStoreName ]);
+            return _.compact([workspaceName, wmsStoreName]);
         },
 
         getWmsLayerParameters: function (config, method) {
             var wmsLayerName = method === "create" ? void 0 : config.layerName;
             var wmsStoreName = config.externalWmsService.name;
             var workspaceName = this.resolveWorkspaceName(config);
-            return _.compact([ workspaceName, wmsStoreName, wmsLayerName ]);
+            return _.compact([workspaceName, wmsStoreName, wmsLayerName]);
         },
 
         getWmtsStoreParameters: function (config, method) {
             var wmtsStoreName = method === "create" ? void 0 : encodeURIComponent(config.name);
             var workspaceName = encodeURIComponent(this.resolveWorkspaceName(config));
-            return _.compact([ workspaceName, wmtsStoreName ]);
+            return _.compact([workspaceName, wmtsStoreName]);
         },
 
         getWmtsLayerParameters: function (config, method) {
             var wmtsLayerName = method === "create" ? void 0 : config.layerName;
             var wmtsStoreName = config.externalWmtsService.name;
             var workspaceName = this.resolveWorkspaceName(config);
-            return _.compact([ workspaceName, wmtsStoreName, wmtsLayerName ]);
+            return _.compact([workspaceName, wmtsStoreName, wmtsLayerName]);
         },
 
         getLayerGroupParameters: function (config, method) {
             var layerGroupName = method === "create" ? void 0 : config.name;
-            return _.compact([ layerGroupName ]);
+            return _.compact([layerGroupName]);
         },
 
         getWorkspaceParameters: function (config) {
             var workspaceName = config && config.name || this.workspace;
-            return [ workspaceName ];
+            return [workspaceName];
         },
 
         getWorkspaceStyleParameters: function (config) {
             var workspaceStyleName = config && config.name || "";
             var workspaceName = this.resolveWorkspaceName(config);
-            return [ workspaceName, workspaceStyleName ];
+            return [workspaceName, workspaceStyleName];
         },
 
         getStyleParameters: function (config) {
             var styleName = config.name;
-            return [ styleName ];
+            return [styleName];
         }
     };
 

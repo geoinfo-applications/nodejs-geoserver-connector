@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require("underscore");
+const _ = require("underscore");
 
 function GeoserverLegend(geoserverConfig) {
 
@@ -24,13 +24,13 @@ GeoserverLegend.prototype = {
     },
 
     getBaseURL: function (config) {
-        var workspace = config && config.workspace || this.defaultWorkspace;
+        const workspace = config && config.workspace || this.defaultWorkspace;
         return this.baseURL + workspace + "/wms?";
     },
 
+    // eslint-disable-next-line complexity
     formatParameters: function (config) {
-
-        var paramaters = [
+        const paramaters = [
             "REQUEST=GetLegendGraphic",
             "VERSION=1.0.0",
             "FORMAT=" + (config.format || this.defaultImageFormat),
@@ -40,8 +40,8 @@ GeoserverLegend.prototype = {
             "TRANSPARENT=true"
         ];
 
-        var ruleName = config.name;
-        var styleName = config.style;
+        const ruleName = config.name;
+        const styleName = config.style;
 
         if (ruleName) {
             paramaters.push("RULE=" + ruleName);

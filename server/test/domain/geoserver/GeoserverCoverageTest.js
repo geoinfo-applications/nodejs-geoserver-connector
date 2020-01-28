@@ -1,77 +1,71 @@
 "use strict";
 
-describe("Geoserver Coverage Test ", function () {
+describe("Geoserver Coverage Test ", () => {
 
-    var Q = require("q");
-    var chai = require("chai");
-    var expect = chai.expect;
-    var sinon = require("sinon");
-    var sinonChai = require("sinon-chai");
+    const chai = require("chai");
+    const expect = chai.expect;
+    const sinon = require("sinon");
+    const sinonChai = require("sinon-chai");
     chai.use(sinonChai);
 
-    this.timeout(50);
-    var config = require("../../config");
-    var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const config = require("../../config");
+    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
 
-    var geoserverRepository, geoserverMockServer, type;
-    var coverageConfig;
+    let geoserverRepository, geoserverMockServer, type;
+    let coverageConfig;
 
-    before(function () {
+    before(() => {
         geoserverMockServer = sinon.fakeServer.create();
     });
 
-    after(function () {
+    after(() => {
         geoserverMockServer.restore();
     });
 
-    beforeEach(function (done) {
+    beforeEach(() => {
         coverageConfig = { name: "AR_2014", store: "AR_2014", workspace: "geoportal" };
         geoserverRepository = new GeoserverRepository(config.unit_test);
 
-        geoserverRepository.isGeoserverRunning = sinon.stub().returns(
-            new Q(JSON.stringify({ about: { resource: {} } }))
-        );
-        geoserverRepository.initializeWorkspace = sinon.stub().returns(new Q());
-        type = geoserverRepository.types.COVERAGE;
+        sinon.stub(geoserverRepository, GeoserverRepository.prototype.isGeoserverRunning.name);
+        geoserverRepository.isGeoserverRunning.returns(Promise.resolve(JSON.stringify({ about: { resource: {} } })));
 
-        geoserverRepository.initializeWorkspace().then(function () {
-            done();
-        }).catch(done);
+        sinon.stub(geoserverRepository, GeoserverRepository.prototype.initializeWorkspace.name);
+        geoserverRepository.initializeWorkspace.returns(Promise.resolve());
+
+        type = geoserverRepository.types.COVERAGE;
     });
 
-    afterEach(function () {
+    afterEach(() => {
         geoserverRepository = null;
     });
 
-    it("should check coverage existance ", function (done) {
-        geoserverRepository.getGeoserverObject = sinon.stub().returns(new Q(true));
-        geoserverRepository.coverageExists(coverageConfig).then(function (result) {
-            expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, coverageConfig);
-            expect(result).to.be.eql(true);
-            done();
-        }).catch(done);
+    it("should check coverage existance ", async () => {
+        geoserverRepository.getGeoserverObject = sinon.stub().returns(Promise.resolve(true));
+
+        const result = await geoserverRepository.coverageExists(coverageConfig);
+
+        expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, coverageConfig);
+        expect(result).to.be.eql(true);
     });
 
-    it("should get coverage ", function (done) {
-        var coverageStoreDetails = { coverage: coverageConfig };
-        geoserverRepository.getGeoserverObject = sinon.stub().returns(new Q(coverageStoreDetails));
+    it("should get coverage ", async () => {
+        const coverageStoreDetails = { coverage: coverageConfig };
+        geoserverRepository.getGeoserverObject = sinon.stub().returns(Promise.resolve(coverageStoreDetails));
 
-        geoserverRepository.getCoverage(coverageConfig).then(function (result) {
-            expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, coverageConfig);
-            expect(result).to.be.eql(coverageStoreDetails.coverage);
-            done();
-        }).catch(done);
+        const result = await geoserverRepository.getCoverage(coverageConfig);
+
+        expect(geoserverRepository.getGeoserverObject).to.have.been.calledWith(type, coverageConfig);
+        expect(result).to.be.eql(coverageStoreDetails.coverage);
     });
 
-    it("should update coverage ", function (done) {
-        var config = { name: coverageConfig.name, updatedConfig: { name: "new_name" } };
-        geoserverRepository.coverageExists = sinon.stub().returns(new Q(true));
-        geoserverRepository.issueCoverageUpdateRequest = sinon.stub().returns(new Q());
+    it("should update coverage ", async () => {
+        const config = { name: coverageConfig.name, updatedConfig: { name: "new_name" } };
+        geoserverRepository.coverageExists = sinon.stub().returns(Promise.resolve(true));
+        geoserverRepository.issueCoverageUpdateRequest = sinon.stub().returns(Promise.resolve());
 
-        geoserverRepository.updateCoverage(config).then(function () {
-            expect(geoserverRepository.issueCoverageUpdateRequest).to.have.been.calledWith(config);
-            done();
-        }).catch(done);
+        await geoserverRepository.updateCoverage(config);
+
+        expect(geoserverRepository.issueCoverageUpdateRequest).to.have.been.calledWith(config);
     });
 
 });

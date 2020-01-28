@@ -4,6 +4,7 @@
 // TODO clean up a bit
 module.exports = function GeoserverDatastore() {
 
+    // eslint-disable-next-line complexity
     this.createDatastore = function (config) {
 
         var storeName = config && config.name || this.geoserver.datastore;

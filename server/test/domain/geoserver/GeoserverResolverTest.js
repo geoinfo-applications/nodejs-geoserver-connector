@@ -1,35 +1,34 @@
 "use strict";
 
-var _ = require("underscore");
-var util = require("util");
-var expect = require("chai").expect;
+// eslint-disable-next-line max-statements
+describe("Geoserver Resolver unit tests ", () => {
 
-var GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
-var GeoserverResolver = require("../../../../server/domain/geoserver/GeoserverResolver");
+    const _ = require("underscore");
+    const util = require("util");
+    const expect = require("chai").expect;
 
-var config = require("../../config");
+    const GeoserverRepository = require("../../../../server/domain/geoserver/GeoserverRepository");
+    const GeoserverResolver = require("../../../../server/domain/geoserver/GeoserverResolver");
 
-describe("Geoserver Resolver unit tests ", function () {
+    const config = require("../../config");
 
-    this.timeout(500);
-
-    var functionalTestConfig = config.functional_test;
-    var geoserverRepository = new GeoserverRepository(functionalTestConfig);
-    var geoserverTypes = geoserverRepository.types;
-    var resolver;
+    const functionalTestConfig = config.functional_test;
+    const geoserverRepository = new GeoserverRepository(functionalTestConfig);
+    const geoserverTypes = geoserverRepository.types;
+    let resolver;
     createGeoserverResolver();
 
-    var workspaceName = functionalTestConfig.geoserver.workspace;
-    var datastoreName = functionalTestConfig.geoserver.datastore;
-    var coverageName = "AR_2014";
-    var featureTypeName = "testFeatureType";
-    var wmsStoreName = "ch";
-    var wmsLayerName = "ch.blw.alpprodukte";
-    var wmtsStoreName = "at";
-    var wmtsLayerName = "at.basis";
-    var layerGroupName = "alpprodukte";
+    const workspaceName = functionalTestConfig.geoserver.workspace;
+    const datastoreName = functionalTestConfig.geoserver.datastore;
+    const coverageName = "AR_2014";
+    const featureTypeName = "testFeatureType";
+    const wmsStoreName = "ch";
+    const wmsLayerName = "ch.blw.alpprodukte";
+    const wmtsStoreName = "at";
+    const wmtsLayerName = "at.basis";
+    const layerGroupName = "alpprodukte";
 
-    var geoserverTypesConfigs = {
+    const geoserverTypesConfigs = {
         Workspace: { name: workspaceName },
         Datastore: { name: datastoreName },
         CoverageStore: { name: coverageName },
@@ -45,7 +44,7 @@ describe("Geoserver Resolver unit tests ", function () {
         LayerGroup: { name: layerGroupName }
     };
 
-    var getParameters = {
+    const getParameters = {
         Workspace: [workspaceName],
         Datastore: [workspaceName, datastoreName],
         CoverageStore: [workspaceName, coverageName],
@@ -73,102 +72,102 @@ describe("Geoserver Resolver unit tests ", function () {
         resolver = null;
     }
 
-    beforeEach(function () {
+    beforeEach(() => {
         createGeoserverResolver();
     });
 
-    afterEach(function () {
+    afterEach(() => {
         tearDownGeoserverResolver();
     });
 
-    it("should contain resolving methods for all geoserver types ", function () {
-        _.each(geoserverTypes, function (value) {
+    it("should contain resolving methods for all geoserver types ", () => {
+        _.each(geoserverTypes, (value) => {
             expect(resolver.getResolvers["resolve" + value]).not.to.equal(undefined);
         });
     });
 
-    it("should get correct parameters when only object name is passed", function () {
+    it("should get correct parameters when only object name is passed", () => {
 
-        _.each(geoserverTypes, function (type) {
+        _.each(geoserverTypes, (type) => {
 
-            var config = geoserverTypesConfigs[type];
+            const config = geoserverTypesConfigs[type];
 
-            var resolvedParameters = resolver.getParameters["get" + type + "Parameters"](config);
-            var expectedParameters = getParameters[type];
+            const resolvedParameters = resolver.getParameters["get" + type + "Parameters"](config);
+            const expectedParameters = getParameters[type];
 
             expect(resolvedParameters).to.be.eql(expectedParameters);
         });
     });
 
-    it("should correctly format urls using format.apply method", function () {
+    it("should correctly format urls using format.apply method", () => {
 
-        _.each(geoserverTypes, function (type) {
+        _.each(geoserverTypes, (type) => {
 
-            var restAPI = resolver.restAPI["get" + type];
-            var typeParameters = getParameters[type];
+            const restAPI = resolver.restAPI["get" + type];
+            const typeParameters = getParameters[type];
 
-            var formattedUrl = resolver.formatReturnUrl(restAPI, typeParameters);
+            const formattedUrl = resolver.formatReturnUrl(restAPI, typeParameters);
 
-            var pathTemplate = resolver.baseURL + restAPI;
-            var expectedUrl = util.format.apply(null, [pathTemplate].concat(getParameters[type]));
+            const pathTemplate = resolver.baseURL + restAPI;
+            const expectedUrl = util.format.apply(null, [pathTemplate].concat(getParameters[type]));
 
             expect(formattedUrl).to.be.equal(expectedUrl);
         });
     });
 
-    it("should corectly resolve get methods ", function () {
+    it("should corectly resolve get methods ", () => {
 
-        _.each(geoserverTypes, function (type) {
+        _.each(geoserverTypes, (type) => {
 
-            var config = geoserverTypesConfigs[type];
-            var resolvedUrl = resolver.get(type, config);
+            const config = geoserverTypesConfigs[type];
+            const resolvedUrl = resolver.get(type, config);
 
-            var pathTemplate = resolver.restAPI["get" + type];
-            var typeParameters = [pathTemplate].concat(getParameters[type]);
+            const pathTemplate = resolver.restAPI["get" + type];
+            const typeParameters = [pathTemplate].concat(getParameters[type]);
 
-            var expectedPath = util.format.apply(null, typeParameters);
-            var expectedUrl = resolver.baseURL + expectedPath;
-
-            expect(expectedUrl).to.be.equal(resolvedUrl);
-        });
-    });
-
-    it("should corectly resolve delete methods ", function () {
-
-        _.each(geoserverTypes, function (type) {
-
-            var config = geoserverTypesConfigs[type];
-            var resolvedUrl = resolver.delete(type, config);
-
-            var pathTemplate = resolver.restAPI["get" + type];
-            var typeParameters = [pathTemplate].concat(getParameters[type]);
-
-            var expectedPath = util.format.apply(null, typeParameters);
-            var expectedUrl = resolver.baseURL + expectedPath;
+            const expectedPath = util.format.apply(null, typeParameters);
+            const expectedUrl = resolver.baseURL + expectedPath;
 
             expect(expectedUrl).to.be.equal(resolvedUrl);
         });
     });
 
-    it("should corectly resolve create methods ", function () {
+    it("should corectly resolve delete methods ", () => {
 
-        _.each(geoserverTypes, function (type) {
+        _.each(geoserverTypes, (type) => {
 
-            var config = geoserverTypesConfigs[type];
-            var resolvedUrl = resolver.create(type, config);
+            const config = geoserverTypesConfigs[type];
+            const resolvedUrl = resolver.delete(type, config);
 
-            var pathTemplate = resolver.restAPI["get" + type + "s"];
-            var urlParameters = getParameters[type];
+            const pathTemplate = resolver.restAPI["get" + type];
+            const typeParameters = [pathTemplate].concat(getParameters[type]);
 
+            const expectedPath = util.format.apply(null, typeParameters);
+            const expectedUrl = resolver.baseURL + expectedPath;
+
+            expect(expectedUrl).to.be.equal(resolvedUrl);
+        });
+    });
+
+    it("should corectly resolve create methods ", () => {
+
+        _.each(geoserverTypes, (type) => {
+
+            const config = geoserverTypesConfigs[type];
+            const resolvedUrl = resolver.create(type, config);
+
+            const pathTemplate = resolver.restAPI["get" + type + "s"];
+
+            let urlParameters = getParameters[type];
             if (type === geoserverTypes.LAYER) {
                 urlParameters = [];
             } else if ([geoserverTypes.COVERAGESTORE, geoserverTypes.COVERAGE].indexOf(type) < 0) {
                 urlParameters.pop();
             }
-            var fullParameters = [pathTemplate].concat(urlParameters);
+            const fullParameters = [pathTemplate].concat(urlParameters);
 
-            var expectedPath = util.format.apply(null, fullParameters);
-            var expectedUrl = resolver.baseURL + expectedPath;
+            const expectedPath = util.format.apply(null, fullParameters);
+            const expectedUrl = resolver.baseURL + expectedPath;
 
             expect(expectedUrl).to.be.equal(resolvedUrl);
         });

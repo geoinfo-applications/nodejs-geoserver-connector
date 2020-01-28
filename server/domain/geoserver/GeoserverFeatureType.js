@@ -1,7 +1,8 @@
 "use strict";
 
-var Q = require("q");
-var _ = require("underscore");
+const Q = require("q");
+const _ = require("underscore");
+
 
 module.exports = function GeoserverFeatureType() {
 
@@ -10,7 +11,7 @@ module.exports = function GeoserverFeatureType() {
     }
 
     function rejectRequest(errorMessage) {
-        return Q.reject(new Error(errorMessage));
+        throw new Error(errorMessage);
     }
 
     this.getFeatureType = function (config) {
@@ -23,16 +24,16 @@ module.exports = function GeoserverFeatureType() {
         if (nameDoesntExist(config)) {
             return rejectRequest("featureType name required");
         }
-        var featureTypeName = config.name;
-        var featureType = config.featureType || { name: featureTypeName };
-        var storeName = config.datastore || this.geoserver.datastore;
-        var wsName = config.workspace || this.geoserver.workspace;
+        const featureTypeName = config.name;
+        const featureType = config.featureType || { name: featureTypeName };
+        const storeName = config.datastore || this.geoserver.datastore;
+        const wsName = config.workspace || this.geoserver.workspace;
 
         return this.featureTypeExists(config).then(function (exists) {
             if (exists) {
-                return new Error("featureType already exists" + featureTypeName);
+                throw new Error("featureType already exists" + featureTypeName);
             }
-            var featureTypeConfig = {
+            const featureTypeConfig = {
                 featureType: featureType,
                 name: featureTypeName,
                 datastore: storeName,
@@ -43,7 +44,7 @@ module.exports = function GeoserverFeatureType() {
     };
 
     this.deleteFeatureType = function (config) {
-        var featureTypeName = config && config.name;
+        const featureTypeName = config && config.name;
         return this.featureTypeExists(config).then(function (exists) {
             if (exists) {
                 return this.deleteGeoserverObject(this.types.FEATURETYPE, config, { recurse: true });
@@ -56,25 +57,24 @@ module.exports = function GeoserverFeatureType() {
         return this.geoserverObjectExists(this.types.FEATURETYPE, featureType);
     };
 
-    // TODO cleanup - reuse gs global methods
-    this.renameFeatureType = function (config, newFeatureTypeName) {
-
+    this.renameFeatureType = async function (config, newFeatureTypeName) {
         if (!newFeatureTypeName) {
-            return Q.reject(new Error("featureType name required"));
+            throw new Error("featureType name required");
         }
 
-        var featureTypeConfig = _.extend({}, config);
-        var renameFeatureType = function (newConfig) {
+        const featureTypeConfig = _.extend({}, config);
+        const renameFeatureType = function (newConfig) {
 
-            var deferred = Q.defer();
-            var restUrl = this.resolver.get(this.types.FEATURETYPE, featureTypeConfig);
-            var payload = JSON.stringify(newConfig);
+            const deferred = Q.defer();
+            const restUrl = this.resolver.get(this.types.FEATURETYPE, featureTypeConfig);
+            const payload = JSON.stringify(newConfig);
 
             function response(err, resp, body) {
                 if (err) {
                     return deferred.reject(new Error(err));
                 }
                 if (resp.statusCode !== 200) {
+                    // eslint-disable-next-line no-console
                     console.error("Error rename Geoserver featureType >", body);
                     return deferred.reject(new Error(body));
                 }
@@ -90,7 +90,7 @@ module.exports = function GeoserverFeatureType() {
         }.bind(this);
 
         function updateFeatureTypeConfig(featureType) {
-            var newConfig = {};
+            const newConfig = {};
             newConfig.featureType = _.extend({}, featureType);
             newConfig.featureType.name = newFeatureTypeName;
             newConfig.featureType.nativeName = newFeatureTypeName;
@@ -100,13 +100,13 @@ module.exports = function GeoserverFeatureType() {
         return this.getFeatureType(featureTypeConfig).then(updateFeatureTypeConfig);
     };
 
+    // eslint-disable-next-line complexity
     this.recalculateFeatureTypeBBox = function (config) {
+        const featureTypeName = config && config.name;
+        const storeName = config && config.datastore || this.geoserver.datastore;
+        const wsName = config && config.workspace || this.geoserver.workspace;
 
-        var featureTypeName = config && config.name;
-        var storeName = config && config.datastore || this.geoserver.datastore;
-        var wsName = config && config.workspace || this.geoserver.workspace;
-
-        var featureTypeConfig = {
+        const featureTypeConfig = {
             featureType: {
                 name: featureTypeName,
                 enabled: true
@@ -116,18 +116,19 @@ module.exports = function GeoserverFeatureType() {
             workspace: wsName
         };
 
-        var deferred = Q.defer();
+        const deferred = Q.defer();
 
-        var restUrl = this.resolver.get(this.types.FEATURETYPE, featureTypeConfig);
+        let restUrl = this.resolver.get(this.types.FEATURETYPE, featureTypeConfig);
         restUrl += "?recalculate=nativebbox,latlonbbox";
 
-        var payload = JSON.stringify(featureTypeConfig);
+        const payload = JSON.stringify(featureTypeConfig);
 
         function response(err, resp, body) {
             if (err) {
                 return deferred.reject(new Error(err));
             }
             if (resp.statusCode !== 200) {
+                // eslint-disable-next-line no-console
                 console.error("Error recalculate Geoserver featureType BBox >", body);
                 return deferred.reject(new Error(body));
             }
