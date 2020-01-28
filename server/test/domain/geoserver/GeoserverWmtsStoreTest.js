@@ -42,10 +42,6 @@ describe("Geoserver Wmts Store Test ", () => {
         type = geoserverConnector.types.WMTSSTORE;
     });
 
-    afterEach(() => {
-        geoserverConnector = null;
-    });
-
     it("should check wmts store existance", async () => {
         geoserverConnector.getGeoserverObject = sinon.stub().returns(Promise.resolve(true));
 

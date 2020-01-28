@@ -43,10 +43,6 @@ describe("Geoserver Wms Store Test ", () => {
         await geoserverConnector.initializeWorkspace();
     });
 
-    afterEach(() => {
-        geoserverConnector = null;
-    });
-
     it("should check wms store existance", async () => {
         geoserverConnector.getGeoserverObject = sinon.stub().returns(Promise.resolve(true));
 

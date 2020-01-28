@@ -62,10 +62,6 @@ describe("Geoserver Wms Layer Test ", () => {
         type = geoserverConnector.types.WMSLAYER;
     });
 
-    afterEach(() => {
-        geoserverConnector = null;
-    });
-
     describe("testing wms layer existance", () => {
 
         beforeEach(() => {

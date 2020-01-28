@@ -35,10 +35,6 @@ describe("Geoserver Coverage Test ", () => {
         type = geoserverConnector.types.COVERAGE;
     });
 
-    afterEach(() => {
-        geoserverConnector = null;
-    });
-
     it("should check coverage existance ", async () => {
         geoserverConnector.getGeoserverObject = sinon.stub().returns(Promise.resolve(true));
 

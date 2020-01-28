@@ -49,13 +49,14 @@ class TestUtils {
     }
 
     deleteStyles(style, numberOfStylesToDelete) {
-        const deleteStyle = function (styleId) {
+        const deleteStyle = async (styleId) => {
             const styleConfig = {
                 name: style.name + styleId
             };
-            return this.deleteWorkspaceStyle(styleConfig)
-                .then(this.deleteGlobalStyle(styleConfig));
-        }.bind(this.gsConnector);
+
+            await this.gsConnector.deleteWorkspaceStyle(styleConfig);
+            await this.gsConnector.deleteGlobalStyle(styleConfig);
+        };
 
         return this.throttleActions(deleteStyle, numberOfStylesToDelete);
     }

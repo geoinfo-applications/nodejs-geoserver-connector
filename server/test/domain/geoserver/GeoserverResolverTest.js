@@ -68,16 +68,8 @@ describe("Geoserver Resolver unit tests ", () => {
         });
     }
 
-    function tearDownGeoserverResolver() {
-        resolver = null;
-    }
-
     beforeEach(() => {
         createGeoserverResolver();
-    });
-
-    afterEach(() => {
-        tearDownGeoserverResolver();
     });
 
     it("should contain resolving methods for all geoserver types ", () => {

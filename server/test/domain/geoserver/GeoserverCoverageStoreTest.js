@@ -33,10 +33,6 @@ describe("Geoserver Coverage Test ", () => {
         geoserverConnector.initializeWorkspace.returns(Promise.resolve());
     });
 
-    afterEach(() => {
-        geoserverConnector = null;
-    });
-
     it("should check coverage store existance ", async () => {
         geoserverConnector.getGeoserverObject = sinon.stub().returns(Promise.resolve(true));
 

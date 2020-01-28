@@ -53,10 +53,6 @@ describe("Geoserver Layer Group Test ", () => {
         type = geoserverConnector.types.LAYERGROUP;
     });
 
-    afterEach(() => {
-        geoserverConnector = null;
-    });
-
     it("should check wms layer existance", async () => {
         geoserverConnector.geoserverObjectExists = sinon.stub().returns(Promise.resolve(true));
 
