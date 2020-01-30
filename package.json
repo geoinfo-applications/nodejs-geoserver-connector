@@ -39,7 +39,6 @@
     "grunt-mocha-cli": "^5.0.0",
     "grunt-mocha-istanbul": "^5.0.2",
     "grunt-mocha-test": "^0.13.3",
-    "grunt-npm-install": "*",
     "grunt-plato": "^1.4.0",
     "grunt-release": "^0.14.0",
     "grunt-todo": "*",
