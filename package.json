@@ -1,6 +1,6 @@
 {
   "name": "@geoinfo/nodejs-geoserver-connector",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "NodeJS bindings for Geoserver Rest API",
   "main": "module.js",
   "repository": {
