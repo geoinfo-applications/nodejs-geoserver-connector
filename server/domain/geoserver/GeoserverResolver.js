@@ -34,8 +34,8 @@ class GeoserverResolver {
             getWmtsStores: "/workspaces/%s/wmtsstores/",
             getWmtsStore: "/workspaces/%s/wmtsstores/%s",
 
-            getWmtsLayers: "/workspaces/%s/wmtsstores/%s/wmtslayers",
-            getWmtsLayer: "/workspaces/%s/wmtsstores/%s/wmtslayers/%s",
+            getWmtsLayers: "/workspaces/%s/wmtsstores/%s/layers",
+            getWmtsLayer: "/workspaces/%s/wmtsstores/%s/layers/%s",
 
             getLayerGroups: "/layergroups",
             getLayerGroup: "/layergroups/%s",

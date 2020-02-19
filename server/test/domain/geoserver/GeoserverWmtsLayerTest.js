@@ -185,7 +185,7 @@ describe("Geoserver Wmts Layer Test ", () => {
             expect(_.contains(geoserverConnector.resolver.create(type, wmtsLayerConfig).split(["/"]), "ch"))
                 .to.be.eql(true);
             expect(_.last(geoserverConnector.resolver.create(type, wmtsLayerConfig).split(["/"])))
-                .to.be.eql("wmtslayers");
+                .to.be.eql("layers");
         });
 
         it("should return correct url with get", () => {
